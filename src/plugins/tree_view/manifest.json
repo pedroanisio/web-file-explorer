@@ -1,0 +1,8 @@
+{
+    "id": "tree_view",
+    "name": "Tree View",
+    "version": "1.0.0",
+    "description": "Show tree structure of the current directory",
+    "entry_point": "tree_plugin",
+    "icon": "🌳"
+}

@@ -1,0 +1,111 @@
+/* Toolbar styles */
+.toolbar {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    padding: 10px;
+    flex-wrap: wrap;
+}
+
+.toolbar-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+}
+
+.toolbar-item:hover {
+    background-color: #d0d0d0;
+}
+
+.toolbar-item-icon {
+    font-size: 1.2rem;
+}
+
+/* Modal styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal {
+    background-color: white;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.modal-content {
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 0.9rem;
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    overflow: auto;
+    max-height: 60vh;
+}
+
+.error-message {
+    color: #d9534f;
+    padding: 10px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
