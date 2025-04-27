@@ -21,9 +21,11 @@ RUN mkdir -p /data
 # Expose port 5000
 EXPOSE 5000
 
-# Create a non-root user
-RUN adduser --disabled-password --gecos '' explorer
+# Create a non-root user with specific UID 1000 (standard first user on many Linux systems)
+RUN adduser --disabled-password --gecos '' --uid 1000 explorer
+# Give ownership of the data directory to the explorer user
+RUN chown -R explorer:explorer /data
 USER explorer
 
 # Command to run the application
-CMD ["flask-file-explorer"]
+CMD ["web-file-explorer"] # Updated command

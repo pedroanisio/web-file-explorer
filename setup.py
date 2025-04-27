@@ -17,7 +17,7 @@ with open('README.md', 'r') as f:
     long_description = f.read()
 
 setup(
-    name='flask-file-explorer',
+    name='web-file-explorer',
     version=version,
     description='A web-based file explorer built with Flask',
     long_description=long_description,
@@ -46,7 +46,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'flask-file-explorer=flask_file_explorer:main',
+            'web-file-explorer=src:main',
         ],
     },
     classifiers=[
