@@ -16,15 +16,15 @@ A simple web-based file explorer built with Flask that allows you to browse dire
 ### From PyPI
 
 ```bash
-pip install flask-file-explorer
+pip install web-file-explorer
 ```
 
 ### From Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/flask-file-explorer.git
-cd flask-file-explorer
+git clone https://github.com/pedroanisio/web-file-explorer.git
+cd web-file-explorer
 
 # Create a virtual environment
 python -m venv venv
