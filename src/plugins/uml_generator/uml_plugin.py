@@ -471,7 +471,7 @@ def generate_output_html(plantuml_code, uml_image_url, classes, path):
     
     <script>
     function showTab(tabId) {
-        // Hide all tabs
+        /* Hide all tabs */
         var tabs = document.getElementsByClassName('tab-content');
         for (var i = 0; i < tabs.length; i++) {
             tabs[i].classList.remove('active');

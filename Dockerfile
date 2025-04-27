@@ -27,5 +27,5 @@ RUN adduser --disabled-password --gecos '' --uid 1000 explorer
 RUN chown -R explorer:explorer /data
 USER explorer
 
-# Command to run the application
-CMD ["web-file-explorer"] # Updated command
+# Command to run the application using Python's module execution
+CMD ["python", "-m", "src"]
