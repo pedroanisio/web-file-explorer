@@ -1,0 +1,580 @@
+"""
+UML Diagram Generator plugin for FIXIT.
+Generates UML diagrams from Python code using the Python UML Analyzer plugin.
+"""
+import os
+import json
+import subprocess
+import logging
+import requests
+import tempfile
+from urllib.parse import quote
+
+# Setup logging
+logger = logging.getLogger("uml_generator")
+
+def execute(path, **kwargs):
+    """
+    Execute the UML generator plugin
+    
+    Args:
+        path (str): Directory path to generate UML diagrams for
+        
+    Returns:
+        dict: Result of the execution
+    """
+    try:
+        # Validate path
+        if not os.path.exists(path):
+            return {
+                "success": False,
+                "error": f"Path does not exist: {path}"
+            }
+            
+        # Use the backend plugin to analyze the Python files
+        analysis_result = analyze_directory(path)
+        
+        if not analysis_result.get("success", False):
+            return {
+                "success": False,
+                "error": analysis_result.get("error", "Failed to analyze directory")
+            }
+            
+        # Get the class data
+        classes = analysis_result.get("classes", [])
+        
+        if not classes:
+            return {
+                "success": False,
+                "error": "No Python classes found in the specified directory"
+            }
+            
+        # Generate PlantUML code from the class data
+        plantuml_code = generate_plantuml(classes)
+        
+        # Generate the UML diagram using the PlantUML web service
+        uml_image = generate_uml_diagram(plantuml_code)
+        
+        # Generate the HTML result with the UML diagram
+        output_html = generate_output_html(plantuml_code, uml_image, classes, path)
+        
+        return {
+            "success": True,
+            "output": output_html,
+            "title": "UML Class Diagram",
+            "is_html": True
+        }
+    except Exception as e:
+        logger.error(f"Error generating UML diagram: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+def analyze_directory(path):
+    """
+    Use the Python UML Analyzer plugin to analyze the directory
+    
+    Args:
+        path (str): Directory path to analyze
+        
+    Returns:
+        dict: Analysis results
+    """
+    try:
+        # Check if Flask app is running by making a request to the API
+        api_url = "http://127.0.0.1:5000/api/plugins/py_uml_analyzer/query"
+        
+        # Prepare the query payload
+        payload = {
+            "query": "analyze_directory",
+            "context": {
+                "action": "analyze_directory",
+                "path": path
+            }
+        }
+        
+        # Make the API request
+        response = requests.post(api_url, json=payload, timeout=30)
+        
+        # Check if request was successful
+        if response.status_code == 200:
+            return response.json()
+        else:
+            # Fall back to direct code analysis if API is not available
+            logger.warning(f"API request failed with status {response.status_code}. Falling back to direct analysis.")
+            return direct_analysis(path)
+    except requests.RequestException:
+        logger.warning("Could not connect to API. Falling back to direct analysis.")
+        return direct_analysis(path)
+    except Exception as e:
+        logger.error(f"Error analyzing directory: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+def direct_analysis(path):
+    """
+    Direct analysis of directory without using the API
+    This is a fallback method if the API is not available
+    
+    Args:
+        path (str): Directory path to analyze
+        
+    Returns:
+        dict: Analysis results
+    """
+    try:
+        # Import the analyzer plugin directly
+        # Note: This is a fallback and not the preferred method
+        from plugins.py_uml_analyzer.analyzer_plugin import PythonUMLAnalyzerPlugin
+        
+        # Create a temporary plugin instance
+        plugin = PythonUMLAnalyzerPlugin("py_uml_analyzer", {}, None)
+        
+        # Analyze the directory
+        return plugin._analyze_directory(path)
+    except ImportError:
+        logger.error("Could not import the Python UML Analyzer plugin")
+        return {
+            "success": False,
+            "error": "Python UML Analyzer plugin is not available"
+        }
+    except Exception as e:
+        logger.error(f"Error in direct analysis: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+def generate_plantuml(classes):
+    """
+    Generate PlantUML code from class data
+    
+    Args:
+        classes (list): List of class information dictionaries
+        
+    Returns:
+        str: PlantUML code
+    """
+    plantuml_code = "@startuml\n\n"
+    plantuml_code += "' UML Diagram generated by UML Generator Plugin\n"
+    plantuml_code += "skinparam classAttributeIconSize 0\n"
+    plantuml_code += "skinparam classFontStyle bold\n\n"
+    
+    # Add all classes
+    for cls in classes:
+        # Class declaration
+        plantuml_code += f"class {cls['name']} "
+        
+        # Add base classes if any
+        if cls['bases']:
+            bases_str = ', '.join(cls['bases'])
+            plantuml_code += f"extends {bases_str} "
+            
+        plantuml_code += "{\n"
+        
+        # Add attributes
+        for attr in cls.get('attributes', []):
+            visibility = ""
+            if attr['visibility'] == 'private':
+                visibility = "-"
+            elif attr['visibility'] == 'protected':
+                visibility = "#"
+            else:
+                visibility = "+"
+                
+            plantuml_code += f"  {visibility} {attr['name']}\n"
+        
+        # Add methods
+        for method in cls.get('methods', []):
+            visibility = ""
+            if method['visibility'] == 'private':
+                visibility = "-"
+            elif method['visibility'] == 'protected':
+                visibility = "#"
+            else:
+                visibility = "+"
+                
+            params_str = ", ".join(method.get('params', []))
+            plantuml_code += f"  {visibility} {method['name']}({params_str})\n"
+        
+        plantuml_code += "}\n\n"
+    
+    # Add relationships (inheritance is already handled by 'extends')
+    # Could add more relationship types here if needed
+    
+    plantuml_code += "@enduml"
+    return plantuml_code
+
+def generate_uml_diagram(plantuml_code):
+    """
+    Generate a UML diagram using the PlantUML web service
+    
+    Args:
+        plantuml_code (str): PlantUML code
+        
+    Returns:
+        str: URL to the generated diagram
+    """
+    # Encode the PlantUML code for use with the PlantUML server
+    encoded_uml = encode_plantuml(plantuml_code)
+    
+    # Use the PlantUML web service
+    image_url = f"https://www.plantuml.com/plantuml/svg/{encoded_uml}"
+    
+    return image_url
+
+def encode_plantuml(plantuml_code):
+    """
+    Encode PlantUML code for use with the PlantUML web service
+    Uses PlantUML's simple encoding (not the full deflate + encode)
+    
+    Args:
+        plantuml_code (str): PlantUML code
+        
+    Returns:
+        str: Encoded string for PlantUML URL
+    """
+    # For simplicity, we'll use the server's text encoding
+    # In a real implementation, you'd use the proper deflate + encode method
+    return quote(plantuml_code)
+
+def generate_output_html(plantuml_code, uml_image_url, classes, path):
+    """
+    Generate HTML output with the UML diagram
+    
+    Args:
+        plantuml_code (str): PlantUML code
+        uml_image_url (str): URL to the UML diagram image
+        classes (list): List of class information dictionaries
+        path (str): Directory path that was analyzed
+        
+    Returns:
+        str: HTML content
+    """
+    class_count = len(classes)
+    file_count = len(set(cls.get('file_path', '') for cls in classes))
+    
+    html = f"""
+    <div class="uml-diagram-container">
+        <div class="uml-header">
+            <h2>UML Class Diagram</h2>
+            <div class="uml-stats">
+                <span>Directory: {path}</span>
+                <span>Files: {file_count}</span>
+                <span>Classes: {class_count}</span>
+            </div>
+        </div>
+        
+        <div class="uml-diagram">
+            <img src="{uml_image_url}" alt="UML Class Diagram" style="max-width: 100%; height: auto;">
+        </div>
+        
+        <div class="uml-tabs">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showTab('diagram')">Diagram</button>
+                <button class="tab-button" onclick="showTab('plantuml')">PlantUML Code</button>
+                <button class="tab-button" onclick="showTab('classes')">Class Details</button>
+            </div>
+            
+            <div id="diagram" class="tab-content active">
+                <p>The UML diagram above shows the classes and their relationships in the analyzed Python code.</p>
+            </div>
+            
+            <div id="plantuml" class="tab-content">
+                <div class="code-header">
+                    <h3>PlantUML Code</h3>
+                    <button onclick="copyToClipboard('plantuml-code')">Copy</button>
+                </div>
+                <pre id="plantuml-code" class="code-block">{plantuml_code}</pre>
+            </div>
+            
+            <div id="classes" class="tab-content">
+                <h3>Class Details</h3>
+                <div class="class-list">
+                    {generate_class_details_html(classes)}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+    .uml-diagram-container {
+        font-family: Arial, sans-serif;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .uml-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+    }
+    
+    .uml-header h2 {
+        margin: 0;
+        color: #2c3e50;
+    }
+    
+    .uml-stats {
+        display: flex;
+        flex-direction: column;
+        font-size: 14px;
+        color: #555;
+    }
+    
+    .uml-diagram {
+        margin-bottom: 20px;
+        text-align: center;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        overflow: auto;
+    }
+    
+    .uml-tabs {
+        margin-top: 20px;
+    }
+    
+    .tab-buttons {
+        display: flex;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .tab-button {
+        background: none;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        color: #555;
+        position: relative;
+    }
+    
+    .tab-button.active {
+        color: #3498db;
+    }
+    
+    .tab-button.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #3498db;
+    }
+    
+    .tab-content {
+        display: none;
+        padding: 15px;
+        background-color: white;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .code-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .code-header h3 {
+        margin: 0;
+        font-size: 16px;
+    }
+    
+    .code-header button {
+        padding: 6px 12px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    
+    .code-block {
+        background-color: #f4f4f4;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-family: monospace;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    .class-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+    }
+    
+    .class-card {
+        background-color: #f4f4f4;
+        border-radius: 6px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .class-name {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 5px;
+        font-size: 16px;
+    }
+    
+    .class-file {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+    
+    .class-section h4 {
+        font-size: 14px;
+        margin: 10px 0 5px 0;
+        color: #333;
+    }
+    
+    .class-attrs, .class-methods {
+        font-size: 13px;
+        font-family: monospace;
+    }
+    
+    .visibility-private {
+        color: #e74c3c;
+    }
+    
+    .visibility-protected {
+        color: #f39c12;
+    }
+    
+    .visibility-public {
+        color: #27ae60;
+    }
+    </style>
+    
+    <script>
+    function showTab(tabId) {
+        // Hide all tabs
+        var tabs = document.getElementsByClassName('tab-content');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+        }
+        
+        // Remove active class from all buttons
+        var buttons = document.getElementsByClassName('tab-button');
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].classList.remove('active');
+        }
+        
+        // Show selected tab
+        document.getElementById(tabId).classList.add('active');
+        
+        // Add active class to clicked button
+        var activeButton = document.querySelector('.tab-button[onclick="showTab(\\''+tabId+'\\')"]');
+        activeButton.classList.add('active');
+    }
+    
+    function copyToClipboard(elementId) {
+        var element = document.getElementById(elementId);
+        var text = element.textContent;
+        
+        navigator.clipboard.writeText(text).then(function() {
+            // Success feedback
+            var button = element.previousElementSibling.querySelector('button');
+            var originalText = button.textContent;
+            button.textContent = 'Copied!';
+            setTimeout(function() {
+                button.textContent = originalText;
+            }, 2000);
+        }, function() {
+            // Error feedback
+            alert('Failed to copy text');
+        });
+    }
+    </script>
+    """
+    
+    return html
+
+def generate_class_details_html(classes):
+    """
+    Generate HTML for the class details tab
+    
+    Args:
+        classes (list): List of class information dictionaries
+        
+    Returns:
+        str: HTML content
+    """
+    html = ""
+    
+    for cls in classes:
+        file_path = cls.get('file_path', '')
+        file_name = os.path.basename(file_path) if file_path else 'Unknown'
+        
+        html += f"""
+        <div class="class-card">
+            <div class="class-name">{cls['name']}</div>
+            <div class="class-file">File: {file_name}</div>
+            
+            <div class="class-section">
+                <h4>Attributes:</h4>
+                <div class="class-attrs">
+        """
+        
+        if cls.get('attributes'):
+            for attr in cls['attributes']:
+                visibility_class = f"visibility-{attr['visibility']}"
+                visibility_symbol = "-" if attr['visibility'] == 'private' else (
+                    "#" if attr['visibility'] == 'protected' else "+"
+                )
+                
+                html += f'<div><span class="{visibility_class}">{visibility_symbol}</span> {attr["name"]}</div>'
+        else:
+            html += "<div>No attributes</div>"
+            
+        html += """
+                </div>
+            </div>
+            
+            <div class="class-section">
+                <h4>Methods:</h4>
+                <div class="class-methods">
+        """
+        
+        if cls.get('methods'):
+            for method in cls['methods']:
+                visibility_class = f"visibility-{method['visibility']}"
+                visibility_symbol = "-" if method['visibility'] == 'private' else (
+                    "#" if method['visibility'] == 'protected' else "+"
+                )
+                
+                params_str = ", ".join(method.get('params', []))
+                html += f'<div><span class="{visibility_class}">{visibility_symbol}</span> {method["name"]}({params_str})</div>'
+        else:
+            html += "<div>No methods</div>"
+            
+        html += """
+                </div>
+            </div>
+        </div>
+        """
+    
+    return html

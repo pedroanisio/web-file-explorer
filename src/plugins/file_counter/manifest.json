@@ -1,0 +1,8 @@
+{
+    "id": "file_counter",
+    "name": "File Counter",
+    "version": "1.0.0",
+    "description": "Counts files in the current directory",
+    "entry_point": "counter_plugin",
+    "icon": "🔢"
+}

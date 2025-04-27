@@ -1,0 +1,8 @@
+{
+    "id": "uml_generator",
+    "name": "UML Diagram Generator",
+    "version": "1.0.0",
+    "description": "Generates UML diagrams from Python code using the PydanticAI plugin",
+    "entry_point": "uml_plugin",
+    "icon": "📊"
+}

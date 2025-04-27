@@ -1,0 +1,14 @@
+{
+    "id": "py_uml_analyzer",
+    "name": "Python UML Analyzer",
+    "version": "1.0.0",
+    "description": "Analyzes Python code and extracts class/method information for UML generation",
+    "entry_point": "analyzer_plugin",
+    "type": "backend",
+    "hooks": [
+        "file_processor",
+        "query_handler"
+    ],
+    "dependencies": [],
+    "settings": {}
+}

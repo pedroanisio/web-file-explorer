@@ -1,0 +1,15 @@
+{
+    "id": "py_analyzer",
+    "name": "Python Analyzer",
+    "version": "1.0.0",
+    "description": "Analyzes Python files",
+    "entry_point": "analyzer_plugin",
+    "type": "backend",
+    "hooks": [
+        "file_processor"
+    ],
+    "dependencies": [],
+    "settings": {
+        "max_complexity": 10
+    }
+}
