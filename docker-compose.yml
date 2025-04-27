@@ -1,0 +1,11 @@
+services:
+  file-explorer:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ${HOST_DIR:-./data}:/data
+    environment:
+      - FLASK_DEBUG=${FLASK_DEBUG:-0}
+      - FLASK_FILE_EXPLORER_BASE_DIR=/data
+    restart: unless-stopped

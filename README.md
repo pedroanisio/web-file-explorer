@@ -146,6 +146,77 @@ mypy src
 black src tests
 ```
 
+## Docker Deployment for Web File Explorer
+
+## Prerequisites
+
+- Docker installed on your system
+- Docker Compose (optional, but recommended)
+
+## Quick Start with Docker Compose
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/web-file-explorer.git
+cd web-file-explorer
+   ```
+
+2. Create a `.env` file (optional) to configure the deployment:
+```
+FLASK_DEBUG=0
+HOST_DIR=/path/to/directory/to/explore
+```
+
+3. Start the application:
+```bash
+docker compose up -d
+```
+
+4. Access the application in your browser at http://localhost:5000
+
+## Manual Docker Deployment
+
+If you prefer not to use Docker Compose, you can build and run the container directly:
+
+1. Build the Docker image:
+```bash
+docker build -t file-explorer .
+```
+
+2. Run the container:
+```bash
+docker run -p 5000:5000 -v /path/to/directory:/data file-explorer
+```
+
+## Configuration Options
+
+### Environment Variables
+
+- `FLASK_DEBUG`: Set to 1 to enable debug mode (default: 0)
+- `FLASK_FILE_EXPLORER_BASE_DIR`: Base directory to explore (default: /data inside the container)
+- `HOST_DIR`: Local directory to mount in the container (when using docker-compose)
+
+### Persistent Volumes
+
+The container mounts the specified directory to `/data` inside the container. This is where the file explorer will browse files from.
+
+## Security Considerations
+
+- The application runs as a non-root user inside the container for improved security
+- Consider using a reverse proxy like Nginx or Traefik with HTTPS if deploying to production
+- Review access permissions for the mounted directories
+
+## Troubleshooting
+
+1. **Permission issues with mounted volumes**: 
+   Ensure the user inside the container (UID 1000) has read access to the mounted directory.
+
+2. **Port conflicts**:
+   If port 5000 is already in use, modify the port mapping in docker-compose.yml or the docker run command.
+
+3. **Plugins not working**:
+   Some plugins may require additional dependencies. You can customize the Dockerfile to install them.
+
 ## License
 
 MIT License - See the LICENSE file for details.
