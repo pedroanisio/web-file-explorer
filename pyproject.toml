@@ -70,6 +70,7 @@ disallow_incomplete_defs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 filterwarnings = [
     "ignore::DeprecationWarning",
 ]
