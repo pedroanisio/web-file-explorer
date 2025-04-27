@@ -87,13 +87,13 @@ class PluginManager:
         """
         Load a UI-based plugin that appears in the toolbar
         """
-        # Check for UI-specific required fields
-        if "icon" not in manifest:
-            logger.warning(f"UI plugin manifest in {plugin_path} missing 'icon' field")
-            return
-            
-        module_path = f"plugins.{plugin_name}.{manifest['entry_point']}"
         try:
+            # Check for UI-specific required fields
+            if "icon" not in manifest:
+                logger.warning(f"UI plugin manifest in {plugin_path} missing 'icon' field")
+                return
+                
+            module_path = f"plugins.{plugin_name}.{manifest['entry_point']}"
             module = importlib.import_module(module_path)
             if not hasattr(module, 'execute'):
                 logger.warning(f"UI plugin {plugin_name} does not have an execute function")
@@ -115,9 +115,9 @@ class PluginManager:
             })
             
             logger.info(f"Successfully loaded UI plugin: {manifest['name']}")
-            
-        except ImportError as e:
-            logger.error(f"Failed to import UI plugin {plugin_name}: {e}")
+        except Exception as e:
+            logger.error(f"Failed to load UI plugin '{plugin_name}' from {plugin_path}: {e}", exc_info=True)
+            # Continue loading other plugins
     
     def _load_backend_plugin(self, plugin_name, plugin_path, manifest):
         """
@@ -148,8 +148,8 @@ class PluginManager:
                     return
         
         # Import backend plugin module
-        module_path = f"plugins.{plugin_name}.{manifest['entry_point']}"
         try:
+            module_path = f"plugins.{plugin_name}.{manifest['entry_point']}"
             module = importlib.import_module(module_path)
             
             # Check for create_plugin function
@@ -169,8 +169,8 @@ class PluginManager:
             
             logger.info(f"Successfully loaded backend plugin: {manifest['name']}")
         except Exception as e:
-            logger.error(f"Error activating backend plugin {plugin_name}: {e}")
-            return
+            logger.error(f"Failed to load or activate backend plugin '{plugin_name}' from {plugin_path}: {e}", exc_info=True)
+            # Continue loading other plugins
     
     def execute_plugin(self, plugin_id, **kwargs):
         """

@@ -336,7 +336,7 @@ def generate_output_html(plantuml_code, uml_image_url, classes, path):
         margin-bottom: 20px;
         text-align: center;
         background-color: white;
-        padding: 20px;
+        padding: 15px;
         border-radius: 8px;
         overflow: auto;
     }
@@ -356,7 +356,7 @@ def generate_output_html(plantuml_code, uml_image_url, classes, path):
         border: none;
         padding: 10px 15px;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: bold;
         color: #555;
         position: relative;
@@ -380,7 +380,9 @@ def generate_output_html(plantuml_code, uml_image_url, classes, path):
         display: none;
         padding: 15px;
         background-color: white;
-        border-radius: 0 0 8px 8px;
+        border: 1px solid #ddd;
+        border-top: none;
+        border-radius: 0 0 6px 6px;
     }
     
     .tab-content.active {
@@ -470,44 +472,44 @@ def generate_output_html(plantuml_code, uml_image_url, classes, path):
     </style>
     
     <script>
-    function showTab(tabId) {
+    function showTab(tabId) {{
         /* Hide all tabs */
         var tabs = document.getElementsByClassName('tab-content');
-        for (var i = 0; i < tabs.length; i++) {
+        for (var i = 0; i < tabs.length; i++) {{
             tabs[i].classList.remove('active');
-        }
+        }}
         
         // Remove active class from all buttons
         var buttons = document.getElementsByClassName('tab-button');
-        for (var i = 0; i < buttons.length; i++) {
+        for (var i = 0; i < buttons.length; i++) {{
             buttons[i].classList.remove('active');
-        }
+        }}
         
         // Show selected tab
         document.getElementById(tabId).classList.add('active');
         
         // Add active class to clicked button
-        var activeButton = document.querySelector('.tab-button[onclick="showTab(\\''+tabId+'\\')"]');
+        var activeButton = document.querySelector('.tab-button[onclick="showTab(\''+tabId+'\')"]'); 
         activeButton.classList.add('active');
-    }
+    }}
     
-    function copyToClipboard(elementId) {
+    function copyToClipboard(elementId) {{
         var element = document.getElementById(elementId);
         var text = element.textContent;
         
-        navigator.clipboard.writeText(text).then(function() {
+        navigator.clipboard.writeText(text).then(function() {{
             // Success feedback
             var button = element.previousElementSibling.querySelector('button');
             var originalText = button.textContent;
             button.textContent = 'Copied!';
-            setTimeout(function() {
+            setTimeout(function() {{
                 button.textContent = originalText;
-            }, 2000);
-        }, function() {
+            }}, 2000);
+        }}, function() {{
             // Error feedback
             alert('Failed to copy text');
-        });
-    }
+        }});
+    }}
     </script>
     """
     

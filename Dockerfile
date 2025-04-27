@@ -6,8 +6,18 @@ WORKDIR /app
 COPY setup.py pyproject.toml README.md ./
 COPY src ./src/
 
-# Install the package
-RUN pip install --no-cache-dir -e .
+# Install dependencies
+COPY requirements.txt .
+RUN python -m pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir . # Install the package itself
+
+# Install tree command
+RUN apt-get update && apt-get install -y tree && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user and switch to it
+RUN addgroup --system nonroot && adduser --system --ingroup nonroot nonroot
 
 # Set environment variables
 ENV FLASK_APP=src
@@ -21,11 +31,9 @@ RUN mkdir -p /data
 # Expose port 5000
 EXPOSE 5000
 
-# Create a non-root user with specific UID 1000 (standard first user on many Linux systems)
-RUN adduser --disabled-password --gecos '' --uid 1000 explorer
-# Give ownership of the data directory to the explorer user
-RUN chown -R explorer:explorer /data
-USER explorer
+# Give ownership of the data directory to the nonroot user
+RUN chown -R nonroot:nonroot /data
+USER nonroot
 
 # Command to run the application using Python's module execution
 CMD ["python", "-m", "src"]
