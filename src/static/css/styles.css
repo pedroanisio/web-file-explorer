@@ -175,3 +175,18 @@
 .theme-dark #file-context-menu li:hover {
     background-color: #4a5568;
 }
+
+/* Favorites bar styles */
+.favorites-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.favorite-item button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+}

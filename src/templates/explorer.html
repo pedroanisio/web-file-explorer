@@ -34,19 +34,24 @@
             </div>
             {% endif %}
             
-            <div class="breadcrumb">
-                <a href="{{ url_for('explore', path='') }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">Home</a>
-                {% if current_path %}
-                    {% set path_segments = current_path.split('/') %}
-                    {% set accumulated_path = '' %}
-                    {% for segment in path_segments %}
-                        {% if segment %}
-                            {% set accumulated_path = accumulated_path + segment + '/' %}
-                            / <a href="{{ url_for('explore', path=accumulated_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ segment }}</a>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
+            <div class="breadcrumb flex flex-wrap items-center justify-between">
+                <div>
+                    <a href="{{ url_for('explore', path='') }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">Home</a>
+                    {% if current_path %}
+                        {% set path_segments = current_path.split('/') %}
+                        {% set accumulated_path = '' %}
+                        {% for segment in path_segments %}
+                            {% if segment %}
+                                {% set accumulated_path = accumulated_path + segment + '/' %}
+                                / <a href="{{ url_for('explore', path=accumulated_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ segment }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <button id="add-favorite-btn" data-current-path="{{ current_path }}" class="px-2 py-1 text-sm bg-blue-500 text-white rounded mt-2 md:mt-0">Add Favorite</button>
             </div>
+
+            <div id="favorites-bar" class="favorites-bar"></div>
             
             <div class="controls">
                 <div class="sort-options">
@@ -213,7 +218,11 @@
     </ul>
 
     <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/favorites.js') }}"></script>
+
     <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
+
     
     <!-- Theme switcher script -->
     <script>
