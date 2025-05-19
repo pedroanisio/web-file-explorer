@@ -6,5 +6,5 @@
     "icon": "📋",
     "type": "ui",
     "has_settings": true,
-    "entry_point": "dump_plugin.py"
+    "entry_point": "dump_plugin"
 }
