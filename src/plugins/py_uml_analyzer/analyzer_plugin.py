@@ -7,6 +7,7 @@ import os
 import logging
 import json
 from typing import Dict, Any, List, Optional
+from ..plugin_base import BackendPlugin
 
 # Setup logging
 logger = logging.getLogger("py_uml_analyzer")
@@ -38,15 +39,13 @@ class ClassInfo:
             "line_number": self.line_number
         }
 
-class PythonUMLAnalyzerPlugin:
+class PythonUMLAnalyzerPlugin(BackendPlugin):
     """
     Python UML Analyzer plugin for extracting class information for UML diagrams
     """
     
     def __init__(self, plugin_id, manifest, registry):
-        self.plugin_id = plugin_id
-        self.manifest = manifest
-        self.registry = registry
+        super().__init__(plugin_id, manifest, registry)
         # Store analyzed classes by file path
         self.class_cache = {}
         

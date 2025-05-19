@@ -6,6 +6,7 @@ import os
 import logging
 import pkg_resources
 from typing import Dict, Any, List, Optional
+from ..plugin_base import BackendPlugin
 
 # Import PydanticAI
 try:
@@ -43,15 +44,13 @@ def create_plugin(plugin_id, manifest, registry):
     """Create the PydanticAI agent plugin instance"""
     return PydanticAIAgentPlugin(plugin_id, manifest, registry)
 
-class PydanticAIAgentPlugin:
+class PydanticAIAgentPlugin(BackendPlugin):
     """
     PydanticAI Agent plugin for code analysis and assistance
     """
     
     def __init__(self, plugin_id, manifest, registry):
-        self.plugin_id = plugin_id
-        self.manifest = manifest
-        self.registry = registry
+        super().__init__(plugin_id, manifest, registry)
         self.agent = None
         
     def activate(self):

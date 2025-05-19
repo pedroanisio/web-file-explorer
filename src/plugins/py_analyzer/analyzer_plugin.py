@@ -4,6 +4,7 @@ Analyzes Python files and provides information about their structure.
 """
 import ast
 import logging
+from ..plugin_base import BackendPlugin
 
 # Setup logging
 logger = logging.getLogger("py_analyzer")
@@ -12,15 +13,13 @@ def create_plugin(plugin_id, manifest, registry):
     """Create the plugin instance"""
     return PythonAnalyzerPlugin(plugin_id, manifest, registry)
 
-class PythonAnalyzerPlugin:
+class PythonAnalyzerPlugin(BackendPlugin):
     """
     Python code analyzer plugin
     """
     
     def __init__(self, plugin_id, manifest, registry):
-        self.plugin_id = plugin_id
-        self.manifest = manifest
-        self.registry = registry
+        super().__init__(plugin_id, manifest, registry)
         
     def activate(self):
         """Called when the plugin is activated"""
