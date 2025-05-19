@@ -487,14 +487,8 @@ async function executePlugin(pluginId, path) {
         // Show loading indicator in modal
         showModal('Processing...', '<div class="flex justify-center items-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>', true);
         
-        // Fetch plugin result
-        const response = await fetch(`/api/plugins/${pluginId}/process`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ path })
-        });
+        // Fetch plugin result using the existing endpoint format
+        const response = await fetch(`/plugins/execute/${pluginId}?path=${encodeURIComponent(path)}`);
         
         if (!response.ok) {
             throw new Error(`Server responded with ${response.status}: ${response.statusText}`);

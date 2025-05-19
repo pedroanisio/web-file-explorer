@@ -61,19 +61,9 @@
     </div>
     
     {% block modals %}
-    <!-- Modal for plugin output -->
-    <div id="modal-overlay" class="modal-overlay">
-        <div id="modal" class="modal">
-            <div class="modal-header">
-                <h2 id="modal-title" class="modal-title">Modal Title</h2>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <pre id="modal-content" class="modal-content"></pre>
-            </div>
-        </div>
-    </div>
-
+    <!-- Include reusable modal component -->
+    {% include "modal.html" %}
+    
     <!-- Context menu for file actions -->
     <ul id="file-context-menu" class="context-menu hidden">
         <li data-action="open">Open</li>
