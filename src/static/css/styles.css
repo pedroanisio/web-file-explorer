@@ -129,3 +129,13 @@
     border-radius: var(--radius-sm);
     margin-bottom: var(--spacing-sm);
 }
+
+/* Preview pane styles */
+.preview-pane {
+    border-left: 1px solid #ddd;
+    padding-left: 1rem;
+}
+.loading-indicator {
+    text-align: center;
+    padding: 1rem;
+}
