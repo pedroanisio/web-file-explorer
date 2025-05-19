@@ -286,69 +286,8 @@ document.addEventListener('DOMContentLoaded', function() {
         contextMenu.classList.add('hidden');
     });
     
-    // Function to show modal with content
-    function showModal(title, content, isError = false, isHtml = false) {
-        modalTitle.textContent = title;
-        
-        if (isError) {
-            modalContent.innerHTML = `<div class="error-message">${content}</div>`;
-            modalContent.classList.add('with-copy-button');
-            modalContent.classList.remove('html-content');
-            
-            // Add copy button for errors
-            let copyButton = modalContent.parentNode.querySelector('.modal-copy-button');
-            if (!copyButton) {
-                copyButton = document.createElement('button');
-                copyButton.textContent = 'Copy';
-                copyButton.className = 'modal-copy-button copy-button';
-                modalContent.parentNode.appendChild(copyButton);
-            }
-        } else if (isHtml) {
-            modalContent.innerHTML = content;
-            modalContent.classList.remove('with-copy-button');
-            modalContent.classList.add('html-content');
-            
-            // Remove any existing copy button for HTML content
-            let copyButton = modalContent.parentNode.querySelector('.modal-copy-button');
-            if (copyButton) {
-                copyButton.remove();
-            }
-        } else {
-            modalContent.textContent = content;
-            modalContent.classList.add('with-copy-button');
-            modalContent.classList.remove('html-content');
-            
-            // Add copy button for plain text
-            let copyButton = modalContent.parentNode.querySelector('.modal-copy-button');
-            if (!copyButton) {
-                copyButton = document.createElement('button');
-                copyButton.textContent = 'Copy';
-                copyButton.className = 'modal-copy-button copy-button';
-                modalContent.parentNode.appendChild(copyButton);
-            }
-        }
-        
-        modalOverlay.style.display = 'flex';
-        
-        // Apply any necessary height adjustments for better display
-        const windowHeight = window.innerHeight;
-        const modalHeight = windowHeight * 0.92;
-        modal.style.height = `${modalHeight}px`;
-        
-        // Dynamically adjust modal-body height based on header
-        const headerHeight = modal.querySelector('.modal-header').offsetHeight;
-        modal.querySelector('.modal-body').style.height = `${modalHeight - headerHeight}px`;
-        
-        // Initialize any charts that might be in the modal
-        setTimeout(() => {
-            if (window.Plotly && isHtml) {
-                const plots = document.querySelectorAll('.js-plotly-plot');
-                plots.forEach(plot => {
-                    window.Plotly.Plots.resize(plot);
-                });
-            }
-        }, 100);
-    }
+    // Use the global showModal function for this scope
+    const showModal = showModalGlobal;
     
     // Close modal when clicking close button or outside the modal
     closeModal.addEventListener('click', function() {
