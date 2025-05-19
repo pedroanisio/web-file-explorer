@@ -112,7 +112,7 @@
                     {% endfor %}
                     
                     {% for file in files %}
-                    <tr class="{{ 'hover:bg-gray-700' if theme == 'dark' else 'hover:bg-gray-50' }}">
+                    <tr class="{{ 'hover:bg-gray-700' if theme == 'dark' else 'hover:bg-gray-50' }} file-row" data-file-path="{{ file.path }}">
                         <td>
                             <span class="file-icon">📄</span>
                             <a href="{{ url_for('explore', path=file.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ file.name }}</a>
@@ -172,7 +172,14 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Context menu for file actions -->
+    <ul id="file-context-menu" class="context-menu hidden">
+        <li data-action="open">Open</li>
+        <li data-action="download">Download</li>
+        <li data-action="copy">Copy Path</li>
+    </ul>
+
     <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
     
     <!-- Theme switcher script -->
