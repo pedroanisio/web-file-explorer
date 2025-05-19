@@ -369,23 +369,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const pluginId = this.getAttribute('data-plugin-id');
             const currentPath = this.getAttribute('data-current-path');
             
-            // Show loading state
-            showModal('Loading...', 'Executing plugin, please wait...');
-            
-            // Make AJAX request to execute plugin
-            fetch(`/plugins/execute/${pluginId}?path=${encodeURIComponent(currentPath)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const isHtml = (data.content_type && data.content_type === 'html') || data.is_html === true;
-                        showModal(data.title || 'Plugin Result', data.output, false, isHtml);
-                    } else {
-                        showModal('Error', data.error + '\n\n' + (data.output || ''), true);
-                    }
-                })
-                .catch(error => {
-                    showModal('Error', 'Failed to execute plugin: ' + error.message, true);
-                });
+            if (pluginId && currentPath) {
+                executePlugin(pluginId, currentPath);
+            }
         });
     });
 
@@ -489,3 +475,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+/**
+ * Execute a plugin for a specific path
+ * 
+ * @param {string} pluginId - The ID of the plugin to execute
+ * @param {string} path - The path to process
+ */
+async function executePlugin(pluginId, path) {
+    try {
+        // Show loading indicator in modal
+        showModal('Processing...', '<div class="flex justify-center items-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>', true);
+        
+        // Fetch plugin result
+        const response = await fetch(`/api/plugins/${pluginId}/process`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ path })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Check if the result is HTML content
+            const isHtml = (data.content_type && data.content_type === 'html') || data.is_html === true;
+            
+            // Update the modal with the plugin output
+            showModal(data.title || pluginId, data.output, isHtml);
+        } else {
+            // Show error in modal
+            showModal('Error', data.error || 'Unknown error occurred', false);
+        }
+    } catch (error) {
+        console.error('Error executing plugin:', error);
+        showModal('Error', `Failed to execute plugin: ${error.message}`, false);
+    }
+}
