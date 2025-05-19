@@ -109,3 +109,13 @@
     border-radius: 4px;
     margin-bottom: 10px;
 }
+
+/* Preview pane styles */
+.preview-pane {
+    border-left: 1px solid #ddd;
+    padding-left: 1rem;
+}
+.loading-indicator {
+    text-align: center;
+    padding: 1rem;
+}

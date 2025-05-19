@@ -76,10 +76,12 @@
                     <input type="hidden" name="sort" value="{{ sort_by }}">
                     <input type="hidden" name="desc" value="{{ 'true' if sort_desc else 'false' }}">
                 </form>
+                <button id="toggle-preview-pane" class="ml-4 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Toggle Preview</button>
             </div>
         </div>
         
-        <div class="content-container">
+        <div class="content-wrapper flex">
+            <div class="content-container flex-1">
             <table class="table">
                 <thead>
                     <tr>
@@ -116,6 +118,7 @@
                         <td>
                             <span class="file-icon">📄</span>
                             <a href="{{ url_for('explore', path=file.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ file.name }}</a>
+                            <button class="ml-2 text-sm text-green-600 preview-link" data-preview-url="{{ get_preview_url(file.path) }}">Preview</button>
                         </td>
                         <td class="{{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">{{ file.modified }}</td>
                         <td class="{{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">
@@ -131,7 +134,7 @@
                         </td>
                     </tr>
                     {% endfor %}
-                    
+
                     {% if not dirs and not files %}
                     <tr>
                         <td colspan="3" class="text-center py-5 {{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">
@@ -145,6 +148,17 @@
                     {% endif %}
                 </tbody>
             </table>
+            </div>
+
+            <!-- Preview Pane -->
+            <div id="preview-pane" class="preview-pane hidden w-1/2 ml-4">
+                <div class="flex justify-between mb-2">
+                    <h3 class="font-semibold">Preview</h3>
+                    <button id="close-preview" class="text-red-500">&times;</button>
+                </div>
+                <div id="preview-loading" class="loading-indicator hidden">Loading...</div>
+                <iframe id="preview-frame" class="w-full h-full hidden"></iframe>
+            </div>
         </div>
     </div>
     
@@ -174,6 +188,7 @@
     </div>
     
     <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
     
     <!-- Theme switcher script -->
     <script>
