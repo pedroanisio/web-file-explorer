@@ -476,6 +476,80 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Define showModal globally so it can be used by executePlugin
+let showModalGlobal;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up the showModal function and make it available globally
+    showModalGlobal = function(title, content, isError = false, isHtml = false) {
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const modalOverlay = document.getElementById('modal-overlay');
+        
+        modalTitle.textContent = title;
+        
+        if (isError) {
+            modalContent.innerHTML = `<div class="error-message">${content}</div>`;
+            modalContent.classList.add('with-copy-button');
+            modalContent.classList.remove('html-content');
+            
+            // Add copy button for errors
+            let copyButton = modalContent.parentNode.querySelector('.modal-copy-button');
+            if (!copyButton) {
+                copyButton = document.createElement('button');
+                copyButton.textContent = 'Copy';
+                copyButton.className = 'modal-copy-button copy-button';
+                modalContent.parentNode.appendChild(copyButton);
+            }
+        } else if (isHtml) {
+            modalContent.innerHTML = content;
+            modalContent.classList.remove('with-copy-button');
+            modalContent.classList.add('html-content');
+            
+            // Remove any existing copy button for HTML content
+            let copyButton = modalContent.parentNode.querySelector('.modal-copy-button');
+            if (copyButton) {
+                copyButton.remove();
+            }
+        } else {
+            modalContent.textContent = content;
+            modalContent.classList.add('with-copy-button');
+            modalContent.classList.remove('html-content');
+            
+            // Add copy button for plain text
+            let copyButton = modalContent.parentNode.querySelector('.modal-copy-button');
+            if (!copyButton) {
+                copyButton = document.createElement('button');
+                copyButton.textContent = 'Copy';
+                copyButton.className = 'modal-copy-button copy-button';
+                modalContent.parentNode.appendChild(copyButton);
+            }
+        }
+        
+        modalOverlay.style.display = 'flex';
+        
+        // Apply any necessary height adjustments for better display
+        const windowHeight = window.innerHeight;
+        const modalHeight = windowHeight * 0.92;
+        const modal = document.getElementById('modal');
+        modal.style.height = `${modalHeight}px`;
+        
+        // Dynamically adjust modal-body height based on header
+        const headerHeight = modal.querySelector('.modal-header').offsetHeight;
+        modal.querySelector('.modal-body').style.height = `${modalHeight - headerHeight}px`;
+        
+        // Initialize any charts that might be in the modal
+        setTimeout(() => {
+            if (window.Plotly && isHtml) {
+                const plots = document.querySelectorAll('.js-plotly-plot');
+                plots.forEach(plot => {
+                    window.Plotly.Plots.resize(plot);
+                });
+            }
+        }, 100);
+    };
+});
+
 /**
  * Execute a plugin for a specific path
  * 
@@ -485,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function executePlugin(pluginId, path) {
     try {
         // Show loading indicator in modal
-        showModal('Processing...', '<div class="flex justify-center items-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>', true);
+        showModalGlobal('Processing...', '<div class="flex justify-center items-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>', true);
         
         // Fetch plugin result using the existing endpoint format
         const response = await fetch(`/plugins/execute/${pluginId}?path=${encodeURIComponent(path)}`);
@@ -501,13 +575,13 @@ async function executePlugin(pluginId, path) {
             const isHtml = (data.content_type && data.content_type === 'html') || data.is_html === true;
             
             // Update the modal with the plugin output
-            showModal(data.title || pluginId, data.output, isHtml);
+            showModalGlobal(data.title || pluginId, data.output, isHtml);
         } else {
             // Show error in modal
-            showModal('Error', data.error || 'Unknown error occurred', false);
+            showModalGlobal('Error', data.error || 'Unknown error occurred', false);
         }
     } catch (error) {
         console.error('Error executing plugin:', error);
-        showModal('Error', `Failed to execute plugin: ${error.message}`, false);
+        showModalGlobal('Error', `Failed to execute plugin: ${error.message}`, false);
     }
 }
