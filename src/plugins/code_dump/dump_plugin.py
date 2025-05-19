@@ -20,45 +20,45 @@ def get_default_patterns():
     """Returns the default list of exclusion patterns."""
     return DEFAULT_PATTERNS
 
+def get_manifest():
+    """Get the plugin manifest."""
+    manifest_path = Path(__file__).parent / "manifest.json"
+    if manifest_path.exists():
+        with open(manifest_path) as f:
+            return json.load(f)
+    return {}
+
 def get_settings():
     """Return plugin settings."""
-    config = get_config()
-    return {
-        "exclude_patterns": config.get("exclude_patterns", DEFAULT_PATTERNS)
-    }
+    manifest = get_manifest()
+    return manifest.get("settings", {"exclude_patterns": DEFAULT_PATTERNS})
 
-def get_config():
-    """Get the current configuration."""
-    config_file = Path(__file__).parent / "config.json"
-    if config_file.exists():
-        with open(config_file) as f:
-            return json.load(f)
-    return {"exclude_patterns": DEFAULT_PATTERNS}
-
-def save_config(config):
-    """Save the configuration."""
-    config_file = Path(__file__).parent / "config.json"
-    with open(config_file, "w") as f:
-        json.dump(config, f)
+def save_settings(settings):
+    """Save plugin settings to manifest."""
+    manifest = get_manifest()
+    manifest["settings"] = settings
+    manifest_path = Path(__file__).parent / "manifest.json"
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=4)
+    return True
 
 def get_config_template():
     """Return the configuration template data."""
-    config = get_config()
+    settings = get_settings()
     return {
         "template": "config.html",
         "data": {
             "default_patterns": DEFAULT_PATTERNS,
-            "selected_patterns": config.get("exclude_patterns", DEFAULT_PATTERNS)
+            "selected_patterns": settings.get("exclude_patterns", DEFAULT_PATTERNS)
         }
     }
 
 def save_plugin_config(data):
     """Save the plugin configuration."""
-    config = {
+    settings = {
         "exclude_patterns": data.getlist("exclude_patterns") or DEFAULT_PATTERNS
     }
-    save_config(config)
-    return True
+    return save_settings(settings)
 
 def build_find_command(path, exclude_patterns):
     """Builds the find command with specified exclusion patterns."""
@@ -96,8 +96,8 @@ def execute(path, **kwargs):
             }
         
         # Get the current configuration
-        config = get_config()
-        exclude_patterns = config.get("exclude_patterns", DEFAULT_PATTERNS)
+        settings = get_settings()
+        exclude_patterns = settings.get("exclude_patterns", DEFAULT_PATTERNS)
         
         # Build the command with provided patterns
         command = build_find_command(path, exclude_patterns)

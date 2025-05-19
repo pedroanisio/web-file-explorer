@@ -1,20 +1,20 @@
-{% extends "plugin_config.html" %}
+{% extends "plugin_detail.html" %}
 
 {% block plugin_config %}
 <div class="code-dump-config">
     <h2>Code Dump Configuration</h2>
     
-    <form method="POST" action="{{ url_for('plugin_config.save_plugin_config', plugin_id='code_dump') }}">
+    <form method="POST" action="{{ url_for('plugin_config.save_plugin_settings', plugin_id='code_dump') }}">
         <div class="config-section">
             <h3>Files/Folders to Exclude</h3>
             <div class="pattern-grid">
-                {% for pattern in default_patterns %}
+                {% for pattern in plugin.settings.exclude_patterns %}
                 <div class="pattern-item">
                     <input type="checkbox" 
                            id="{{ pattern }}" 
                            name="exclude_patterns" 
                            value="{{ pattern }}"
-                           {% if pattern in selected_patterns %}checked{% endif %}>
+                           checked>
                     <label for="{{ pattern }}">{{ pattern }}</label>
                 </div>
                 {% endfor %}
