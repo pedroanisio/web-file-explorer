@@ -129,105 +129,61 @@ def execute(path, **kwargs):
         
         # Add a copy button with enhanced styling and functionality
         output_with_copy = f"""
-        <div class="code-dump-container">
-            <header class="code-dump-header">
-                <h3>Code Dump Results</h3>
-                <div class="copy-button-container">
-                    <button id="copy-button" class="copy-button">📋 Copy All Code</button>
-                    <span id="copy-status" class="copy-status"></span>
-                </div>
-            </header>
-            <pre id="code-dump-content" style="white-space: pre-wrap; max-height: 70vh; overflow-y: auto;">{output_html}</pre>
+        <div class="code-dump-container card">
+            <div class="code-dump-header card-header">
+                <h3 class="card-title">Code Dump Results</h3>
+                <button id="copy-button" class="btn-blue">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                    Copy All Code
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <pre id="code-dump-content" class="source-code">{output_html}</pre>
+            </div>
         </div>
         
-        <style>
-        .code-dump-container {{
-            position: relative;
-            border: 1px solid #2c3e50;
-            border-radius: 8px;
-            padding: 0;
-            margin-top: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            max-width: 100%;
-            overflow: hidden;
-            font-family: sans-serif;
-        }}
-        
-        .code-dump-header {{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #2c3e50;
-            color: white;
-            padding: 10px 15px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }}
-        
-        .code-dump-header h3 {{
-            margin: 0;
-            font-size: 16px;
-        }}
-        
-        .copy-button-container {{
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }}
-        
-        .copy-button {{
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            font-size: 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 600;
-        }}
-        
-        .copy-button:hover {{
-            background-color: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }}
-        
-        .copy-status {{
-            font-size: 12px;
-            transition: opacity 0.5s ease;
-        }}
-        
-        .copy-status.success {{
-            color: #2ecc71;
-        }}
-        
-        .copy-status.error {{
-            color: #e74c3c;
-        }}
-        
-        #code-dump-content {{
-            padding: 15px;
-            margin: 0;
-            background-color: #f8f9fa;
-            color: #333;
-            font-family: monospace;
-            line-height: 1.5;
-            border-radius: 0 0 8px 8px;
-        }}
-        </style>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {{
+            const copyButton = document.getElementById('copy-button');
+            const codeContent = document.getElementById('code-dump-content');
+            
+            copyButton.addEventListener('click', function() {{
+                const originalText = copyButton.innerHTML;
+                
+                // Create a temporary textarea element to copy the text
+                const textArea = document.createElement('textarea');
+                textArea.value = codeContent.textContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {{
+                    const successful = document.execCommand('copy');
+                    if (successful) {{
+                        copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg> Copied!';
+                        
+                        setTimeout(function() {{
+                            copyButton.innerHTML = originalText;
+                        }}, 2000);
+                    }}
+                }} catch (err) {{
+                    console.error('Failed to copy: ', err);
+                }}
+                
+                document.body.removeChild(textArea);
+            }});
+        }});
+        </script>
         """
         
         return {
             "success": True,
             "output": output_with_copy,
             "title": "Code Dump Results",
-            "content_type": "html"
+            "content_type": "html",
+            "is_html": True
         }
     except subprocess.CalledProcessError as e:
         logger.error(f"CalledProcessError: {e}", exc_info=True)

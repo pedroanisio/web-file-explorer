@@ -150,4 +150,28 @@
 /* Icon placement */
 .icon {
     @apply h-5 w-5 inline-flex;
+}
+
+/* Code Dump Component */
+.code-dump-container {
+    @apply max-w-full overflow-hidden my-4;
+}
+
+.code-dump-header {
+    @apply sticky top-0 z-10 bg-white dark:bg-gray-800 shadow-sm;
+}
+
+#code-dump-content {
+    @apply w-full h-[70vh] overflow-y-auto whitespace-pre-wrap;
+}
+
+/* Copy button animation */
+@keyframes pulse {
+    0% { @apply opacity-100; }
+    50% { @apply opacity-60; }
+    100% { @apply opacity-100; }
+}
+
+.pulse {
+    animation: pulse 1.5s ease-in-out infinite;
 } 

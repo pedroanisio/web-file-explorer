@@ -8,7 +8,25 @@
     "has_settings": true,
     "settings": {
         "exclude_patterns": [
-            "['.venv', 'venv', '*.md', 'node_modules', '*.png', '*-lock.json', '*.jpg', '*.lock', '.git', '*.db', '*.pyc', '*git*', '*.ico', '*.svg', 'wait-for-it.sh', '.pytest_cache', 'htmlcov', '.coverage', '*.log']"
+            ".venv", 
+            "venv", 
+            "*.md", 
+            "node_modules", 
+            "*.png", 
+            "*-lock.json", 
+            "*.jpg", 
+            "*.lock", 
+            ".git", 
+            "*.db", 
+            "*.pyc", 
+            "*git*", 
+            "*.ico", 
+            "*.svg", 
+            "wait-for-it.sh", 
+            ".pytest_cache", 
+            "htmlcov", 
+            ".coverage", 
+            "*.log"
         ]
     },
     "entry_point": "dump_plugin"
