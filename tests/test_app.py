@@ -4,6 +4,8 @@ Tests for the Flask File Explorer application.
 import os
 import tempfile
 import shutil
+import io
+import zipfile
 import pytest
 from flask import url_for
 
@@ -107,3 +109,24 @@ def test_directory_traversal_prevention(client, temp_test_dir):
     
     response = client.get(f'/explore/{relative_path}')
     assert response.status_code == 403  # Should be forbidden
+
+
+def test_download_selected_files(client, temp_test_dir):
+    """Test downloading multiple selected files as a zip archive."""
+    extra_path = os.path.join(temp_test_dir, 'extra.txt')
+    with open(extra_path, 'w') as f:
+        f.write('extra')
+
+    response = client.post('/download-selected', json={
+        'paths': ['test_file.txt', 'another_file.txt', 'extra.txt']
+    })
+    assert response.status_code == 200
+    assert response.headers['Content-Type'] == 'application/zip'
+
+    zip_bytes = io.BytesIO(response.data)
+    with zipfile.ZipFile(zip_bytes) as zf:
+        assert set(zf.namelist()) >= {
+            'test_file.txt',
+            'another_file.txt',
+            'extra.txt',
+        }

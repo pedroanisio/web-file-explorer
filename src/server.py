@@ -4,6 +4,8 @@ Updated app.py file to integrate the enhancements.
 from flask import Flask, render_template, request, send_file, redirect, url_for, abort, jsonify
 import os
 import datetime
+import io
+import zipfile
 import logging
 from .plugins import PluginManager
 from .app_extensions import setup_enhancements
@@ -346,3 +348,40 @@ def invoke_hook(hook_name):
         "success": True,
         "results": results
     })
+
+
+@app.route('/download-selected', methods=['POST'])
+def download_selected():
+    """Download multiple selected files and folders as a ZIP archive."""
+    base_dir = app.config.get('BASE_DIR')
+    if not base_dir:
+        logger.error("BASE_DIR is not configured in the application.")
+        abort(500, description="Application base directory not configured.")
+
+    data = request.get_json() or {}
+    paths = data.get("paths")
+    if not isinstance(paths, list) or not paths:
+        return jsonify({"error": "No paths provided"}), 400
+
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for rel_path in paths:
+            abs_path = os.path.abspath(os.path.join(base_dir, rel_path))
+            if not abs_path.startswith(os.path.abspath(base_dir)):
+                abort(403)
+            if os.path.isdir(abs_path):
+                for root_dir, _, files in os.walk(abs_path):
+                    for fname in files:
+                        abs_file = os.path.join(root_dir, fname)
+                        arcname = os.path.relpath(abs_file, base_dir)
+                        zipf.write(abs_file, arcname)
+            elif os.path.isfile(abs_path):
+                zipf.write(abs_path, rel_path)
+
+    memory_file.seek(0)
+    return send_file(
+        memory_file,
+        download_name="selected_files.zip",
+        mimetype="application/zip",
+        as_attachment=True,
+    )
