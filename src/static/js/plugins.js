@@ -237,6 +237,54 @@ document.addEventListener('DOMContentLoaded', function() {
             copyToClipboard(textToCopy, event.target);
         }
     });
+
+    // Context menu for file actions
+    const contextMenu = document.getElementById('file-context-menu');
+    let contextFilePath = null;
+
+    document.querySelectorAll('tr.file-row').forEach(row => {
+        row.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            contextFilePath = this.getAttribute('data-file-path');
+            contextMenu.style.top = `${e.pageY}px`;
+            contextMenu.style.left = `${e.pageX}px`;
+            contextMenu.classList.remove('hidden');
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.classList.add('hidden');
+        }
+    });
+
+    contextMenu.addEventListener('click', function(e) {
+        const action = e.target.getAttribute('data-action');
+        if (!action) return;
+
+        if (action === 'open') {
+            window.open(`/preview/${encodeURIComponent(contextFilePath)}`, '_blank');
+        } else if (action === 'download') {
+            window.open(`/explore/${encodeURIComponent(contextFilePath)}`, '_blank');
+        } else if (action === 'copy') {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(contextFilePath);
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = contextFilePath;
+                textarea.style.position = 'fixed';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+            }
+        }
+
+        contextMenu.classList.add('hidden');
+    });
     
     // Function to show modal with content
     function showModal(title, content, isError = false, isHtml = false) {
@@ -339,6 +387,86 @@ document.addEventListener('DOMContentLoaded', function() {
                     showModal('Error', 'Failed to execute plugin: ' + error.message, true);
                 });
         });
+    });
+
+    // Multi-select functionality
+    const selectToggle = document.getElementById('select-toggle');
+    const selectionActions = document.getElementById('selection-actions');
+    const selectAllBtn = document.getElementById('select-all');
+    const deselectAllBtn = document.getElementById('deselect-all');
+    const downloadSelectedBtn = document.getElementById('download-selected');
+    const selectedCount = document.getElementById('selected-count');
+
+    function getCheckboxes() {
+        return Array.from(document.querySelectorAll('.select-checkbox'));
+    }
+
+    function updateSelectedCount() {
+        const count = getCheckboxes().filter(cb => cb.checked).length;
+        selectedCount.textContent = count;
+    }
+
+    if (selectToggle) {
+        selectToggle.addEventListener('click', () => {
+            const active = selectionActions.classList.toggle('hidden') === false;
+            document.querySelectorAll('.select-column').forEach(col => {
+                if (active) {
+                    col.classList.remove('hidden');
+                } else {
+                    col.classList.add('hidden');
+                    const input = col.querySelector('input[type="checkbox"]');
+                    if (input) input.checked = false;
+                }
+            });
+            selectToggle.textContent = active ? 'Cancel' : 'Select';
+            updateSelectedCount();
+        });
+    }
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => {
+            getCheckboxes().forEach(cb => cb.checked = true);
+            updateSelectedCount();
+        });
+    }
+
+    if (deselectAllBtn) {
+        deselectAllBtn.addEventListener('click', () => {
+            getCheckboxes().forEach(cb => cb.checked = false);
+            updateSelectedCount();
+        });
+    }
+
+    if (downloadSelectedBtn) {
+        downloadSelectedBtn.addEventListener('click', () => {
+            const paths = getCheckboxes().filter(cb => cb.checked).map(cb => cb.dataset.path);
+            if (!paths.length) {
+                return;
+            }
+            fetch('/download-selected', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paths })
+            })
+                .then(resp => resp.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'selected_files.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(err => console.error('Download failed', err));
+        });
+    }
+
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.classList.contains('select-checkbox')) {
+            updateSelectedCount();
+        }
     });
     
     // When window is resized, fix the modal position and size

@@ -9,7 +9,7 @@
 <body class="{{ 'bg-gray-900 text-gray-100' if theme == 'dark' else 'bg-gray-100 text-gray-800' }}">
     <div class="container">
         <div class="header-container">
-            <div class="flex justify-between items-center mb-4">
+            <div class="nav-bar flex justify-between items-start md:items-center mb-4 flex-wrap md:flex-nowrap space-y-2 md:space-y-0">
                 <h1 class="text-2xl font-bold {{ 'text-gray-100' if theme == 'dark' else 'text-gray-800' }}">File Explorer</h1>
                 
                 <div class="flex items-center space-x-2">
@@ -81,13 +81,27 @@
                     <input type="hidden" name="sort" value="{{ sort_by }}">
                     <input type="hidden" name="desc" value="{{ 'true' if sort_desc else 'false' }}">
                 </form>
+
+                <div class="select-controls flex items-center space-x-2">
+                    <button id="select-toggle" type="button" class="px-3 py-2 bg-gray-200 rounded-md">Select</button>
+                    <div id="selection-actions" class="hidden space-x-2">
+                        <button id="select-all" type="button" class="px-2 py-1 bg-gray-200 rounded-md">Select All</button>
+                        <button id="deselect-all" type="button" class="px-2 py-1 bg-gray-200 rounded-md">Deselect All</button>
+                        <button id="download-selected" type="button" class="px-2 py-1 bg-blue-500 text-white rounded-md">Download Selected (<span id="selected-count">0</span>)</button>
+                      
+                    </div>
+                </div>
+         <button id="toggle-preview-pane" class="ml-4 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Toggle Preview</button>
+
             </div>
         </div>
         
-        <div class="content-container">
+        <div class="content-wrapper flex">
+            <div class="content-container flex-1">
             <table class="table">
                 <thead>
                     <tr>
+                        <th class="select-column hidden"></th>
                         <th>Name</th>
                         <th>Modified</th>
                         <th>Size</th>
@@ -96,6 +110,7 @@
                 <tbody>
                     {% if parent_path is not none %}
                     <tr>
+                        <td class="select-column hidden"></td>
                         <td>
                             <span class="folder-icon">📁</span>
                             <a href="{{ url_for('explore', path=parent_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">..</a>
@@ -107,6 +122,7 @@
                     
                     {% for dir in dirs %}
                     <tr class="{{ 'hover:bg-gray-700' if theme == 'dark' else 'hover:bg-gray-50' }}">
+                        <td class="select-column hidden"><input type="checkbox" class="select-checkbox" data-path="{{ dir.path }}"></td>
                         <td>
                             <span class="folder-icon">📁</span>
                             <a href="{{ url_for('explore', path=dir.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ dir.name }}/</a>
@@ -117,10 +133,15 @@
                     {% endfor %}
                     
                     {% for file in files %}
-                    <tr class="{{ 'hover:bg-gray-700' if theme == 'dark' else 'hover:bg-gray-50' }}">
+
+                    <tr class="{{ 'hover:bg-gray-700' if theme == 'dark' else 'hover:bg-gray-50' }} file-row" data-file-path="{{ file.path }}">
+
+                        <td class="select-column hidden"><input type="checkbox" class="select-checkbox" data-path="{{ file.path }}"></td>
+
                         <td>
                             <span class="file-icon">📄</span>
                             <a href="{{ url_for('explore', path=file.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ file.name }}</a>
+                            <button class="ml-2 text-sm text-green-600 preview-link" data-preview-url="{{ get_preview_url(file.path) }}">Preview</button>
                         </td>
                         <td class="{{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">{{ file.modified }}</td>
                         <td class="{{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">
@@ -136,10 +157,10 @@
                         </td>
                     </tr>
                     {% endfor %}
-                    
+
                     {% if not dirs and not files %}
                     <tr>
-                        <td colspan="3" class="text-center py-5 {{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">
+                        <td colspan="4" class="text-center py-5 {{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">
                             {% if search %}
                                 No items found matching "{{ search }}"
                             {% else %}
@@ -150,6 +171,17 @@
                     {% endif %}
                 </tbody>
             </table>
+            </div>
+
+            <!-- Preview Pane -->
+            <div id="preview-pane" class="preview-pane hidden w-1/2 ml-4">
+                <div class="flex justify-between mb-2">
+                    <h3 class="font-semibold">Preview</h3>
+                    <button id="close-preview" class="text-red-500">&times;</button>
+                </div>
+                <div id="preview-loading" class="loading-indicator hidden">Loading...</div>
+                <iframe id="preview-frame" class="w-full h-full hidden"></iframe>
+            </div>
         </div>
     </div>
     
@@ -177,9 +209,20 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Context menu for file actions -->
+    <ul id="file-context-menu" class="context-menu hidden">
+        <li data-action="open">Open</li>
+        <li data-action="download">Download</li>
+        <li data-action="copy">Copy Path</li>
+    </ul>
+
     <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
+
     <script src="{{ url_for('static', filename='js/favorites.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
+
     
     <!-- Theme switcher script -->
     <script>
