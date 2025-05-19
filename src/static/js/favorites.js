@@ -1,6 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     const favoritesBar = document.getElementById('favorites-bar');
     const addFavoriteBtn = document.getElementById('add-favorite-btn');
+    
+    // Log a warning if key elements aren't found
+    if (!favoritesBar) {
+        console.warn('Favorites bar (#favorites-bar) not found in the DOM - favorites feature will be disabled');
+    }
+    
+    if (!addFavoriteBtn) {
+        console.warn('Add favorite button (#add-favorite-btn) not found in the DOM - adding favorites will be disabled');
+    }
 
     function loadFavorites() {
         // Only try to load favorites if we have the favorites bar element

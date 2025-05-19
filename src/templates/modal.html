@@ -15,13 +15,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     const modalOverlay = document.getElementById('modal-overlay');
     const modalClose = document.getElementById('modal-close');
-    const modalTitle = document.getElementById('modal-title');
-    const modalContent = document.getElementById('modal-content');
+    // const modalTitle = document.getElementById('modal-title'); // No longer needed here
+    // const modalContent = document.getElementById('modal-content'); // No longer needed here
     
     // Close modal when clicking the close button
     if (modalClose) {
         modalClose.addEventListener('click', function() {
-            modalOverlay.classList.add('hidden');
+            if (modalOverlay) { // Check if modalOverlay exists
+                modalOverlay.style.display = 'none'; // Use style.display instead of classList
+            }
             document.body.classList.remove('modal-open');
         });
     }
@@ -30,27 +32,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (modalOverlay) {
         modalOverlay.addEventListener('click', function(e) {
             if (e.target === modalOverlay) {
-                modalOverlay.classList.add('hidden');
+                modalOverlay.style.display = 'none'; // Use style.display
                 document.body.classList.remove('modal-open');
             }
         });
     }
     
-    // Expose global function to open modal
-    window.openModal = function(title, content, isHtml = false) {
-        if (modalTitle) modalTitle.textContent = title || 'Modal';
-        
-        if (modalContent) {
-            if (isHtml) {
-                modalContent.innerHTML = content;
-            } else {
-                modalContent.textContent = content;
-            }
-        }
-        
-        modalOverlay.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-    };
+    // Expose global function to open modal -- REMOVED
+    // window.openModal = function(title, content, isHtml = false) { ... }; -- REMOVED
 });
 </script>
 
