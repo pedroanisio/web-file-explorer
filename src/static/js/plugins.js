@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const isHtml = data.content_type === 'html';
+                        const isHtml = (data.content_type && data.content_type === 'html') || data.is_html === true;
                         showModal(data.title || 'Plugin Result', data.output, false, isHtml);
                     } else {
                         showModal('Error', data.error + '\n\n' + (data.output || ''), true);

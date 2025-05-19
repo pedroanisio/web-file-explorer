@@ -4,6 +4,7 @@ Generates UML diagrams from Python code using the Python UML Analyzer plugin.
 """
 import os
 import json
+import logging
 import requests
 from urllib.parse import quote
 from string import Template
