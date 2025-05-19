@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" class="{{ 'theme-dark' if theme == 'dark' else 'theme-light' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Browse and manage files via a web interface." />
+    <!-- Apply stored theme before CSS to avoid FOUC -->
+    <script>
+        (function() {
+            const stored = localStorage.getItem('theme');
+            if (stored === 'dark' || stored === 'light') {
+                document.documentElement.classList.remove('theme-dark', 'theme-light');
+                document.documentElement.classList.add('theme-' + stored);
+            }
+        })();
+    </script>
+    <title>{% block title %}File Explorer{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body class="{{ 'bg-gray-900 text-gray-100' if theme == 'dark' else 'bg-gray-100 text-gray-800' }}">
+    <div class="w-full max-w-screen-2xl px-4 mx-auto">
+        <div class="header-container">
+            <div class="nav-bar flex justify-between items-start md:items-center mb-4 flex-wrap md:flex-nowrap space-y-2 md:space-y-0">
+                <h1 class="text-2xl font-bold {{ 'text-gray-100' if theme == 'dark' else 'text-gray-800' }}">
+                    <a href="{{ url_for('explore', path='') }}">File Explorer</a>
+                </h1>
+                
+                <div class="flex items-center space-x-2">
+                    <a href="{{ url_for('plugin_config.index') }}" class="btn-blue">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                        </svg>
+                        Plugins
+                    </a>
+                </div>
+            </div>
+            
+            {% block breadcrumbs %}{% endblock %}
+            
+            {% block toolbar %}{% endblock %}
+        </div>
+        
+        <div class="content-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <!-- Theme switcher button -->
+    <div class="theme-switch" id="theme-switch">
+        <!-- Sun icon for dark mode -->
+        <svg class="sun-icon" role="img" aria-label="Sun icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.758a.75.75 0 001.06-1.061l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
+        </svg>
+        <!-- Moon icon for light mode -->
+        <svg class="moon-icon" role="img" aria-label="Moon icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
+        </svg>
+    </div>
+    
+    {% block modals %}
+    <!-- Modal for plugin output -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div id="modal" class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title" class="modal-title">Modal Title</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="modal-content" class="modal-content"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context menu for file actions -->
+    <ul id="file-context-menu" class="context-menu hidden">
+        <li data-action="open">Open</li>
+        <li data-action="download">Download</li>
+        <li data-action="copy">Copy Path</li>
+    </ul>
+    {% endblock %}
+    
+    <script src="{{ url_for('static', filename='js/plugins.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/favorites.js') }}" defer></script>
+    {% block scripts %}{% endblock %}
+
+    <!-- Theme switcher script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeSwitch = document.getElementById('theme-switch');
+            const htmlElement = document.documentElement;
+            
+            themeSwitch.addEventListener('click', function() {
+                // Toggle theme class
+                if (htmlElement.classList.contains('theme-dark')) {
+                    htmlElement.classList.remove('theme-dark');
+                    htmlElement.classList.add('theme-light');
+                    updateTheme('light');
+                } else {
+                    htmlElement.classList.remove('theme-light');
+                    htmlElement.classList.add('theme-dark');
+                    updateTheme('dark');
+                }
+            });
+            
+            function updateTheme(theme) {
+                // Save theme preference via AJAX
+                fetch('/theme/toggle-theme')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Theme updated:', data.theme);
+                        // Persist choice
+                        localStorage.setItem('theme', data.theme);
+                    })
+                    .catch(error => {
+                        console.error('Error updating theme:', error);
+                    });
+            }
+        });
+    </script>
+</body>
+</html> 

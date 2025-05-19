@@ -1,219 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plugin Configuration - Web File Explorer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .header-container {
-            padding: 20px 20px 0 20px;
-            border-bottom: 1px solid #eee;
-        }
-        h1 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        .back-link {
-            margin-bottom: 15px;
-            display: inline-block;
-            color: #3498db;
-            text-decoration: none;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        .content-container {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .plugin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .plugin-card {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .plugin-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .plugin-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .plugin-icon {
-            font-size: 2.5rem;
-            margin-right: 15px;
-            color: #3498db;
-        }
-        .plugin-title {
-            margin: 0;
-            font-size: 1.2rem;
-            color: #2c3e50;
-        }
-        .plugin-version {
-            font-size: 0.8rem;
-            color: #7f8c8d;
-            margin-top: 2px;
-        }
-        .plugin-type {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-        .plugin-type.ui {
-            background-color: #e74c3c;
-            color: #fff;
-        }
-        .plugin-type.backend {
-            background-color: #27ae60;
-            color: #fff;
-        }
-        .plugin-description {
-            margin: 10px 0;
-            color: #555;
-            flex-grow: 1;
-        }
-        .plugin-actions {
-            margin-top: 15px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .config-btn {
-            padding: 8px 16px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            transition: background-color 0.2s;
-        }
-        .config-btn:hover {
-            background-color: #2980b9;
-        }
-        .config-btn.disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-        }
-        .settings-label {
-            color: #7f8c8d;
-            font-size: 0.8rem;
-        }
-        .has-settings {
-            color: #27ae60;
-        }
-        .no-settings {
-            color: #e74c3c;
-        }
-        .no-plugins {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-            font-size: 1.2rem;
-        }
-        
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .plugin-grid {
-                grid-template-columns: 1fr;
-            }
-            .header-container {
-                padding: 15px 15px 0 15px;
-            }
-            .content-container {
-                padding: 15px;
-            }
-            .plugin-actions {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .config-btn {
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header-container">
-            <a href="{{ url_for('explore', path='') }}" class="back-link">← Back to Explorer</a>
-            <h1>Plugin Configuration</h1>
-        </div>
-        
-        <div class="content-container">
-            {% if plugins %}
-                <div class="plugin-grid">
-                    {% for plugin in plugins %}
-                        <div class="plugin-card">
-                            <div class="plugin-header">
-                                <div class="plugin-icon">{{ plugin.icon }}</div>
-                                <div>
-                                    <h2 class="plugin-title">{{ plugin.name }}</h2>
-                                    <div class="plugin-version">v{{ plugin.version }}</div>
-                                    <span class="plugin-type {{ plugin.type }}">{{ plugin.type }}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="plugin-description">{{ plugin.description }}</div>
-                            
-                            <div class="plugin-actions">
-                                <div class="settings-label">
-                                    {% if plugin.has_settings %}
-                                        <span class="has-settings">✓ Has configuration options</span>
-                                    {% else %}
-                                        <span class="no-settings">✗ No configuration options</span>
-                                    {% endif %}
-                                </div>
-                                
-                                {% if plugin.has_settings %}
-                                    <a href="{{ url_for('plugin_config.plugin_detail', plugin_id=plugin.id) }}" class="config-btn">Configure</a>
-                                {% else %}
-                                    <span class="config-btn disabled">Configure</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="no-plugins">
-                    <p>No plugins found. Install plugins to see them here.</p>
-                </div>
-            {% endif %}
-        </div>
+{% extends "_base.html" %}
+
+{% block title %}Plugin Configuration - File Explorer{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb flex items-center mb-4">
+    <a href="{{ url_for('explore', path='') }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">Home</a>
+    <span class="mx-2 text-gray-500">/</span>
+    <span class="text-gray-500 dark:text-gray-400">Plugin Configuration</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="pb-10">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Plugin Configuration</h2>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Manage and configure installed plugins</p>
     </div>
-</body>
-</html>
+
+    <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        {% for plugin in plugins %}
+            {% with %}
+                {% set has_config = plugin.has_settings %}
+                {% include "_components/plugin_card.html" %}
+            {% endwith %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
