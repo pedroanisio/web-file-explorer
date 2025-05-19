@@ -3,6 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const addFavoriteBtn = document.getElementById('add-favorite-btn');
 
     function loadFavorites() {
+        // Only try to load favorites if we have the favorites bar element
+        if (!favoritesBar) {
+            console.warn('Favorites bar element not found, cannot load favorites');
+            return;
+        }
+        
         const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
         renderFavorites(favs);
     }
@@ -12,6 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderFavorites(favs) {
+        // Check if favoritesBar exists before trying to modify it
+        if (!favoritesBar) {
+            console.warn('Favorites bar element not found in DOM');
+            return;
+        }
+        
         favoritesBar.innerHTML = '';
         if (!favs.length) {
             favoritesBar.style.display = 'none';
