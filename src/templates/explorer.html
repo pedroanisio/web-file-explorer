@@ -76,7 +76,18 @@
                     <input type="hidden" name="sort" value="{{ sort_by }}">
                     <input type="hidden" name="desc" value="{{ 'true' if sort_desc else 'false' }}">
                 </form>
-                <button id="toggle-preview-pane" class="ml-4 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Toggle Preview</button>
+
+                <div class="select-controls flex items-center space-x-2">
+                    <button id="select-toggle" type="button" class="px-3 py-2 bg-gray-200 rounded-md">Select</button>
+                    <div id="selection-actions" class="hidden space-x-2">
+                        <button id="select-all" type="button" class="px-2 py-1 bg-gray-200 rounded-md">Select All</button>
+                        <button id="deselect-all" type="button" class="px-2 py-1 bg-gray-200 rounded-md">Deselect All</button>
+                        <button id="download-selected" type="button" class="px-2 py-1 bg-blue-500 text-white rounded-md">Download Selected (<span id="selected-count">0</span>)</button>
+                      
+                    </div>
+                </div>
+         <button id="toggle-preview-pane" class="ml-4 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Toggle Preview</button>
+
             </div>
         </div>
         
@@ -85,6 +96,7 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th class="select-column hidden"></th>
                         <th>Name</th>
                         <th>Modified</th>
                         <th>Size</th>
@@ -93,6 +105,7 @@
                 <tbody>
                     {% if parent_path is not none %}
                     <tr>
+                        <td class="select-column hidden"></td>
                         <td>
                             <span class="folder-icon">📁</span>
                             <a href="{{ url_for('explore', path=parent_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">..</a>
@@ -104,6 +117,7 @@
                     
                     {% for dir in dirs %}
                     <tr class="{{ 'hover:bg-gray-700' if theme == 'dark' else 'hover:bg-gray-50' }}">
+                        <td class="select-column hidden"><input type="checkbox" class="select-checkbox" data-path="{{ dir.path }}"></td>
                         <td>
                             <span class="folder-icon">📁</span>
                             <a href="{{ url_for('explore', path=dir.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ dir.name }}/</a>
@@ -115,6 +129,7 @@
                     
                     {% for file in files %}
                     <tr class="{{ 'hover:bg-gray-700' if theme == 'dark' else 'hover:bg-gray-50' }}">
+                        <td class="select-column hidden"><input type="checkbox" class="select-checkbox" data-path="{{ file.path }}"></td>
                         <td>
                             <span class="file-icon">📄</span>
                             <a href="{{ url_for('explore', path=file.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ file.name }}</a>
@@ -137,7 +152,7 @@
 
                     {% if not dirs and not files %}
                     <tr>
-                        <td colspan="3" class="text-center py-5 {{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">
+                        <td colspan="4" class="text-center py-5 {{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">
                             {% if search %}
                                 No items found matching "{{ search }}"
                             {% else %}

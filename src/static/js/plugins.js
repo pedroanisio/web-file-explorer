@@ -340,6 +340,86 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     });
+
+    // Multi-select functionality
+    const selectToggle = document.getElementById('select-toggle');
+    const selectionActions = document.getElementById('selection-actions');
+    const selectAllBtn = document.getElementById('select-all');
+    const deselectAllBtn = document.getElementById('deselect-all');
+    const downloadSelectedBtn = document.getElementById('download-selected');
+    const selectedCount = document.getElementById('selected-count');
+
+    function getCheckboxes() {
+        return Array.from(document.querySelectorAll('.select-checkbox'));
+    }
+
+    function updateSelectedCount() {
+        const count = getCheckboxes().filter(cb => cb.checked).length;
+        selectedCount.textContent = count;
+    }
+
+    if (selectToggle) {
+        selectToggle.addEventListener('click', () => {
+            const active = selectionActions.classList.toggle('hidden') === false;
+            document.querySelectorAll('.select-column').forEach(col => {
+                if (active) {
+                    col.classList.remove('hidden');
+                } else {
+                    col.classList.add('hidden');
+                    const input = col.querySelector('input[type="checkbox"]');
+                    if (input) input.checked = false;
+                }
+            });
+            selectToggle.textContent = active ? 'Cancel' : 'Select';
+            updateSelectedCount();
+        });
+    }
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => {
+            getCheckboxes().forEach(cb => cb.checked = true);
+            updateSelectedCount();
+        });
+    }
+
+    if (deselectAllBtn) {
+        deselectAllBtn.addEventListener('click', () => {
+            getCheckboxes().forEach(cb => cb.checked = false);
+            updateSelectedCount();
+        });
+    }
+
+    if (downloadSelectedBtn) {
+        downloadSelectedBtn.addEventListener('click', () => {
+            const paths = getCheckboxes().filter(cb => cb.checked).map(cb => cb.dataset.path);
+            if (!paths.length) {
+                return;
+            }
+            fetch('/download-selected', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paths })
+            })
+                .then(resp => resp.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'selected_files.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(err => console.error('Download failed', err));
+        });
+    }
+
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.classList.contains('select-checkbox')) {
+            updateSelectedCount();
+        }
+    });
     
     // When window is resized, fix the modal position and size
     window.addEventListener('resize', function() {
