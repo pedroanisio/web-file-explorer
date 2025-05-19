@@ -1,0 +1,15 @@
+{
+    "id": "git_repo_analyzer",
+    "name": "Git Repository Analyzer",
+    "version": "1.0.0",
+    "description": "Provides comprehensive Git repository analysis with beautiful charts and visualizations",
+    "entry_point": "git_analyzer",
+    "icon": "📊",
+    "dependencies": [
+        "gitpython>=3.1.0",
+        "plotly>=5.10.0",
+        "pandas>=1.3.0",
+        "tabulate>=0.8.0"
+    ],
+    "auto_install_dependencies": true
+} 

@@ -2,7 +2,7 @@ services:
   file-explorer:
     build: .
     ports:
-      - "5000:5000"
+      - "5099:5000"
     volumes:
       - ${HOST_DIR:-./data}:/data
     environment:
