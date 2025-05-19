@@ -17,6 +17,14 @@
   --dark-text: #f8f9fa;
   --light-border: #eee;
   --dark-border: #4a5568;
+  --radius-sm: 4px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+  --modal-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --spacing-sm: 10px;
+  --spacing-md: 15px;
+  --switch-size: 40px;
+  --icon-size: 24px;
 }
 
 /* Dark mode overrides */
@@ -91,8 +99,8 @@
 /* Theme switcher */
 .theme-switch {
   @apply fixed bottom-5 right-5 z-50 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg cursor-pointer;
-  width: 40px;
-  height: 40px;
+  width: var(--switch-size);
+  height: var(--switch-size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,8 +111,8 @@
 }
 .theme-switch .sun-icon,
 .theme-switch .moon-icon {
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size);
+  height: var(--icon-size);
 }
 .theme-switch .sun-icon {
   display: none;
