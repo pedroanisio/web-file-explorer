@@ -1,4 +1,11 @@
-:root {
+/* src/static/css/styles.css */
+/* Custom CSS variables that do not conflict with tailwind-styles.css can remain if needed. */
+/* For this exercise, identified conflicting root variables are removed. */
+/* Other variables specific to styles.css and not covered by tailwind-styles.css would be kept. */
+
+/*
+Removed conflicting :root variables. These are now primarily managed in tailwind-styles.css
+Original :root {
     --bg-default: #f5f5f5;
     --toolbar-bg: #e0e0e0;
     --toolbar-hover-bg: #d0d0d0;
@@ -17,8 +24,10 @@
     --spacing-sm: 10px;
     --spacing-md: 15px;
 }
+*/
 
-/* Toolbar styles */
+/* Toolbar styles - Removed as they are handled by tailwind-styles.css and Tailwind classes */
+/*
 .toolbar {
     display: flex;
     gap: var(--spacing-sm);
@@ -50,8 +59,10 @@
 .toolbar-item-icon {
     font-size: 1.2rem;
 }
+*/
 
-/* Modal styles */
+/* Modal styles - Removed as they are primarily handled by tailwind-styles.css, Tailwind classes, and dynamically by plugins.js */
+/*
 .modal-overlay {
     display: none;
     position: fixed;
@@ -120,17 +131,21 @@
     overflow: auto;
     max-height: 60vh;
 }
+*/
 
+/* Error message styles - Can be kept if not covered by Tailwind components, or integrated. */
+/* plugins.js also adds some styling for .error-message. We should consolidate. */
+/* For now, keeping it to ensure error messages are styled if plugins.js CSS fails or is overridden. */
 .error-message {
-    color: var(--error-color);
-    padding: var(--spacing-sm);
-    background-color: var(--error-bg);
-    border: 1px solid var(--error-border);
-    border-radius: var(--radius-sm);
-    margin-bottom: var(--spacing-sm);
+    color: #d9534f; /* Consider using var(--error-color) if defined in a central place */
+    padding: 10px; /* Consider var(--spacing-sm) */
+    background-color: #f8d7da; /* Consider var(--error-bg) */
+    border: 1px solid #f5c6cb; /* Consider var(--error-border) */
+    border-radius: 4px; /* Consider var(--radius-sm) */
+    margin-bottom: 10px; /* Consider var(--spacing-sm) */
 }
 
-/* Preview pane styles */
+/* Preview pane styles - Keeping these as they seem specific and not directly conflicting */
 .preview-pane {
     border-left: 1px solid #ddd;
     padding-left: 1rem;
@@ -140,13 +155,14 @@
     padding: 1rem;
 }
 
-/* Multi-select styles */
+/* Multi-select styles - Keeping these */
 .select-column {
     text-align: center;
     width: 24px;
 }
 
-/* Context menu styles */
+/* Context menu styles - Keeping these, tailwind-styles.css also has .context-menu but with different definitions. This needs careful review. */
+/* For now, assuming these are the primary styles for #file-context-menu specifically. */
 #file-context-menu {
     position: absolute;
     z-index: 2000;
@@ -166,6 +182,7 @@
     background-color: #f0f0f0;
 }
 
+/* Dark theme context menu styles - these directly target #file-context-menu */
 .theme-dark #file-context-menu {
     background: #2d3748;
     border-color: #4a5568;
@@ -176,7 +193,7 @@
     background-color: #4a5568;
 }
 
-/* Favorites bar styles */
+/* Favorites bar styles - Keeping these */
 .favorites-bar {
     display: flex;
     gap: 8px;
