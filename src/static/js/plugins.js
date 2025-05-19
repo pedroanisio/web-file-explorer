@@ -237,6 +237,54 @@ document.addEventListener('DOMContentLoaded', function() {
             copyToClipboard(textToCopy, event.target);
         }
     });
+
+    // Context menu for file actions
+    const contextMenu = document.getElementById('file-context-menu');
+    let contextFilePath = null;
+
+    document.querySelectorAll('tr.file-row').forEach(row => {
+        row.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            contextFilePath = this.getAttribute('data-file-path');
+            contextMenu.style.top = `${e.pageY}px`;
+            contextMenu.style.left = `${e.pageX}px`;
+            contextMenu.classList.remove('hidden');
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.classList.add('hidden');
+        }
+    });
+
+    contextMenu.addEventListener('click', function(e) {
+        const action = e.target.getAttribute('data-action');
+        if (!action) return;
+
+        if (action === 'open') {
+            window.open(`/preview/${encodeURIComponent(contextFilePath)}`, '_blank');
+        } else if (action === 'download') {
+            window.open(`/explore/${encodeURIComponent(contextFilePath)}`, '_blank');
+        } else if (action === 'copy') {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(contextFilePath);
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = contextFilePath;
+                textarea.style.position = 'fixed';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+            }
+        }
+
+        contextMenu.classList.add('hidden');
+    });
     
     // Function to show modal with content
     function showModal(title, content, isError = false, isHtml = false) {
