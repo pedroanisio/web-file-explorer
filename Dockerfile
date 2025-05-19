@@ -4,13 +4,17 @@ WORKDIR /app
 
 # Copy requirements first for better caching
 COPY setup.py pyproject.toml README.md ./
-COPY src ./src/
 
-# Install dependencies
+# Copy just the requirements file first to leverage Docker cache
+COPY src/plugins/requirements.txt ./plugin_requirements.txt
+
+# Install the application and plugin dependencies
 RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir . && \
-    # Install Git Repository Analyzer plugin dependencies
-    pip install --no-cache-dir gitpython>=3.1.0 plotly>=5.10.0 pandas>=1.3.0 tabulate>=0.8.0
+    pip install --no-cache-dir -r plugin_requirements.txt && \
+    pip install --no-cache-dir .
+
+# Now copy the source code (this will change frequently)
+COPY src ./src/
 
 # Install git and tree commands
 RUN apt-get update && apt-get install -y tree git && \

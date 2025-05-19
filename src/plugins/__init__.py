@@ -44,7 +44,27 @@ class PluginManager:
             self.registry = None
             
         self.load_plugins()
+        
+        # After loading all plugins, register dependencies in the requirements file
+        if BACKEND_PLUGINS_ENABLED:
+            logger.debug("Updating plugin requirements.txt file with all plugin dependencies")
+            self.collect_all_plugin_dependencies()
     
+    def collect_all_plugin_dependencies(self):
+        """Collect all plugin dependencies and ensure they're in the requirements file"""
+        if not BACKEND_PLUGINS_ENABLED or not hasattr(self, 'dependency_manager'):
+            logger.warning("Cannot collect dependencies: dependency manager not available")
+            return
+            
+        # This will trigger an update of the requirements file
+        for plugin_id, plugin_info in self.plugins.items():
+            manifest = plugin_info.get('manifest', {})
+            dependencies = manifest.get('dependencies', [])
+            if dependencies:
+                logger.debug(f"Registering dependencies for UI plugin {plugin_id}: {dependencies}")
+                # This just registers the dependencies without trying to install them
+                self.dependency_manager.check_dependencies(plugin_id, dependencies)
+                
     def load_plugins(self):
         """
         Load all plugins from the plugins directory.
