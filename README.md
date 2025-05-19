@@ -77,6 +77,22 @@ Flask File Explorer includes a flexible plugin system that allows you to extend 
 - **UI Plugins**: Add buttons to the toolbar and provide user-facing functionality
 - **Backend Plugins**: Provide server-side functionality through hooks
 
+### Installed Plugins
+
+The application comes with the following plugins pre-installed:
+
+| Plugin ID | Name | Type | Description |
+|-----------|------|------|-------------|
+| file_counter | File Counter | UI | Counts files in the current directory |
+| tree_view | Tree View | UI | Show tree structure of the current directory |
+| code_dump | Code Dump | UI | Outputs all code files in a directory while excluding common non-code files |
+| py_analyzer | Python Analyzer | Backend | Analyzes Python files to extract code structure |
+| git_repo_analyzer | Git Repository Analyzer | UI | Provides comprehensive Git repository analysis with beautiful charts and visualizations |
+| py_uml_analyzer | Python UML Analyzer | Backend | Analyzes Python code and extracts class/method information for UML generation |
+| uml_generator | UML Diagram Generator | UI | Generates UML diagrams from Python code using the PydanticAI plugin |
+| pydantic_ai_agent | PydanticAI Agent | Backend | Integration with PydanticAI for intelligent code analysis and assistance |
+| cloc_analyzer | Code Line Counter | Backend | Analyzes directory code using cloc and provides JSON reports via API |
+
 ### Creating a Plugin
 
 Create a directory with the following structure:
@@ -120,6 +136,24 @@ def execute(path, **kwargs):
 ```
 
 See the [Plugin Development Guide](docs/plugin_development_guide.md) for more information.
+
+#### Using API Plugins
+
+Some plugins provide functionality through HTTP APIs. These plugins can be called directly from external applications.
+
+For example, to use the Code Line Counter API plugin:
+
+```bash
+# Analyze a directory
+curl -X POST "http://localhost:5000/api/plugins/cloc_analyzer/query" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "analyze", "context": {"path": "/path/to/analyze"}}'
+
+# List all supported languages
+curl -X POST "http://localhost:5000/api/plugins/cloc_analyzer/query" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "list_languages"}'
+```
 
 ## Development
 

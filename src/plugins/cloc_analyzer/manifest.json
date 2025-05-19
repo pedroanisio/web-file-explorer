@@ -1,0 +1,13 @@
+{
+    "id": "cloc_analyzer",
+    "name": "Code Line Counter",
+    "version": "1.0.0",
+    "description": "Analyzes directory code using cloc and provides JSON reports",
+    "entry_point": "analyzer_plugin",
+    "type": "backend",
+    "icon": "📊",
+    "hooks": [
+        "query_handler"
+    ],
+    "dependencies": []
+} 

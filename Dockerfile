@@ -19,8 +19,8 @@ COPY --chown=root:root src ./src/
 # Install the application itself
 RUN pip install --no-cache-dir .
 
-# Install git and tree commands
-RUN apt-get update && apt-get install -y tree git && \
+# Install git, tree and cloc commands
+RUN apt-get update && apt-get install -y tree git cloc && \
     rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user with specific UID/GID 1000
