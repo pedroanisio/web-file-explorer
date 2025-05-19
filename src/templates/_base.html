@@ -17,6 +17,7 @@
     </script>
     <title>{% block title %}File Explorer{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     {% block head %}{% endblock %}
 </head>
 <body class="{{ 'bg-gray-900 text-gray-100' if theme == 'dark' else 'bg-gray-100 text-gray-800' }}">

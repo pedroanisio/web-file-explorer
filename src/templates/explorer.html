@@ -1,162 +1,132 @@
-<!DOCTYPE html>
-<html lang="en" class="{{ 'theme-dark' if theme == 'dark' else 'theme-light' }}">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Browse and manage files via a web interface." />
-    <!-- Apply stored theme before CSS to avoid FOUC -->
-    <script>
-        (function() {
-            const stored = localStorage.getItem('theme');
-            if (stored === 'dark' || stored === 'light') {
-                document.documentElement.classList.remove('theme-dark', 'theme-light');
-                document.documentElement.classList.add('theme-' + stored);
-            }
-        })();
-    </script>
-    <title>File Explorer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-</head>
-<body class="{{ 'bg-gray-900 text-gray-100' if theme == 'dark' else 'bg-gray-100 text-gray-800' }}">
-    <div class="w-full px-4 mx-auto">
-        <div class="header-container">
-            <div class="nav-bar flex justify-between items-start md:items-center mb-4 flex-wrap md:flex-nowrap space-y-2 md:space-y-0">
-                <h1 class="text-2xl font-bold {{ 'text-gray-100' if theme == 'dark' else 'text-gray-800' }}">File Explorer</h1>
-                
-                <div class="flex items-center space-x-2">
-                    <a href="{{ url_for('plugin_config.index') }}" class="inline-flex items-center px-3 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-                        </svg>
-                        Plugins
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Plugin Toolbar -->
-            {% if plugins %}
-            <div class="toolbar">
-                {% for plugin in plugins %}
-                <button class="toolbar-item" data-plugin-id="{{ plugin.id }}" data-current-path="{{ current_path }}" title="{{ plugin.description }}" aria-label="{{ plugin.name }} plugin button">
-                    <span class="toolbar-item-icon">{{ plugin.icon }}</span>
-                    <span>{{ plugin.name }}</span>
-                </button>
-                {% endfor %}
-            </div>
+{% extends "_base.html" %}
+
+{% block title %}File Explorer{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb flex flex-wrap items-center justify-between">
+    <div>
+        <a href="{{ url_for('explore', path='') }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">Home</a>
+        {% if current_path %}
+            {% set path_segments = current_path.split('/') %}
+            {% set accumulated_path = '' %}
+            {% for segment in path_segments %}
+                {% if segment %}
+                    {% set accumulated_path = accumulated_path + segment + '/' %}
+                    / <a href="{{ url_for('explore', path=accumulated_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ segment }}</a>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+    <button id="add-favorite-btn" data-current-path="{{ current_path }}" class="btn-blue text-sm">Add Favorite</button>
+</div>
+{% endblock %}
+
+{% block toolbar %}
+<!-- Plugin Toolbar -->
+{% if plugins %}
+<div class="toolbar flex flex-wrap gap-2 mb-4">
+    {% for plugin in plugins %}
+    <button class="toolbar-item btn-gray" data-plugin-id="{{ plugin.id }}" data-current-path="{{ current_path }}" title="{{ plugin.description }}" aria-label="{{ plugin.name }} plugin button">
+        <span class="toolbar-item-icon">{{ plugin.icon }}</span>
+        <span>{{ plugin.name }}</span>
+    </button>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div id="favorites-bar" class="favorites-bar mb-4"></div>
+
+<div class="controls flex flex-wrap gap-4 justify-between items-center mb-4">
+    <div class="sort-options flex items-center gap-2">
+        <span>Sort by:</span>
+        <a href="{{ url_for('explore', path=current_path, sort='name', desc='false' if sort_by == 'name' and not sort_desc else 'true', search=search) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">
+            Name
+            {% if sort_by == 'name' %}
+                <span class="sort-arrow {{ 'down' if sort_desc else 'up' }}"></span>
             {% endif %}
-            
-            <div class="breadcrumb flex flex-wrap items-center justify-between">
-                <div>
-                    <a href="{{ url_for('explore', path='') }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">Home</a>
-                    {% if current_path %}
-                        {% set path_segments = current_path.split('/') %}
-                        {% set accumulated_path = '' %}
-                        {% for segment in path_segments %}
-                            {% if segment %}
-                                {% set accumulated_path = accumulated_path + segment + '/' %}
-                                / <a href="{{ url_for('explore', path=accumulated_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ segment }}</a>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                </div>
-                <button id="add-favorite-btn" data-current-path="{{ current_path }}" class="px-2 py-1 text-sm bg-blue-500 text-white rounded mt-2 md:mt-0">Add Favorite</button>
-            </div>
+        </a>
+        <a href="{{ url_for('explore', path=current_path, sort='modified', desc='false' if sort_by == 'modified' and not sort_desc else 'true', search=search) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">
+            Modified
+            {% if sort_by == 'modified' %}
+                <span class="sort-arrow {{ 'down' if sort_desc else 'up' }}"></span>
+            {% endif %}
+        </a>
+        <a href="{{ url_for('explore', path=current_path, sort='size', desc='false' if sort_by == 'size' and not sort_desc else 'true', search=search) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">
+            Size
+            {% if sort_by == 'size' %}
+                <span class="sort-arrow {{ 'down' if sort_desc else 'up' }}"></span>
+            {% endif %}
+        </a>
+    </div>
+    
+    <form class="search-form" method="get" action="{{ url_for('explore', path=current_path) }}">
+        <input type="text" name="search" placeholder="Search in current folder..." value="{{ search }}" class="px-3 py-2 rounded border {{ 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-500' if theme == 'dark' else 'bg-white border-gray-300 text-gray-800 placeholder-gray-400' }}">
+        <input type="hidden" name="sort" value="{{ sort_by }}">
+        <input type="hidden" name="desc" value="{{ 'true' if sort_desc else 'false' }}">
+    </form>
 
-            <div id="favorites-bar" class="favorites-bar"></div>
-            
-            <div class="controls">
-                <div class="sort-options">
-                    <span>Sort by:</span>
-                    <a href="{{ url_for('explore', path=current_path, sort='name', desc='false' if sort_by == 'name' and not sort_desc else 'true', search=search) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">
-                        Name
-                        {% if sort_by == 'name' %}
-                            <span class="sort-arrow {{ 'down' if sort_desc else 'up' }}"></span>
-                        {% endif %}
-                    </a>
-                    <a href="{{ url_for('explore', path=current_path, sort='modified', desc='false' if sort_by == 'modified' and not sort_desc else 'true', search=search) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">
-                        Modified
-                        {% if sort_by == 'modified' %}
-                            <span class="sort-arrow {{ 'down' if sort_desc else 'up' }}"></span>
-                        {% endif %}
-                    </a>
-                    <a href="{{ url_for('explore', path=current_path, sort='size', desc='false' if sort_by == 'size' and not sort_desc else 'true', search=search) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">
-                        Size
-                        {% if sort_by == 'size' %}
-                            <span class="sort-arrow {{ 'down' if sort_desc else 'up' }}"></span>
-                        {% endif %}
-                    </a>
-                </div>
-                
-                <form class="search-form" method="get" action="{{ url_for('explore', path=current_path) }}">
-                    <input type="text" name="search" placeholder="Search in current folder..." value="{{ search }}" class="{{ 'placeholder-gray-500' if theme == 'dark' else 'placeholder-gray-400' }}">
-                    <input type="hidden" name="sort" value="{{ sort_by }}">
-                    <input type="hidden" name="desc" value="{{ 'true' if sort_desc else 'false' }}">
-                </form>
-
-                <div class="select-controls flex items-center space-x-2">
-                    <button id="select-toggle" type="button" class="px-3 py-2 bg-gray-200 rounded-md">Select</button>
-                    <div id="selection-actions" class="hidden space-x-2">
-                        <button id="select-all" type="button" class="px-2 py-1 bg-gray-200 rounded-md">Select All</button>
-                        <button id="deselect-all" type="button" class="px-2 py-1 bg-gray-200 rounded-md">Deselect All</button>
-                        <button id="download-selected" type="button" class="px-2 py-1 bg-blue-500 text-white rounded-md">Download Selected (<span id="selected-count">0</span>)</button>
-                      
-                    </div>
-                </div>
-         <button id="toggle-preview-pane" class="ml-4 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Toggle Preview</button>
-
+    <div class="actions flex items-center gap-2">
+        <div class="select-controls flex items-center gap-2">
+            <button id="select-toggle" type="button" class="btn-gray">Select</button>
+            <div id="selection-actions" class="hidden space-x-2">
+                <button id="select-all" type="button" class="btn-gray">Select All</button>
+                <button id="deselect-all" type="button" class="btn-gray">Deselect All</button>
+                <button id="download-selected" type="button" class="btn-blue">Download Selected (<span id="selected-count">0</span>)</button>
             </div>
         </div>
-        
-        <div class="content-wrapper flex">
-            <div class="content-container flex-1">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th class="select-column hidden"></th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Modified</th>
-                        <th scope="col">Size</th>
+        <button id="toggle-preview-pane" class="btn-blue">Toggle Preview</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper flex">
+    <div class="content-container flex-1">
+        <div class="card">
+            <table class="table w-full">
+                <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                        <th class="select-column hidden p-3"></th>
+                        <th class="p-3 text-left" scope="col">Name</th>
+                        <th class="p-3 text-left" scope="col">Modified</th>
+                        <th class="p-3 text-left" scope="col">Size</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     {% if parent_path is not none %}
-                    <tr>
-                        <td class="select-column hidden"></td>
-                        <td>
-                            <span class="folder-icon">📁</span>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <td class="select-column hidden p-3"></td>
+                        <td class="p-3">
+                            <span class="folder-icon text-blue-500 dark:text-blue-400 mr-2">📁</span>
                             <a href="{{ url_for('explore', path=parent_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">..</a>
                         </td>
-                        <td></td>
-                        <td></td>
+                        <td class="p-3"></td>
+                        <td class="p-3"></td>
                     </tr>
                     {% endif %}
                     
                     {% for dir in dirs %}
-                    <tr class="{{ 'hover:bg-gray-700' if theme == 'dark' else 'hover:bg-gray-50' }}">
-                        <td class="select-column hidden"><input type="checkbox" class="select-checkbox" data-path="{{ dir.path }}"></td>
-                        <td>
-                            <span class="folder-icon">📁</span>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <td class="select-column hidden p-3"><input type="checkbox" class="select-checkbox" data-path="{{ dir.path }}"></td>
+                        <td class="p-3">
+                            <span class="folder-icon text-blue-500 dark:text-blue-400 mr-2">📁</span>
                             <a href="{{ url_for('explore', path=dir.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ dir.name }}/</a>
                         </td>
-                        <td class="{{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">{{ dir.modified }}</td>
-                        <td></td>
+                        <td class="p-3 text-gray-500 dark:text-gray-400">{{ dir.modified }}</td>
+                        <td class="p-3"></td>
                     </tr>
                     {% endfor %}
                     
                     {% for file in files %}
-
-                    <tr class="{{ 'hover:bg-gray-700' if theme == 'dark' else 'hover:bg-gray-50' }} file-row" data-file-path="{{ file.path }}">
-
-                        <td class="select-column hidden"><input type="checkbox" class="select-checkbox" data-path="{{ file.path }}"></td>
-
-                        <td>
-                            <span class="file-icon">📄</span>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors file-row" data-file-path="{{ file.path }}">
+                        <td class="select-column hidden p-3"><input type="checkbox" class="select-checkbox" data-path="{{ file.path }}"></td>
+                        <td class="p-3">
+                            <span class="file-icon text-gray-500 dark:text-gray-400 mr-2">📄</span>
                             <a href="{{ url_for('explore', path=file.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ file.name }}</a>
-                            <button class="ml-2 text-sm text-green-600 preview-link" data-preview-url="{{ get_preview_url(file.path) }}">Preview</button>
+                            <button class="ml-2 text-sm badge-blue preview-link" data-preview-url="{{ get_preview_url(file.path) }}">Preview</button>
                         </td>
-                        <td class="{{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">{{ file.modified }}</td>
-                        <td class="{{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">
+                        <td class="p-3 text-gray-500 dark:text-gray-400">{{ file.modified }}</td>
+                        <td class="p-3 text-gray-500 dark:text-gray-400">
                             {% if file.size < 1024 %}
                                 {{ file.size }} bytes
                             {% elif file.size < 1024 * 1024 %}
@@ -172,7 +142,7 @@
 
                     {% if not dirs and not files %}
                     <tr>
-                        <td colspan="4" class="text-center py-5 {{ 'text-gray-400' if theme == 'dark' else 'text-gray-500' }}">
+                        <td colspan="4" class="text-center py-8 text-gray-500 dark:text-gray-400">
                             {% if search %}
                                 No items found matching "{{ search }}"
                             {% else %}
@@ -183,90 +153,25 @@
                     {% endif %}
                 </tbody>
             </table>
-            </div>
+        </div>
+    </div>
 
-            <!-- Preview Pane -->
-            <div id="preview-pane" class="preview-pane hidden w-1/2 ml-4">
-                <div class="flex justify-between mb-2">
-                    <h3 class="font-semibold">Preview</h3>
-                    <button id="close-preview" class="text-red-500">&times;</button>
-                </div>
+    <!-- Preview Pane -->
+    <div id="preview-pane" class="preview-pane hidden w-1/2 ml-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Preview</h3>
+                <button id="close-preview" class="text-lg font-bold text-red-500 hover:text-red-700">&times;</button>
+            </div>
+            <div class="card-body">
                 <div id="preview-loading" class="loading-indicator hidden">Loading...</div>
                 <iframe id="preview-frame" class="w-full h-full hidden" sandbox="allow-same-origin"></iframe>
             </div>
         </div>
     </div>
-    
-    <!-- Theme switcher button -->
-    <div class="theme-switch" id="theme-switch">
-        <!-- Sun icon for dark mode -->
-        <svg class="sun-icon" role="img" aria-label="Sun icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.758a.75.75 0 001.06-1.061l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
-        </svg>
-        <!-- Moon icon for light mode -->
-        <svg class="moon-icon" role="img" aria-label="Moon icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
-        </svg>
-    </div>
-    
-    <!-- Modal for plugin output -->
-    <div id="modal-overlay" class="modal-overlay">
-        <div id="modal" class="modal">
-            <div class="modal-header">
-                <h2 id="modal-title" class="modal-title">Modal Title</h2>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <pre id="modal-content" class="modal-content"></pre>
-            </div>
-        </div>
-    </div>
+</div>
+{% endblock %}
 
-    <!-- Context menu for file actions -->
-    <ul id="file-context-menu" class="context-menu hidden">
-        <li data-action="open">Open</li>
-        <li data-action="download">Download</li>
-        <li data-action="copy">Copy Path</li>
-    </ul>
-
-    <script src="{{ url_for('static', filename='js/plugins.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/favorites.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/preview.js') }}" defer></script>
-
-    
-    <!-- Theme switcher script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeSwitch = document.getElementById('theme-switch');
-            const htmlElement = document.documentElement;
-            
-            themeSwitch.addEventListener('click', function() {
-                // Toggle theme class
-                if (htmlElement.classList.contains('theme-dark')) {
-                    htmlElement.classList.remove('theme-dark');
-                    htmlElement.classList.add('theme-light');
-                    updateTheme('light');
-                } else {
-                    htmlElement.classList.remove('theme-light');
-                    htmlElement.classList.add('theme-dark');
-                    updateTheme('dark');
-                }
-            });
-            
-            function updateTheme(theme) {
-                // Save theme preference via AJAX
-                fetch('/theme/toggle-theme')
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Theme updated:', data.theme);
-                        // Persist choice
-                        localStorage.setItem('theme', data.theme);
-                    })
-                    .catch(error => {
-                        console.error('Error updating theme:', error);
-                    });
-            }
-        });
-    </script>
-</body>
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/preview.js') }}" defer></script>
+{% endblock %}

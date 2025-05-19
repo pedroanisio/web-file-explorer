@@ -59,6 +59,12 @@ def setup_enhancements():
         # Register component CSS
         app.static_folder = 'static'
         
+        # Register custom CSS as part of tailwind output
+        if os.path.exists(os.path.join(app.static_folder, 'css/components.css')):
+            logger.info("Component CSS found and will be included")
+        else:
+            logger.warning("Component CSS file missing - UI will use default styles")
+        
         # Add theme context processor
         @app.context_processor
         def inject_theme():
