@@ -108,19 +108,19 @@ def execute(path, **kwargs):
             "error": f"Error analyzing Git repository: {str(e)}\n\n{error_details}"
         }
 
-def generate_git_report(repo, path):
+def generate_git_report(repo, repo_path):
     """
     Generate a comprehensive HTML report for the Git repository
     
     Args:
         repo: GitPython repository object
-        path: Path to the repository
+        repo_path: Path to the repository
         
     Returns:
         str: HTML content for the report
     """
     # Collect repository information
-    repo_info = get_repo_info(repo, path)
+    repo_info = get_repo_info(repo, repo_path)
     branch_info = get_branch_info(repo)
     commit_history = get_commit_history(repo)
     commit_stats = analyze_commit_stats(commit_history)
@@ -131,7 +131,7 @@ def generate_git_report(repo, path):
     author_distribution_chart = generate_author_distribution_chart(commit_history)
     file_types_chart = generate_file_types_chart(file_stats)
     
-    # Start building HTML content
+    # Start building HTML content with a copy button for all <pre> elements
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -144,51 +144,62 @@ def generate_git_report(repo, path):
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 line-height: 1.6;
                 color: #333;
-                max-width: 1200px;
-                margin: 0 auto;
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                background-color: #f9f9f9;
+            }}
+            h1 {{
+                margin: 0;
                 padding: 20px;
+                color: #2c3e50;
+                border-bottom: 2px solid #3498db;
+                background-color: #f8f9fa;
+                font-size: 1.8rem;
+                font-weight: 600;
             }}
             .dashboard {{
                 display: grid;
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
                 gap: 20px;
-            }}
-            @media (max-width: 768px) {{
-                .dashboard {{
-                    grid-template-columns: 1fr;
-                }}
+                padding: 20px;
             }}
             .card {{
                 background: white;
                 border-radius: 8px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 padding: 20px;
                 margin-bottom: 20px;
+                height: fit-content;
             }}
             .full-width {{
                 grid-column: 1 / -1;
             }}
-            h1, h2, h3 {{
+            h2, h3 {{
                 color: #2c3e50;
-            }}
-            h1 {{
-                border-bottom: 2px solid #3498db;
-                padding-bottom: 10px;
+                margin-top: 0;
             }}
             h2 {{
                 margin-top: 0;
-                border-bottom: 1px solid #ddd;
-                padding-bottom: 8px;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+                font-size: 1.4rem;
+            }}
+            h3 {{
+                font-size: 1.1rem;
+                margin-top: 20px;
+                margin-bottom: 10px;
             }}
             table {{
                 width: 100%;
                 border-collapse: collapse;
                 margin: 15px 0;
+                font-size: 14px;
             }}
             th, td {{
-                padding: 12px 15px;
+                padding: 10px;
                 text-align: left;
-                border-bottom: 1px solid #ddd;
+                border-bottom: 1px solid #eee;
             }}
             th {{
                 background-color: #f8f9fa;
@@ -199,7 +210,7 @@ def generate_git_report(repo, path):
             }}
             .stat-grid {{
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
                 gap: 15px;
                 margin: 15px 0;
             }}
@@ -208,6 +219,12 @@ def generate_git_report(repo, path):
                 border-radius: 6px;
                 padding: 15px;
                 text-align: center;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                transition: transform 0.2s, box-shadow 0.2s;
+            }}
+            .stat-box:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             }}
             .stat-value {{
                 font-size: 24px;
@@ -221,12 +238,14 @@ def generate_git_report(repo, path):
             }}
             .chart-container {{
                 width: 100%;
-                height: 350px;
+                height: 400px;
                 margin: 15px 0;
             }}
             .branch-list, .commit-list {{
                 max-height: 400px;
                 overflow-y: auto;
+                border: 1px solid #eee;
+                border-radius: 4px;
             }}
             .branch-current {{
                 font-weight: bold;
@@ -238,11 +257,109 @@ def generate_git_report(repo, path):
             }}
             .commit-message {{
                 font-style: italic;
+                max-width: 300px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: block;
+            }}
+            /* Copy button styles */
+            .copy-button {{
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                background: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                padding: 5px 10px;
+                cursor: pointer;
+                font-size: 12px;
+                z-index: 10;
+            }}
+            .copy-button:hover {{
+                background: #45a049;
+            }}
+            pre {{
+                position: relative;
+                padding: 15px;
+                background-color: #f8f9fa;
+                border-radius: 5px;
+                overflow-x: auto;
+            }}
+            
+            /* For mobile devices */
+            @media (max-width: 768px) {{
+                .dashboard {{
+                    grid-template-columns: 1fr;
+                    padding: 10px;
+                }}
+                .stat-grid {{
+                    grid-template-columns: repeat(2, 1fr);
+                }}
+                .chart-container {{
+                    height: 300px;
+                }}
+                h1 {{
+                    padding: 15px;
+                    font-size: 1.5em;
+                }}
             }}
         </style>
+        <script>
+            // Function to copy text to clipboard
+            function copyToClipboard(text) {{
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                // Show "Copied!" message
+                event.target.textContent = "Copied!";
+                setTimeout(() => {{
+                    event.target.textContent = "Copy";
+                }}, 2000);
+            }}
+            
+            // Add copy button to all pre elements when the page loads
+            document.addEventListener('DOMContentLoaded', function() {{
+                const preElements = document.querySelectorAll('pre');
+                preElements.forEach(pre => {{
+                    const button = document.createElement('button');
+                    button.className = 'copy-button';
+                    button.textContent = 'Copy';
+                    button.addEventListener('click', function(event) {{
+                        copyToClipboard(pre.textContent);
+                    }});
+                    pre.appendChild(button);
+                }});
+                
+                // Ensure all charts resize properly after render
+                if (window.Plotly) {{
+                    setTimeout(() => {{
+                        const plots = document.querySelectorAll('.js-plotly-plot');
+                        plots.forEach(plot => {{
+                            window.Plotly.Plots.resize(plot);
+                        }});
+                    }}, 100);
+                }}
+            }});
+            
+            // Resize charts when window size changes
+            window.addEventListener('resize', function() {{
+                if (window.Plotly) {{
+                    const plots = document.querySelectorAll('.js-plotly-plot');
+                    plots.forEach(plot => {{
+                        window.Plotly.Plots.resize(plot);
+                    }});
+                }}
+            }});
+        </script>
     </head>
     <body>
-        <h1>Git Repository Analysis: {os.path.basename(path)}</h1>
+        <h1>Git Repository Analysis: {os.path.basename(repo_path)}</h1>
         
         <div class="dashboard">
             <!-- Repository Information -->
@@ -276,6 +393,22 @@ def generate_git_report(repo, path):
                     </tr>
         """
     
+    # Create a context dictionary for the format string to avoid duplicate keyword arguments
+    format_data = {
+        'commits_over_time_chart': commits_over_time_chart,
+        'author_distribution_chart': author_distribution_chart,
+        'file_types_chart': file_types_chart,
+        'total_commits': commit_stats['total_commits'],
+        'total_authors': commit_stats['total_authors'],
+        'branch_count': branch_info['count'],
+        'tags_count': repo_info['tags_count'],
+        'first_commit_date': commit_stats['first_commit_date'],
+        'last_commit_date': commit_stats['last_commit_date'],
+        'repo_age': commit_stats['repo_age'],
+        'most_active_author': commit_stats['most_active_author'],
+        'most_active_author_commits': commit_stats['most_active_author_commits']
+    }
+    
     html += """
                 </table>
             </div>
@@ -285,19 +418,19 @@ def generate_git_report(repo, path):
                 <h2>Repository Statistics</h2>
                 <div class="stat-grid">
                     <div class="stat-box">
-                        <div class="stat-value">{commit_stats['total_commits']}</div>
+                        <div class="stat-value">{total_commits}</div>
                         <div class="stat-label">Total Commits</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value">{commit_stats['total_authors']}</div>
+                        <div class="stat-value">{total_authors}</div>
                         <div class="stat-label">Contributors</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value">{branch_info['count']}</div>
+                        <div class="stat-value">{branch_count}</div>
                         <div class="stat-label">Branches</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value">{repo_info['tags_count']}</div>
+                        <div class="stat-value">{tags_count}</div>
                         <div class="stat-label">Tags</div>
                     </div>
                 </div>
@@ -306,26 +439,50 @@ def generate_git_report(repo, path):
                 <table>
                     <tr>
                         <th>First Commit</th>
-                        <td>{commit_stats['first_commit_date']}</td>
+                        <td>{first_commit_date}</td>
                     </tr>
                     <tr>
                         <th>Last Commit</th>
-                        <td>{commit_stats['last_commit_date']}</td>
+                        <td>{last_commit_date}</td>
                     </tr>
                     <tr>
                         <th>Repository Age</th>
-                        <td>{commit_stats['repo_age']}</td>
+                        <td>{repo_age}</td>
                     </tr>
                     <tr>
                         <th>Most Active Author</th>
-                        <td>{commit_stats['most_active_author']} ({commit_stats['most_active_author_commits']} commits)</td>
+                        <td>{most_active_author} ({most_active_author_commits} commits)</td>
                     </tr>
                 </table>
             </div>
             
+            <!-- Commits Over Time Chart -->
+            <div class="card full-width">
+                <h2>Commit Activity Over Time</h2>
+                <div class="chart-container" id="commits-over-time">
+                    {commits_over_time_chart}
+                </div>
+            </div>
+            
+            <!-- Author Distribution Chart -->
+            <div class="card">
+                <h2>Commits by Author</h2>
+                <div class="chart-container" id="author-distribution">
+                    {author_distribution_chart}
+                </div>
+            </div>
+            
+            <!-- File Types Chart -->
+            <div class="card">
+                <h2>File Types Distribution</h2>
+                <div class="chart-container" id="file-types">
+                    {file_types_chart}
+                </div>
+            </div>
+            
             <!-- Branches -->
             <div class="card">
-                <h2>Branches ({branch_info['count']})</h2>
+                <h2>Branches ({branch_count})</h2>
                 <div class="branch-list">
                     <table>
                         <tr>
@@ -333,7 +490,7 @@ def generate_git_report(repo, path):
                             <th>Last Commit</th>
                             <th>Last Active</th>
                         </tr>
-    """.format(**locals(), **commit_stats, **repo_info)
+    """.format(**format_data)
     
     # Add branch information
     for branch in branch_info['branches']:
@@ -372,7 +529,7 @@ def generate_git_report(repo, path):
                             <td class="commit-hash">{commit['hash'][:7]}</td>
                             <td>{commit['author']}</td>
                             <td>{commit['date']}</td>
-                            <td class="commit-message">{commit['message']}</td>
+                            <td class="commit-message" title="{commit['message']}">{commit['message']}</td>
                         </tr>
         """
     
@@ -380,36 +537,10 @@ def generate_git_report(repo, path):
                     </table>
                 </div>
             </div>
-            
-            <!-- Commits Over Time Chart -->
-            <div class="card full-width">
-                <h2>Commit Activity Over Time</h2>
-                <div class="chart-container" id="commits-over-time">
-                    {commits_over_time_chart}
-                </div>
-            </div>
-            
-            <!-- Author Distribution Chart -->
-            <div class="card">
-                <h2>Commits by Author</h2>
-                <div class="chart-container" id="author-distribution">
-                    {author_distribution_chart}
-                </div>
-            </div>
-            
-            <!-- File Types Chart -->
-            <div class="card">
-                <h2>File Types Distribution</h2>
-                <div class="chart-container" id="file-types">
-                    {file_types_chart}
-                </div>
-            </div>
         </div>
     </body>
     </html>
-    """.format(commits_over_time_chart=commits_over_time_chart,
-               author_distribution_chart=author_distribution_chart,
-               file_types_chart=file_types_chart)
+    """.format(**format_data)
     
     return html
 
