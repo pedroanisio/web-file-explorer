@@ -21,7 +21,19 @@ class DependencyManager:
         logger.debug("Initializing DependencyManager")
         self.installed_packages = {}
         self.all_plugin_dependencies = set()  # Track all dependencies from all plugins
-        self.requirements_file = os.path.join(os.path.dirname(__file__), "requirements.txt")
+        
+        # Determine the path to the requirements file
+        # First check for a specific file at the app root (Docker container)
+        docker_path = "/app/src/plugins/requirements.txt"
+        local_path = os.path.join(os.path.dirname(__file__), "requirements.txt")
+        
+        if os.path.exists(docker_path) and os.access(docker_path, os.W_OK):
+            self.requirements_file = docker_path
+            logger.debug(f"Using Docker container requirements file path: {self.requirements_file}")
+        else:
+            self.requirements_file = local_path
+            logger.debug(f"Using local requirements file path: {self.requirements_file}")
+            
         logger.debug(f"Requirements file path: {self.requirements_file}")
         self._refresh_installed_packages()
         logger.debug(f"Initial packages detected: {len(self.installed_packages)}")
@@ -86,8 +98,8 @@ class DependencyManager:
         for dep in dependencies:
             self.all_plugin_dependencies.add(dep)
             
-        # Update requirements file
-        self._update_requirements_file()
+        # Try to update requirements file, but don't fail if we can't
+        self._update_requirements_file(fail_silently=True)
             
         missing = []
         for dep in dependencies:
@@ -105,17 +117,47 @@ class DependencyManager:
         logger.debug(f"Dependencies check result - All satisfied: {len(missing) == 0}, Missing: {missing}")        
         return len(missing) == 0, missing
     
-    def _update_requirements_file(self):
+    def _update_requirements_file(self, fail_silently=False):
         """Write all plugin dependencies to requirements.txt file"""
         try:
             logger.debug(f"Writing {len(self.all_plugin_dependencies)} dependencies to {self.requirements_file}")
+            
+            # Check if the file is writable before attempting to write
+            if not os.path.exists(os.path.dirname(self.requirements_file)):
+                os.makedirs(os.path.dirname(self.requirements_file), exist_ok=True)
+                logger.debug(f"Created directory: {os.path.dirname(self.requirements_file)}")
+                
+            if os.path.exists(self.requirements_file) and not os.access(self.requirements_file, os.W_OK):
+                if not fail_silently:
+                    logger.error(f"Cannot write to requirements file: {self.requirements_file} (permission denied)")
+                    return False
+                else:
+                    logger.warning(f"Skipping requirements file update - file not writable: {self.requirements_file}")
+                    return False
+            
+            # Check if the directory is writable
+            if not os.access(os.path.dirname(self.requirements_file), os.W_OK):
+                if not fail_silently:
+                    logger.error(f"Cannot write to directory: {os.path.dirname(self.requirements_file)} (permission denied)")
+                    return False
+                else:
+                    logger.warning(f"Skipping requirements file update - directory not writable: {os.path.dirname(self.requirements_file)}")
+                    return False
+            
+            # Try to write to the file
             with open(self.requirements_file, 'w') as f:
                 # Sort dependencies for consistent output
                 for dependency in sorted(self.all_plugin_dependencies):
                     f.write(f"{dependency}\n")
             logger.info(f"Successfully updated requirements file at {self.requirements_file}")
+            return True
         except Exception as e:
-            logger.error(f"Error writing requirements file: {e}", exc_info=True)
+            if fail_silently:
+                logger.warning(f"Could not update requirements file: {e}")
+                return False
+            else:
+                logger.error(f"Error writing requirements file: {e}", exc_info=True)
+                return False
     
     def install_dependencies(self, plugin_id, dependencies):
         """
@@ -128,8 +170,8 @@ class DependencyManager:
         for dep in dependencies:
             self.all_plugin_dependencies.add(dep)
             
-        # Update requirements file
-        self._update_requirements_file()
+        # Try to update requirements file, but don't fail if we can't
+        self._update_requirements_file(fail_silently=True)
         
         # Log Python executable and environment
         logger.debug(f"Python executable: {sys.executable}")

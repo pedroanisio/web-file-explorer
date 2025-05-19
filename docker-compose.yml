@@ -5,7 +5,7 @@ services:
       - "5099:5000"
     volumes:
       - ${HOST_DIR:-./data}:/data
-      - ./src/plugins/requirements.txt:/app/plugin_requirements.txt
+      - ./src/plugins:/app/src/plugins
     environment:
       - FLASK_DEBUG=${FLASK_DEBUG:-0}
       - FLASK_FILE_EXPLORER_BASE_DIR=/data
@@ -16,3 +16,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
+volumes:
+  plugin-requirements:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/src/plugins/requirements.txt

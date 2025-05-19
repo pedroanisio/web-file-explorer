@@ -6,15 +6,17 @@ WORKDIR /app
 COPY setup.py pyproject.toml README.md ./
 
 # Copy just the requirements file first to leverage Docker cache
-COPY src/plugins/requirements.txt ./plugin_requirements.txt
+COPY src/plugins/requirements.txt /app/src/plugins/requirements.txt
 
-# Install the application and plugin dependencies
+# Install pip and plugin dependencies
 RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir -r plugin_requirements.txt && \
-    pip install --no-cache-dir .
+    pip install --no-cache-dir -r /app/src/plugins/requirements.txt
 
-# Now copy the source code (this will change frequently)
-COPY src ./src/
+# Now copy the source code (except for the requirements.txt which is already in place)
+COPY --chown=root:root src ./src/
+
+# Install the application itself
+RUN pip install --no-cache-dir .
 
 # Install git and tree commands
 RUN apt-get update && apt-get install -y tree git && \
@@ -34,6 +36,10 @@ ENV FLASK_DEBUG=1
 
 # Create a data directory to mount user files
 RUN mkdir -p /data
+
+# Ensure the requirements file is writeable by the nonroot user
+RUN chown nonroot:nonroot /app/src/plugins/requirements.txt && \
+    chmod 664 /app/src/plugins/requirements.txt
 
 # Expose port 5000
 EXPOSE 5000
