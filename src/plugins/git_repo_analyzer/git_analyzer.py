@@ -131,65 +131,148 @@ def generate_git_report(repo, repo_path):
     author_distribution_chart = generate_author_distribution_chart(commit_history)
     file_types_chart = generate_file_types_chart(file_stats)
     
-    # Start building HTML content with a copy button for all <pre> elements
+    # Create a context dictionary for the format string to avoid duplicate keyword arguments
+    format_data = {
+        'repo_name': os.path.basename(repo_path),
+        'repo_path': repo_info['path'],
+        'current_branch': repo_info['current_branch'],
+        'repo_size': repo_info['size'],
+        'commits_over_time_chart': commits_over_time_chart,
+        'author_distribution_chart': author_distribution_chart,
+        'file_types_chart': file_types_chart,
+        'total_commits': commit_stats['total_commits'],
+        'total_authors': commit_stats['total_authors'],
+        'branch_count': branch_info['count'],
+        'tags_count': repo_info['tags_count'],
+        'first_commit_date': commit_stats['first_commit_date'],
+        'last_commit_date': commit_stats['last_commit_date'],
+        'repo_age': commit_stats['repo_age'],
+        'most_active_author': commit_stats['most_active_author'],
+        'most_active_author_commits': commit_stats['most_active_author_commits']
+    }
+    
+    # Build remotes HTML
+    remotes_html = ""
+    for name, url in repo_info['remotes'].items():
+        remotes_html += f"""
+            <tr>
+                <th>{name}</th>
+                <td>{url}</td>
+            </tr>
+        """
+    
+    # Build branches HTML
+    branches_html = ""
+    for branch in branch_info['branches']:
+        current_marker = "✅ " if branch['is_current'] else ""
+        css_class = 'branch-current' if branch['is_current'] else ''
+        branches_html += f"""
+            <tr class="{css_class}">
+                <td>{current_marker}{branch['name']}</td>
+                <td class="commit-hash">{branch['last_commit_hash']}</td>
+                <td>{branch['last_commit_date']}</td>
+            </tr>
+        """
+    
+    # Build recent commits HTML
+    commits_html = ""
+    for commit in commit_history['commits'][:10]:  # Show only 10 most recent commits
+        commits_html += f"""
+            <tr>
+                <td class="commit-hash">{commit['hash'][:7]}</td>
+                <td>{commit['author']}</td>
+                <td>{commit['date']}</td>
+                <td class="commit-message" title="{commit['message']}">{commit['message']}</td>
+            </tr>
+        """
+    
+    # Start building HTML content
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Git Repository Analysis</title>
+        <title>Git Repository Analysis: {format_data['repo_name']}</title>
         <style>
             body {{
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 line-height: 1.6;
                 color: #333;
-                max-width: 100%;
                 margin: 0;
                 padding: 0;
-                background-color: #f9f9f9;
-            }}
-            h1 {{
-                margin: 0;
-                padding: 20px;
-                color: #2c3e50;
-                border-bottom: 2px solid #3498db;
                 background-color: #f8f9fa;
+            }}
+            
+            /* Main layout */
+            .container {{
+                padding: 0;
+                max-width: 100%;
+            }}
+            
+            /* Header */
+            .header {{
+                background-color: #fff;
+                padding: 20px;
+                border-bottom: 2px solid #3498db;
+                margin-bottom: 20px;
+            }}
+            .header h1 {{
+                margin: 0;
+                color: #2c3e50;
                 font-size: 1.8rem;
                 font-weight: 600;
             }}
-            .dashboard {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-                gap: 20px;
-                padding: 20px;
+            
+            /* Main content */
+            .main-content {{
+                padding: 0 20px 20px 20px;
             }}
+            
+            /* Two column layout */
+            .row {{
+                display: flex;
+                flex-wrap: wrap;
+                margin: 0 -10px;
+            }}
+            .col {{
+                flex: 1;
+                padding: 0 10px;
+                min-width: 300px;
+                margin-bottom: 20px;
+            }}
+            .col-full {{
+                flex-basis: 100%;
+                padding: 0 10px;
+                margin-bottom: 20px;
+            }}
+            
+            /* Cards */
             .card {{
                 background: white;
                 border-radius: 8px;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 padding: 20px;
-                margin-bottom: 20px;
-                height: fit-content;
+                height: 100%;
+                box-sizing: border-box;
             }}
-            .full-width {{
-                grid-column: 1 / -1;
-            }}
-            h2, h3 {{
-                color: #2c3e50;
-                margin-top: 0;
-            }}
+            
+            /* Headings */
             h2 {{
                 margin-top: 0;
+                color: #2c3e50;
                 border-bottom: 1px solid #eee;
                 padding-bottom: 10px;
                 font-size: 1.4rem;
             }}
             h3 {{
+                color: #2c3e50;
                 font-size: 1.1rem;
                 margin-top: 20px;
                 margin-bottom: 10px;
             }}
+            
+            /* Tables */
             table {{
                 width: 100%;
                 border-collapse: collapse;
@@ -208,19 +291,23 @@ def generate_git_report(repo, repo_path):
             tr:hover {{
                 background-color: #f5f5f5;
             }}
+            
+            /* Stat boxes */
             .stat-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: 15px;
-                margin: 15px 0;
+                display: flex;
+                flex-wrap: wrap;
+                margin: 0 -5px;
             }}
             .stat-box {{
+                flex: 1 0 45%;
                 background: #f8f9fa;
                 border-radius: 6px;
                 padding: 15px;
                 text-align: center;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                transition: transform 0.2s, box-shadow 0.2s;
+                transition: transform 0.2s;
+                margin: 5px;
+                min-width: 120px;
             }}
             .stat-box:hover {{
                 transform: translateY(-2px);
@@ -236,17 +323,23 @@ def generate_git_report(repo, repo_path):
                 font-size: 14px;
                 color: #7f8c8d;
             }}
+            
+            /* Charts */
             .chart-container {{
                 width: 100%;
-                height: 400px;
+                height: 350px;
                 margin: 15px 0;
             }}
-            .branch-list, .commit-list {{
-                max-height: 400px;
+            
+            /* Scrolling containers */
+            .scrollable {{
+                max-height: 350px;
                 overflow-y: auto;
                 border: 1px solid #eee;
                 border-radius: 4px;
             }}
+            
+            /* Utility classes */
             .branch-current {{
                 font-weight: bold;
                 color: #27ae60;
@@ -263,80 +356,26 @@ def generate_git_report(repo, repo_path):
                 text-overflow: ellipsis;
                 display: block;
             }}
-            /* Copy button styles */
-            .copy-button {{
-                position: absolute;
-                top: 5px;
-                right: 5px;
-                background: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 5px 10px;
-                cursor: pointer;
-                font-size: 12px;
-                z-index: 10;
-            }}
-            .copy-button:hover {{
-                background: #45a049;
-            }}
-            pre {{
-                position: relative;
-                padding: 15px;
-                background-color: #f8f9fa;
-                border-radius: 5px;
-                overflow-x: auto;
-            }}
             
-            /* For mobile devices */
+            /* Responsive adjustments */
             @media (max-width: 768px) {{
-                .dashboard {{
-                    grid-template-columns: 1fr;
-                    padding: 10px;
+                .col {{
+                    flex-basis: 100%;
                 }}
-                .stat-grid {{
-                    grid-template-columns: repeat(2, 1fr);
+                .header {{
+                    padding: 15px;
+                }}
+                .header h1 {{
+                    font-size: 1.5rem;
                 }}
                 .chart-container {{
                     height: 300px;
                 }}
-                h1 {{
-                    padding: 15px;
-                    font-size: 1.5em;
-                }}
             }}
         </style>
         <script>
-            // Function to copy text to clipboard
-            function copyToClipboard(text) {{
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                
-                // Show "Copied!" message
-                event.target.textContent = "Copied!";
-                setTimeout(() => {{
-                    event.target.textContent = "Copy";
-                }}, 2000);
-            }}
-            
-            // Add copy button to all pre elements when the page loads
             document.addEventListener('DOMContentLoaded', function() {{
-                const preElements = document.querySelectorAll('pre');
-                preElements.forEach(pre => {{
-                    const button = document.createElement('button');
-                    button.className = 'copy-button';
-                    button.textContent = 'Copy';
-                    button.addEventListener('click', function(event) {{
-                        copyToClipboard(pre.textContent);
-                    }});
-                    pre.appendChild(button);
-                }});
-                
-                // Ensure all charts resize properly after render
+                // Make sure charts render properly
                 if (window.Plotly) {{
                     setTimeout(() => {{
                         const plots = document.querySelectorAll('.js-plotly-plot');
@@ -347,7 +386,6 @@ def generate_git_report(repo, repo_path):
                 }}
             }});
             
-            // Resize charts when window size changes
             window.addEventListener('resize', function() {{
                 if (window.Plotly) {{
                     const plots = document.querySelectorAll('.js-plotly-plot');
@@ -359,188 +397,154 @@ def generate_git_report(repo, repo_path):
         </script>
     </head>
     <body>
-        <h1>Git Repository Analysis: {os.path.basename(repo_path)}</h1>
-        
-        <div class="dashboard">
-            <!-- Repository Information -->
-            <div class="card">
-                <h2>Repository Information</h2>
-                <table>
-                    <tr>
-                        <th>Repository Path</th>
-                        <td>{repo_info['path']}</td>
-                    </tr>
-                    <tr>
-                        <th>Current Branch</th>
-                        <td>{repo_info['current_branch']}</td>
-                    </tr>
-                    <tr>
-                        <th>Repository Size</th>
-                        <td>{repo_info['size']}</td>
-                    </tr>
-                </table>
-                
-                <h3>Remote Information</h3>
-                <table>
-    """
-    
-    # Add remote information
-    for name, url in repo_info['remotes'].items():
-        html += f"""
-                    <tr>
-                        <th>{name}</th>
-                        <td>{url}</td>
-                    </tr>
-        """
-    
-    # Create a context dictionary for the format string to avoid duplicate keyword arguments
-    format_data = {
-        'commits_over_time_chart': commits_over_time_chart,
-        'author_distribution_chart': author_distribution_chart,
-        'file_types_chart': file_types_chart,
-        'total_commits': commit_stats['total_commits'],
-        'total_authors': commit_stats['total_authors'],
-        'branch_count': branch_info['count'],
-        'tags_count': repo_info['tags_count'],
-        'first_commit_date': commit_stats['first_commit_date'],
-        'last_commit_date': commit_stats['last_commit_date'],
-        'repo_age': commit_stats['repo_age'],
-        'most_active_author': commit_stats['most_active_author'],
-        'most_active_author_commits': commit_stats['most_active_author_commits']
-    }
-    
-    html += """
-                </table>
+        <div class="container">
+            <div class="header">
+                <h1>Git Repository Analysis: {format_data['repo_name']}</h1>
             </div>
             
-            <!-- Repository Statistics -->
-            <div class="card">
-                <h2>Repository Statistics</h2>
-                <div class="stat-grid">
-                    <div class="stat-box">
-                        <div class="stat-value">{total_commits}</div>
-                        <div class="stat-label">Total Commits</div>
+            <div class="main-content">
+                <div class="row">
+                    <!-- Repository Information -->
+                    <div class="col">
+                        <div class="card">
+                            <h2>Repository Information</h2>
+                            <table>
+                                <tr>
+                                    <th>Repository Path</th>
+                                    <td>{format_data['repo_path']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Current Branch</th>
+                                    <td>{format_data['current_branch']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Repository Size</th>
+                                    <td>{format_data['repo_size']}</td>
+                                </tr>
+                            </table>
+                            
+                            <h3>Remote Information</h3>
+                            <table>
+                                {remotes_html}
+                            </table>
+                        </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value">{total_authors}</div>
-                        <div class="stat-label">Contributors</div>
+                    
+                    <!-- Repository Statistics -->
+                    <div class="col">
+                        <div class="card">
+                            <h2>Repository Statistics</h2>
+                            <div class="stat-grid">
+                                <div class="stat-box">
+                                    <div class="stat-value">{format_data['total_commits']}</div>
+                                    <div class="stat-label">Total Commits</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">{format_data['total_authors']}</div>
+                                    <div class="stat-label">Contributors</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">{format_data['branch_count']}</div>
+                                    <div class="stat-label">Branches</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">{format_data['tags_count']}</div>
+                                    <div class="stat-label">Tags</div>
+                                </div>
+                            </div>
+                            
+                            <h3>Activity Summary</h3>
+                            <table>
+                                <tr>
+                                    <th>First Commit</th>
+                                    <td>{format_data['first_commit_date']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Commit</th>
+                                    <td>{format_data['last_commit_date']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Repository Age</th>
+                                    <td>{format_data['repo_age']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Most Active Author</th>
+                                    <td>{format_data['most_active_author']} ({format_data['most_active_author_commits']} commits)</td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value">{branch_count}</div>
-                        <div class="stat-label">Branches</div>
+                    
+                    <!-- Commits Over Time Chart -->
+                    <div class="col-full">
+                        <div class="card">
+                            <h2>Commit Activity Over Time</h2>
+                            <div class="chart-container" id="commits-over-time">
+                                {format_data['commits_over_time_chart']}
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value">{tags_count}</div>
-                        <div class="stat-label">Tags</div>
+                    
+                    <!-- Author Distribution Chart -->
+                    <div class="col">
+                        <div class="card">
+                            <h2>Commits by Author</h2>
+                            <div class="chart-container" id="author-distribution">
+                                {format_data['author_distribution_chart']}
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <h3>Activity Summary</h3>
-                <table>
-                    <tr>
-                        <th>First Commit</th>
-                        <td>{first_commit_date}</td>
-                    </tr>
-                    <tr>
-                        <th>Last Commit</th>
-                        <td>{last_commit_date}</td>
-                    </tr>
-                    <tr>
-                        <th>Repository Age</th>
-                        <td>{repo_age}</td>
-                    </tr>
-                    <tr>
-                        <th>Most Active Author</th>
-                        <td>{most_active_author} ({most_active_author_commits} commits)</td>
-                    </tr>
-                </table>
-            </div>
-            
-            <!-- Commits Over Time Chart -->
-            <div class="card full-width">
-                <h2>Commit Activity Over Time</h2>
-                <div class="chart-container" id="commits-over-time">
-                    {commits_over_time_chart}
-                </div>
-            </div>
-            
-            <!-- Author Distribution Chart -->
-            <div class="card">
-                <h2>Commits by Author</h2>
-                <div class="chart-container" id="author-distribution">
-                    {author_distribution_chart}
-                </div>
-            </div>
-            
-            <!-- File Types Chart -->
-            <div class="card">
-                <h2>File Types Distribution</h2>
-                <div class="chart-container" id="file-types">
-                    {file_types_chart}
-                </div>
-            </div>
-            
-            <!-- Branches -->
-            <div class="card">
-                <h2>Branches ({branch_count})</h2>
-                <div class="branch-list">
-                    <table>
-                        <tr>
-                            <th>Branch Name</th>
-                            <th>Last Commit</th>
-                            <th>Last Active</th>
-                        </tr>
-    """.format(**format_data)
-    
-    # Add branch information
-    for branch in branch_info['branches']:
-        current_marker = "✅ " if branch['is_current'] else ""
-        css_class = 'branch-current' if branch['is_current'] else ''
-        html += f"""
-                        <tr class="{css_class}">
-                            <td>{current_marker}{branch['name']}</td>
-                            <td class="commit-hash">{branch['last_commit_hash']}</td>
-                            <td>{branch['last_commit_date']}</td>
-                        </tr>
-        """
-    
-    html += """
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Recent Commits -->
-            <div class="card">
-                <h2>Recent Commits</h2>
-                <div class="commit-list">
-                    <table>
-                        <tr>
-                            <th>Commit</th>
-                            <th>Author</th>
-                            <th>Date</th>
-                            <th>Message</th>
-                        </tr>
-    """
-    
-    # Add recent commits
-    for commit in commit_history['commits'][:10]:  # Show only 10 most recent commits
-        html += f"""
-                        <tr>
-                            <td class="commit-hash">{commit['hash'][:7]}</td>
-                            <td>{commit['author']}</td>
-                            <td>{commit['date']}</td>
-                            <td class="commit-message" title="{commit['message']}">{commit['message']}</td>
-                        </tr>
-        """
-    
-    html += """
-                    </table>
+                    
+                    <!-- File Types Chart -->
+                    <div class="col">
+                        <div class="card">
+                            <h2>File Types Distribution</h2>
+                            <div class="chart-container" id="file-types">
+                                {format_data['file_types_chart']}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Branches -->
+                    <div class="col">
+                        <div class="card">
+                            <h2>Branches ({format_data['branch_count']})</h2>
+                            <div class="scrollable">
+                                <table>
+                                    <tr>
+                                        <th>Branch Name</th>
+                                        <th>Last Commit</th>
+                                        <th>Last Active</th>
+                                    </tr>
+                                    {branches_html}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Commits -->
+                    <div class="col">
+                        <div class="card">
+                            <h2>Recent Commits</h2>
+                            <div class="scrollable">
+                                <table>
+                                    <tr>
+                                        <th>Commit</th>
+                                        <th>Author</th>
+                                        <th>Date</th>
+                                        <th>Message</th>
+                                    </tr>
+                                    {commits_html}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </body>
     </html>
-    """.format(**format_data)
+    """
     
     return html
 
