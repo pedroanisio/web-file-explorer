@@ -3,30 +3,41 @@
 {% block title %}File Explorer{% endblock %}
 
 {% block breadcrumbs %}
-<div class="breadcrumb flex flex-wrap items-center justify-between">
-    <div>
-        <a href="{{ url_for('explore', path='') }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">Home</a>
+<nav aria-label="Breadcrumb" class="breadcrumb flex flex-wrap items-center justify-between bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-4 overflow-x-auto">
+    <div class="breadcrumb-path flex items-center flex-wrap">
+        <a href="{{ url_for('explore', path='') }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+            </svg>
+            Home
+        </a>
         {% if current_path %}
             {% set path_segments = current_path.split('/') %}
             {% set accumulated_path = '' %}
             {% for segment in path_segments %}
                 {% if segment %}
                     {% set accumulated_path = accumulated_path + segment + '/' %}
-                    / <a href="{{ url_for('explore', path=accumulated_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ segment }}</a>
+                    <span class="mx-2 text-gray-500 dark:text-gray-400">/</span>
+                    <a href="{{ url_for('explore', path=accumulated_path) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 truncate max-w-xs">{{ segment }}</a>
                 {% endif %}
             {% endfor %}
         {% endif %}
     </div>
-    <button id="add-favorite-btn" data-current-path="{{ current_path }}" class="btn-blue text-sm">Add Favorite</button>
-</div>
+    <button id="add-favorite-btn" data-current-path="{{ current_path }}" class="btn-blue text-sm flex items-center mt-2 sm:mt-0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+        Add Favorite
+    </button>
+</nav>
 {% endblock %}
 
 {% block toolbar %}
 <!-- Plugin Toolbar -->
 {% if plugins %}
-<div class="toolbar flex flex-wrap gap-2 mb-4">
+<div class="toolbar flex flex-wrap gap-2 mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
     {% for plugin in plugins %}
-    <button class="toolbar-item btn-gray" data-plugin-id="{{ plugin.id }}" data-current-path="{{ current_path }}" title="{{ plugin.description }}" aria-label="{{ plugin.name }} plugin button">
+    <button class="toolbar-item" data-plugin-id="{{ plugin.id }}" data-current-path="{{ current_path }}" title="{{ plugin.description }}" aria-label="{{ plugin.name }} plugin button">
         <span class="toolbar-item-icon">{{ plugin.icon }}</span>
         <span>{{ plugin.name }}</span>
     </button>
@@ -34,62 +45,109 @@
 </div>
 {% endif %}
 
-<div id="favorites-bar" class="favorites-bar mb-4"></div>
+<div id="favorites-bar" class="favorites-bar flex flex-wrap gap-2 mb-4"></div>
 
 <div class="controls flex flex-wrap gap-4 justify-between items-center mb-4">
-    <div class="sort-options flex items-center gap-2">
-        <span>Sort by:</span>
-        <a href="{{ url_for('explore', path=current_path, sort='name', desc='false' if sort_by == 'name' and not sort_desc else 'true', search=search) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">
+    <div class="sort-options flex items-center gap-2 flex-wrap">
+        <span class="text-gray-700 dark:text-gray-300">Sort by:</span>
+        <a href="{{ url_for('explore', path=current_path, sort='name', desc='false' if sort_by == 'name' and not sort_desc else 'true', search=search) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
             Name
             {% if sort_by == 'name' %}
-                <span class="sort-arrow {{ 'down' if sort_desc else 'up' }}"></span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                    {% if sort_desc %}
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    {% else %}
+                    <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    {% endif %}
+                </svg>
             {% endif %}
         </a>
-        <a href="{{ url_for('explore', path=current_path, sort='modified', desc='false' if sort_by == 'modified' and not sort_desc else 'true', search=search) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">
+        <a href="{{ url_for('explore', path=current_path, sort='modified', desc='false' if sort_by == 'modified' and not sort_desc else 'true', search=search) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
             Modified
             {% if sort_by == 'modified' %}
-                <span class="sort-arrow {{ 'down' if sort_desc else 'up' }}"></span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                    {% if sort_desc %}
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    {% else %}
+                    <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    {% endif %}
+                </svg>
             {% endif %}
         </a>
-        <a href="{{ url_for('explore', path=current_path, sort='size', desc='false' if sort_by == 'size' and not sort_desc else 'true', search=search) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">
+        <a href="{{ url_for('explore', path=current_path, sort='size', desc='false' if sort_by == 'size' and not sort_desc else 'true', search=search) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
             Size
             {% if sort_by == 'size' %}
-                <span class="sort-arrow {{ 'down' if sort_desc else 'up' }}"></span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                    {% if sort_desc %}
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    {% else %}
+                    <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    {% endif %}
+                </svg>
             {% endif %}
         </a>
     </div>
     
-    <form class="search-form" method="get" action="{{ url_for('explore', path=current_path) }}">
-        <input type="text" name="search" placeholder="Search in current folder..." value="{{ search }}" class="px-3 py-2 rounded border {{ 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-500' if theme == 'dark' else 'bg-white border-gray-300 text-gray-800 placeholder-gray-400' }}">
+    <form class="search-form relative flex-grow max-w-sm" method="get" action="{{ url_for('explore', path=current_path) }}">
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+            </span>
+            <input type="text" name="search" placeholder="Search in current folder..." value="{{ search }}" class="pl-10 pr-10 py-2 border w-full border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 rounded">
+            {% if search %}
+            <button type="button" class="clear-search absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" onclick="this.previousElementSibling.value = ''; this.form.submit();">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            {% endif %}
+        </div>
         <input type="hidden" name="sort" value="{{ sort_by }}">
         <input type="hidden" name="desc" value="{{ 'true' if sort_desc else 'false' }}">
     </form>
 
-    <div class="actions flex items-center gap-2">
+    <div class="actions flex items-center gap-2 flex-wrap">
         <div class="select-controls flex items-center gap-2">
-            <button id="select-toggle" type="button" class="btn-gray">Select</button>
-            <div id="selection-actions" class="hidden space-x-2">
-                <button id="select-all" type="button" class="btn-gray">Select All</button>
-                <button id="deselect-all" type="button" class="btn-gray">Deselect All</button>
-                <button id="download-selected" type="button" class="btn-blue">Download Selected (<span id="selected-count">0</span>)</button>
+            <button id="select-toggle" type="button" class="btn-gray flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                </svg>
+                Select
+            </button>
+            <div id="selection-actions" class="hidden space-x-2 flex-wrap">
+                <button id="select-all" type="button" class="btn-gray text-sm">Select All</button>
+                <button id="deselect-all" type="button" class="btn-gray text-sm">Deselect All</button>
+                <button id="download-selected" type="button" class="btn-blue text-sm flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Selected (<span id="selected-count">0</span>)
+                </button>
             </div>
         </div>
-        <button id="toggle-preview-pane" class="btn-blue">Toggle Preview</button>
+        <button id="toggle-preview-pane" class="btn-blue flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+            </svg>
+            Preview
+        </button>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="content-wrapper flex">
+<div class="content-wrapper flex flex-col md:flex-row">
     <div class="content-container flex-1">
-        <div class="card">
+        <div class="card overflow-x-auto">
             <table class="table w-full">
                 <thead class="bg-gray-50 dark:bg-gray-800">
                     <tr class="border-b border-gray-200 dark:border-gray-700">
-                        <th class="select-column hidden p-3"></th>
-                        <th class="p-3 text-left" scope="col">Name</th>
-                        <th class="p-3 text-left" scope="col">Modified</th>
-                        <th class="p-3 text-left" scope="col">Size</th>
+                        <th class="select-column hidden p-3 w-10"></th>
+                        <th class="p-3 text-left font-medium text-gray-700 dark:text-gray-300" scope="col">Name</th>
+                        <th class="p-3 text-left font-medium text-gray-700 dark:text-gray-300 hidden md:table-cell" scope="col">Modified</th>
+                        <th class="p-3 text-left font-medium text-gray-700 dark:text-gray-300 hidden md:table-cell" scope="col">Size</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -97,36 +155,75 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <td class="select-column hidden p-3"></td>
                         <td class="p-3">
-                            <span class="folder-icon text-blue-500 dark:text-blue-400 mr-2">📁</span>
-                            <a href="{{ url_for('explore', path=parent_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">..</a>
+                            <a href="{{ url_for('explore', path=parent_path) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Parent Directory</span>
+                            </a>
                         </td>
-                        <td class="p-3"></td>
-                        <td class="p-3"></td>
+                        <td class="p-3 hidden md:table-cell"></td>
+                        <td class="p-3 hidden md:table-cell"></td>
                     </tr>
                     {% endif %}
                     
                     {% for dir in dirs %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <td class="select-column hidden p-3"><input type="checkbox" class="select-checkbox" data-path="{{ dir.path }}"></td>
-                        <td class="p-3">
-                            <span class="folder-icon text-blue-500 dark:text-blue-400 mr-2">📁</span>
-                            <a href="{{ url_for('explore', path=dir.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ dir.name }}/</a>
+                        <td class="select-column hidden p-3">
+                            <input type="checkbox" class="select-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:checked:bg-blue-600 focus:ring-blue-500" data-path="{{ dir.path }}">
                         </td>
-                        <td class="p-3 text-gray-500 dark:text-gray-400">{{ dir.modified }}</td>
-                        <td class="p-3"></td>
+                        <td class="p-3">
+                            <a href="{{ url_for('explore', path=dir.path) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-yellow-500 dark:text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="truncate max-w-xs">{{ dir.name }}/</span>
+                            </a>
+                        </td>
+                        <td class="p-3 text-gray-500 dark:text-gray-400 hidden md:table-cell">{{ dir.modified }}</td>
+                        <td class="p-3 hidden md:table-cell"></td>
                     </tr>
                     {% endfor %}
                     
                     {% for file in files %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors file-row" data-file-path="{{ file.path }}">
-                        <td class="select-column hidden p-3"><input type="checkbox" class="select-checkbox" data-path="{{ file.path }}"></td>
-                        <td class="p-3">
-                            <span class="file-icon text-gray-500 dark:text-gray-400 mr-2">📄</span>
-                            <a href="{{ url_for('explore', path=file.path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ file.name }}</a>
-                            <button class="ml-2 text-sm badge-blue preview-link" data-preview-url="{{ get_preview_url(file.path) }}">Preview</button>
+                        <td class="select-column hidden p-3">
+                            <input type="checkbox" class="select-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:checked:bg-blue-600 focus:ring-blue-500" data-path="{{ file.path }}">
                         </td>
-                        <td class="p-3 text-gray-500 dark:text-gray-400">{{ file.modified }}</td>
-                        <td class="p-3 text-gray-500 dark:text-gray-400">
+                        <td class="p-3">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                                </svg>
+                                <div class="flex-1 flex flex-col sm:flex-row sm:items-center">
+                                    <a href="{{ url_for('explore', path=file.path) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 truncate max-w-xs">{{ file.name }}</a>
+                                    <div class="mt-1 sm:mt-0 sm:ml-2 flex">
+                                        <button class="text-xs badge-blue hover:bg-blue-200 dark:hover:bg-blue-700 preview-link flex items-center" data-preview-url="{{ get_preview_url(file.path) }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                            </svg>
+                                            Preview
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Mobile-only metadata -->
+                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400 md:hidden">
+                                {{ file.modified }} &middot;
+                                {% if file.size < 1024 %}
+                                    {{ file.size }} bytes
+                                {% elif file.size < 1024 * 1024 %}
+                                    {{ (file.size / 1024) | round(1) }} KB
+                                {% elif file.size < 1024 * 1024 * 1024 %}
+                                    {{ (file.size / 1024 / 1024) | round(1) }} MB
+                                {% else %}
+                                    {{ (file.size / 1024 / 1024 / 1024) | round(1) }} GB
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="p-3 text-gray-500 dark:text-gray-400 hidden md:table-cell">{{ file.modified }}</td>
+                        <td class="p-3 text-gray-500 dark:text-gray-400 hidden md:table-cell">
                             {% if file.size < 1024 %}
                                 {{ file.size }} bytes
                             {% elif file.size < 1024 * 1024 %}
@@ -142,12 +239,24 @@
 
                     {% if not dirs and not files %}
                     <tr>
-                        <td colspan="4" class="text-center py-8 text-gray-500 dark:text-gray-400">
-                            {% if search %}
-                                No items found matching "{{ search }}"
-                            {% else %}
-                                This folder is empty
-                            {% endif %}
+                        <td colspan="4" class="text-center py-12 text-gray-500 dark:text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-xl font-medium mb-2">
+                                {% if search %}
+                                    No items found matching "{{ search }}"
+                                {% else %}
+                                    This folder is empty
+                                {% endif %}
+                            </p>
+                            <p class="text-gray-500 dark:text-gray-400">
+                                {% if search %}
+                                    Try a different search term or <a href="{{ url_for('explore', path=current_path) }}" class="text-blue-600 dark:text-blue-400 hover:underline">clear the search</a>
+                                {% else %}
+                                    Add files to this directory and they will appear here
+                                {% endif %}
+                            </p>
                         </td>
                     </tr>
                     {% endif %}
@@ -157,15 +266,22 @@
     </div>
 
     <!-- Preview Pane -->
-    <div id="preview-pane" class="preview-pane hidden w-1/2 ml-4">
-        <div class="card">
+    <div id="preview-pane" class="preview-pane hidden w-full md:w-1/2 ml-0 md:ml-4 mt-4 md:mt-0">
+        <div class="card h-full">
             <div class="card-header">
-                <h3 class="card-title">Preview</h3>
-                <button id="close-preview" class="text-lg font-bold text-red-500 hover:text-red-700">&times;</button>
+                <h3 class="card-title text-gray-800 dark:text-gray-100">Preview</h3>
+                <button id="close-preview" class="text-lg font-bold text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" aria-label="Close preview">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
             <div class="card-body">
-                <div id="preview-loading" class="loading-indicator hidden">Loading...</div>
-                <iframe id="preview-frame" class="w-full h-full hidden" sandbox="allow-same-origin"></iframe>
+                <div id="preview-loading" class="loading-indicator hidden flex flex-col items-center justify-center py-8">
+                    <div class="loading-animation mb-4"></div>
+                    <p class="text-gray-600 dark:text-gray-400">Loading preview...</p>
+                </div>
+                <iframe id="preview-frame" class="w-full h-[500px] hidden border-0" sandbox="allow-same-origin"></iframe>
             </div>
         </div>
     </div>

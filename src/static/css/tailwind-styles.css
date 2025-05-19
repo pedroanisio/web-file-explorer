@@ -1,9 +1,9 @@
-/* styles.css - Combined with Tailwind CSS */
+/* Updated tailwind-styles.css - Combined with Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom variables */
+/* Custom variables with improved dark mode support */
 :root {
   --primary-color: #3498db;
   --primary-dark: #2980b9;
@@ -27,7 +27,7 @@
   --icon-size: 24px;
 }
 
-/* Dark mode overrides */
+/* Dark mode overrides with more consistent values */
 .theme-dark {
   --primary-color: #4299e1;
   --primary-dark: #3182ce;
@@ -35,9 +35,15 @@
   --success-color: #48bb78;
   --danger-color: #f56565;
   --warning-color: #ed8936;
+  --light-bg: #1a202c;
+  --dark-bg: #0d1117;
+  --light-text: #f8f9fa;
+  --dark-text: #f8f9fa;
+  --light-border: #4a5568;
+  --dark-border: #2d3748;
 }
 
-/* Theme-specific color classes */
+/* Theme-specific color classes with improved scope */
 .bg-theme-primary {
   background-color: var(--primary-color);
 }
@@ -54,7 +60,12 @@
   color: var(--secondary-color);
 }
 
-/* Dark mode styles */
+/* Base styles with proper dark mode transitions */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode styles with consistent color schemes */
 .theme-dark {
   @apply text-gray-100;
   background-color: var(--dark-bg);
@@ -95,104 +106,208 @@
 .theme-dark .breadcrumb {
   @apply bg-gray-700;
 }
+.theme-dark .source-code {
+  @apply bg-gray-900 text-gray-100;
+}
 
-/* Theme switcher */
+/* Improved theme switcher with smoother transitions */
 .theme-switch {
-  @apply fixed bottom-5 right-5 z-50 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg cursor-pointer;
+  @apply fixed bottom-5 right-5 z-50 rounded-full p-2 shadow-lg cursor-pointer;
   width: var(--switch-size);
   height: var(--switch-size);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  background-color: #fff;
+}
+.theme-dark .theme-switch {
+  background-color: #1a202c;
 }
 .theme-switch:hover {
   transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+.theme-dark .theme-switch:hover {
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
 .theme-switch .sun-icon,
 .theme-switch .moon-icon {
   width: var(--icon-size);
   height: var(--icon-size);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .theme-switch .sun-icon {
-  display: none;
+  @apply text-amber-400;
+  opacity: 0;
+  transform: scale(0.7);
+  position: absolute;
 }
 .theme-switch .moon-icon {
-  display: block;
+  @apply text-gray-700;
+  opacity: 1;
+  transform: scale(1);
 }
 .theme-dark .theme-switch .sun-icon {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 .theme-dark .theme-switch .moon-icon {
-  display: none;
+  opacity: 0;
+  transform: scale(0.7);
 }
 
-/* Toolbar styles - Enhanced with Tailwind */
+/* Toolbar styles - Enhanced with Tailwind and better consistency */
 .toolbar {
-  @apply flex flex-wrap gap-2 p-3 mb-4 bg-gray-100 dark:bg-gray-700 rounded;
+  @apply flex flex-wrap gap-2 p-3 mb-4 rounded transition-colors;
+  background-color: #f3f4f6;
+}
+.theme-dark .toolbar {
+  background-color: #2d3748;
 }
 .toolbar-item {
-  @apply flex items-center gap-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer text-sm;
+  @apply flex items-center gap-1 px-4 py-3 border rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer text-sm;
+  background-color: #fff;
+  border-color: #e5e7eb;
+}
+.theme-dark .toolbar-item {
+  background-color: #1e293b;
+  border-color: #4b5563;
+  color: #e5e7eb;
 }
 .toolbar-item-icon {
   @apply text-lg;
 }
 
-/* Modal styles - Enhanced with Tailwind */
+/* Modal styles - Enhanced with Tailwind and better dark mode */
 .modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 hidden z-50 items-center justify-center;
+  @apply fixed inset-0 hidden z-50 items-center justify-center p-4 transition-all duration-300;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.theme-dark .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
 }
 .modal {
-  @apply bg-white dark:bg-gray-800 rounded-lg w-11/12 max-w-4xl max-h-[90vh] flex flex-col shadow-xl;
+  @apply rounded-lg w-11/12 max-w-4xl max-h-[90vh] flex flex-col shadow-xl transition-all duration-300;
+  background-color: #fff;
+  transform: scale(0.95);
+}
+.modal-overlay.active .modal {
+  transform: scale(1);
+}
+.theme-dark .modal {
+  background-color: #1e293b;
 }
 .modal-header {
-  @apply p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center;
+  @apply p-4 flex justify-between items-center;
+  border-bottom: 1px solid #e5e7eb;
+}
+.theme-dark .modal-header {
+  border-bottom-color: #4b5563;
 }
 .modal-title {
-  @apply m-0 text-xl font-bold text-gray-800 dark:text-gray-100;
+  @apply m-0 text-xl font-bold;
+  color: #111827;
+}
+.theme-dark .modal-title {
+  color: #f3f4f6;
 }
 .modal-close {
-  @apply bg-transparent border-0 text-2xl cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200;
+  @apply bg-transparent border-0 text-2xl cursor-pointer;
+  color: #6b7280;
+}
+.modal-close:hover {
+  color: #111827;
+}
+.theme-dark .modal-close {
+  color: #9ca3af;
+}
+.theme-dark .modal-close:hover {
+  color: #f3f4f6;
 }
 .modal-body {
   @apply p-4 overflow-y-auto flex-grow;
 }
 .modal-content {
-  @apply whitespace-pre-wrap font-mono text-sm bg-gray-50 dark:bg-gray-900 p-3 rounded border border-gray-200 dark:border-gray-700 overflow-auto max-h-[60vh];
+  @apply whitespace-pre-wrap font-mono text-sm p-3 rounded border overflow-auto max-h-[60vh];
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+.theme-dark .modal-content {
+  background-color: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
 }
 
-/* General table enhancements */
+/* Enhanced table styles */
 .table {
   @apply w-full border-collapse;
 }
 .table th {
-  @apply text-left p-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 font-semibold;
+  @apply text-left p-3 font-semibold;
+  border-bottom: 2px solid #e5e7eb;
+  background-color: #f9fafb;
+  color: #374151;
+}
+.theme-dark .table th {
+  border-bottom-color: #4b5563;
+  background-color: #1f2937;
+  color: #e5e7eb;
 }
 .table td {
-  @apply p-3 border-b border-gray-200 dark:border-gray-700;
+  @apply p-3;
+  border-bottom: 1px solid #e5e7eb;
+}
+.theme-dark .table td {
+  border-bottom-color: #4b5563;
 }
 .table tr:hover {
-  @apply bg-gray-50 dark:bg-gray-700;
+  background-color: #f3f4f6;
+}
+.theme-dark .table tr:hover {
+  background-color: #2d3748;
 }
 
-/* File Explorer specific styles */
+/* File Explorer specific styles with better icons */
 .folder-icon {
-  @apply text-yellow-500 dark:text-yellow-400 mr-2;
+  @apply mr-2;
+  color: #eab308;
+}
+.theme-dark .folder-icon {
+  color: #fbbf24;
 }
 .file-icon {
-  @apply text-blue-500 dark:text-blue-400 mr-2;
+  @apply mr-2;
+  color: #3b82f6;
+}
+.theme-dark .file-icon {
+  color: #60a5fa;
 }
 .container {
-  @apply max-w-6xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-0 flex flex-col h-screen;
+  @apply max-w-6xl mx-auto rounded-lg shadow-md p-0 flex flex-col h-screen;
+  background-color: #fff;
+}
+.theme-dark .container {
+  background-color: #1e293b;
 }
 .header-container {
-  @apply sticky top-0 z-10 bg-white dark:bg-gray-800 p-5 pb-0 border-b border-gray-200 dark:border-gray-700;
+  @apply sticky top-0 z-10 p-5 pb-0 border-b;
+  background-color: #fff;
+  border-color: #e5e7eb;
+}
+.theme-dark .header-container {
+  background-color: #1e293b;
+  border-color: #4b5563;
 }
 .breadcrumb {
-  @apply bg-gray-100 dark:bg-gray-700 p-3 rounded mb-4;
+  @apply p-3 rounded mb-4;
+  background-color: #f3f4f6;
+}
+.theme-dark .breadcrumb {
+  background-color: #2d3748;
 }
 .controls {
-  @apply flex justify-between mb-4 flex-wrap;
+  @apply flex justify-between mb-4 flex-wrap gap-2;
 }
 .sort-options {
   @apply flex gap-3 items-center flex-wrap mb-3;
@@ -201,19 +316,159 @@
   @apply flex-grow max-w-sm;
 }
 .search-form input {
-  @apply w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded;
+  @apply w-full p-2 border rounded transition-colors duration-200;
+  border-color: #d1d5db;
+  background-color: #fff;
+  color: #1f2937;
+}
+.theme-dark .search-form input {
+  border-color: #4b5563;
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+.search-form input:focus {
+  @apply outline-none ring-2 ring-blue-500 border-blue-500;
 }
 .content-container {
   @apply flex-grow overflow-y-auto p-5;
 }
 
-/* Responsive adjustments */
+/* Improved card styling with consistent spacing */
+.card {
+  @apply rounded-lg shadow border overflow-hidden;
+  background-color: #fff;
+  border-color: #e5e7eb;
+}
+.theme-dark .card {
+  background-color: #1e293b;
+  border-color: #4b5563;
+}
+.card-header {
+  @apply flex justify-between items-center p-4;
+  border-bottom: 1px solid #e5e7eb;
+}
+.theme-dark .card-header {
+  border-bottom-color: #4b5563;
+}
+.card-title {
+  @apply font-semibold text-lg m-0;
+  color: #111827;
+}
+.theme-dark .card-title {
+  color: #f3f4f6;
+}
+.card-body {
+  @apply p-4;
+}
+
+/* Improved button styling */
+.btn {
+  @apply px-3 py-2 rounded-md inline-flex items-center justify-center text-sm font-medium transition-colors border border-transparent;
+}
+.btn-blue {
+  @apply btn text-white;
+  background-color: #3b82f6;
+}
+.btn-blue:hover {
+  background-color: #2563eb;
+}
+.theme-dark .btn-blue {
+  background-color: #3b82f6;
+}
+.theme-dark .btn-blue:hover {
+  background-color: #2563eb;
+}
+.btn-gray {
+  @apply btn;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border-color: #d1d5db;
+}
+.btn-gray:hover {
+  background-color: #e5e7eb;
+}
+.theme-dark .btn-gray {
+  background-color: #2d3748;
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+.theme-dark .btn-gray:hover {
+  background-color: #1f2937;
+}
+
+/* Badge component styles with consistent colors */
+.badge {
+  @apply inline-block px-2 py-0.5 text-xs font-semibold rounded;
+}
+.badge-success {
+  @apply badge;
+  background-color: #dcfce7;
+  color: #166534;
+}
+.theme-dark .badge-success {
+  background-color: #064e3b;
+  color: #6ee7b7;
+}
+.badge-warning {
+  @apply badge;
+  background-color: #fef3c7;
+  color: #92400e;
+}
+.theme-dark .badge-warning {
+  background-color: #783c00;
+  color: #fcd34d;
+}
+.badge-blue {
+  @apply badge;
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+.theme-dark .badge-blue {
+  background-color: #1e3a8a;
+  color: #93c5fd;
+}
+.badge-secondary {
+  @apply badge;
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+.theme-dark .badge-secondary {
+  background-color: #374151;
+  color: #d1d5db;
+}
+
+/* Error message styling */
+.error-message {
+  @apply p-4 mb-4 rounded border;
+  color: #b91c1c;
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+.theme-dark .error-message {
+  color: #f87171;
+  background-color: #7f1d1d;
+  border-color: #b91c1c;
+}
+
+/* Preview pane styles */
+.preview-pane {
+  @apply border-l px-4;
+  border-color: #d1d5db;
+}
+.theme-dark .preview-pane {
+  border-color: #4b5563;
+}
+.loading-indicator {
+  @apply text-center p-4;
+}
+
+/* Responsive improvements */
 @media (max-width: 768px) {
   .controls {
-    @apply flex-col;
+    @apply flex-col gap-4;
   }
   .search-form {
-    @apply max-w-full mt-3;
+    @apply max-w-full;
   }
   .nav-bar {
     @apply flex-col items-start space-y-2;
@@ -225,6 +480,29 @@
     @apply w-full justify-start;
   }
   .breadcrumb {
-    @apply overflow-x-auto whitespace-nowrap;
+    @apply overflow-x-auto whitespace-nowrap pb-2;
   }
+  .preview-pane {
+    @apply border-l-0 border-t px-0 pt-4 mt-4;
+  }
+  .card-header {
+    @apply flex-col items-start gap-2;
+  }
+  .card-header > div:last-child {
+    @apply w-full flex justify-end;
+  }
+  .table th:not(:first-child):not(:nth-child(2)) {
+    @apply hidden;
+  }
+  .table td:not(:first-child):not(:nth-child(2)) {
+    @apply hidden;
+  }
+}
+
+/* Transition utilities */
+.transition-all {
+  transition-property: all;
+}
+.duration-300 {
+  transition-duration: 300ms;
 }
