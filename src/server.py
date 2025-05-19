@@ -1,12 +1,12 @@
 """
-Main application module for Flask File Explorer.
-Implements a web-based file explorer with plugin support.
+Updated app.py file to integrate the enhancements.
 """
 from flask import Flask, render_template, request, send_file, redirect, url_for, abort, jsonify
 import os
 import datetime
 import logging
 from .plugins import PluginManager
+from .app_extensions import setup_enhancements
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +42,10 @@ def create_app(config=None):
     # Apply provided configuration (potentially overriding BASE_DIR for tests)
     if config:
         app.config.update(config)
+    
+    # Setup enhancements
+    enhance = setup_enhancements()
+    enhance(app)
     
     return app
 

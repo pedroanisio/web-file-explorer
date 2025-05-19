@@ -31,6 +31,8 @@ dependencies = [
     "flask>=2.0.0",
     "python-dotenv>=0.20.0",
     "werkzeug>=2.0.0",
+    "python-magic",
+    "pygments"
 ]
 
 [project.urls]

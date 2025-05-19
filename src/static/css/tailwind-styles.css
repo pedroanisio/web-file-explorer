@@ -1,0 +1,210 @@
+/* styles.css - Combined with Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom variables */
+:root {
+  --primary-color: #3498db;
+  --primary-dark: #2980b9;
+  --secondary-color: #2c3e50;
+  --success-color: #27ae60;
+  --danger-color: #e74c3c;
+  --warning-color: #f39c12;
+  --light-bg: #f8f9fa;
+  --dark-bg: #1a202c;
+  --light-text: #333;
+  --dark-text: #f8f9fa;
+  --light-border: #eee;
+  --dark-border: #4a5568;
+}
+
+/* Dark mode overrides */
+.theme-dark {
+  --primary-color: #4299e1;
+  --primary-dark: #3182ce;
+  --secondary-color: #a0aec0;
+  --success-color: #48bb78;
+  --danger-color: #f56565;
+  --warning-color: #ed8936;
+}
+
+/* Theme-specific color classes */
+.bg-theme-primary {
+  background-color: var(--primary-color);
+}
+.text-theme-primary {
+  color: var(--primary-color);
+}
+.border-theme-primary {
+  border-color: var(--primary-color);
+}
+.bg-theme-secondary {
+  background-color: var(--secondary-color);
+}
+.text-theme-secondary {
+  color: var(--secondary-color);
+}
+
+/* Dark mode styles */
+.theme-dark {
+  @apply text-gray-100;
+  background-color: var(--dark-bg);
+}
+.theme-dark .container,
+.theme-dark .card,
+.theme-dark .modal,
+.theme-dark .dropdown-menu {
+  @apply bg-gray-800 text-gray-100;
+}
+.theme-dark .table th {
+  @apply bg-gray-700;
+}
+.theme-dark .table td {
+  @apply border-gray-700;
+}
+.theme-dark .table tr:hover {
+  @apply bg-gray-700;
+}
+.theme-dark a {
+  @apply text-blue-400;
+}
+.theme-dark a:hover {
+  @apply text-blue-300;
+}
+.theme-dark .plugin-card {
+  @apply bg-gray-800 shadow-lg border border-gray-700;
+}
+.theme-dark .settings-form {
+  @apply bg-gray-800 border-gray-700;
+}
+.theme-dark .form-control {
+  @apply bg-gray-700 border-gray-600 text-gray-100;
+}
+.theme-dark .form-control:focus {
+  @apply border-blue-500;
+}
+.theme-dark .breadcrumb {
+  @apply bg-gray-700;
+}
+
+/* Theme switcher */
+.theme-switch {
+  @apply fixed bottom-5 right-5 z-50 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg cursor-pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+.theme-switch:hover {
+  transform: scale(1.1);
+}
+.theme-switch .sun-icon,
+.theme-switch .moon-icon {
+  width: 24px;
+  height: 24px;
+}
+.theme-switch .sun-icon {
+  display: none;
+}
+.theme-switch .moon-icon {
+  display: block;
+}
+.theme-dark .theme-switch .sun-icon {
+  display: block;
+}
+.theme-dark .theme-switch .moon-icon {
+  display: none;
+}
+
+/* Toolbar styles - Enhanced with Tailwind */
+.toolbar {
+  @apply flex flex-wrap gap-2 p-3 mb-4 bg-gray-100 dark:bg-gray-700 rounded;
+}
+.toolbar-item {
+  @apply flex items-center gap-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer text-sm;
+}
+.toolbar-item-icon {
+  @apply text-lg;
+}
+
+/* Modal styles - Enhanced with Tailwind */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 hidden z-50 items-center justify-center;
+}
+.modal {
+  @apply bg-white dark:bg-gray-800 rounded-lg w-11/12 max-w-4xl max-h-[90vh] flex flex-col shadow-xl;
+}
+.modal-header {
+  @apply p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center;
+}
+.modal-title {
+  @apply m-0 text-xl font-bold text-gray-800 dark:text-gray-100;
+}
+.modal-close {
+  @apply bg-transparent border-0 text-2xl cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200;
+}
+.modal-body {
+  @apply p-4 overflow-y-auto flex-grow;
+}
+.modal-content {
+  @apply whitespace-pre-wrap font-mono text-sm bg-gray-50 dark:bg-gray-900 p-3 rounded border border-gray-200 dark:border-gray-700 overflow-auto max-h-[60vh];
+}
+
+/* General table enhancements */
+.table {
+  @apply w-full border-collapse;
+}
+.table th {
+  @apply text-left p-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 font-semibold;
+}
+.table td {
+  @apply p-3 border-b border-gray-200 dark:border-gray-700;
+}
+.table tr:hover {
+  @apply bg-gray-50 dark:bg-gray-700;
+}
+
+/* File Explorer specific styles */
+.folder-icon {
+  @apply text-yellow-500 dark:text-yellow-400 mr-2;
+}
+.file-icon {
+  @apply text-blue-500 dark:text-blue-400 mr-2;
+}
+.container {
+  @apply max-w-6xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-0 flex flex-col h-screen;
+}
+.header-container {
+  @apply sticky top-0 z-10 bg-white dark:bg-gray-800 p-5 pb-0 border-b border-gray-200 dark:border-gray-700;
+}
+.breadcrumb {
+  @apply bg-gray-100 dark:bg-gray-700 p-3 rounded mb-4;
+}
+.controls {
+  @apply flex justify-between mb-4 flex-wrap;
+}
+.sort-options {
+  @apply flex gap-3 items-center flex-wrap mb-3;
+}
+.search-form {
+  @apply flex-grow max-w-sm;
+}
+.search-form input {
+  @apply w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded;
+}
+.content-container {
+  @apply flex-grow overflow-y-auto p-5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .controls {
+    @apply flex-col;
+  }
+  .search-form {
+    @apply max-w-full mt-3;
+  }
+}

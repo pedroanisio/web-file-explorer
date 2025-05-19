@@ -1,0 +1,12 @@
+{
+  "name": "python-file-explorer-app",
+  "version": "1.0.0",
+  "description": "File Explorer Web Application",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/static/css/tailwind-styles.css -o ./src/static/css/tailwind.css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.0"
+  }
+} 

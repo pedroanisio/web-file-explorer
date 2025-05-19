@@ -2,7 +2,7 @@
 
 __version__ = "0.1.0"
 
-from .app import create_app, app
+from .server import create_app, app
 import os
 
 def main():

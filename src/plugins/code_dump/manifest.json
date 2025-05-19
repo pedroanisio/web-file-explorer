@@ -3,6 +3,8 @@
     "name": "Code Dump",
     "version": "1.0.0",
     "description": "Outputs all code files in a directory while excluding common non-code files",
-    "entry_point": "dump_plugin",
-    "icon": "📋"
+    "icon": "📋",
+    "type": "ui",
+    "has_settings": true,
+    "entry_point": "dump_plugin.py"
 }

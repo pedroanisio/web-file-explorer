@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" class="{{ 'theme-dark' if theme == 'dark' else 'theme-light' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ file_name }} - File Preview</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind-styles.css') }}">
+    <style>
+        /* Syntax highlighting styles */
+        {{ highlight_css|safe if highlight_css }}
+        
+        /* File preview specific styles */
+        .preview-container {
+            max-width: 100%;
+            overflow: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .source-code {
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 15px;
+            overflow-x: auto;
+        }
+        .source-code .linenos {
+            color: #999;
+            padding-right: 12px;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #ddd;
+            margin-right: 12px;
+        }
+        .theme-dark .source-code .linenos {
+            color: #666;
+            border-right-color: #444;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 70vh;
+            margin: 0 auto;
+            display: block;
+        }
+        .pdf-container {
+            width: 100%;
+            height: 70vh;
+        }
+        .file-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+        }
+        .info-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .file-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        
+        /* Dark mode adjustments */
+        .theme-dark .preview-container {
+            border-color: #4a5568;
+        }
+        .theme-dark .source-code {
+            background-color: #1a202c;
+        }
+    </style>
+</head>
+<body class="{{ 'bg-gray-900 text-gray-100' if theme == 'dark' else 'bg-gray-100 text-gray-800' }}">
+    <div class="container">
+        <div class="header-container">
+            <a href="{{ url_for('explore', path='/'.join(file_path.split('/')[:-1])) }}" class="back-link {{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">← Back to Explorer</a>
+            <h1 class="text-2xl font-bold mt-2 {{ 'text-gray-100' if theme == 'dark' else 'text-gray-800' }}">File Preview</h1>
+        </div>
+        
+        <div class="content-container">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold {{ 'text-gray-100' if theme == 'dark' else 'text-gray-800' }}">{{ file_name }}</h2>
+                
+                <div class="file-info {{ 'text-gray-400' if theme == 'dark' else 'text-gray-600' }}">
+                    <div class="info-item">
+                        <span class="info-icon">📁</span>
+                        <span>{{ file_path }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">📊</span>
+                        <span>
+                            {% if file_size < 1024 %}
+                                {{ file_size }} bytes
+                            {% elif file_size < 1024 * 1024 %}
+                                {{ (file_size / 1024) | round(1) }} KB
+                            {% elif file_size < 1024 * 1024 * 1024 %}
+                                {{ (file_size / 1024 / 1024) | round(1) }} MB
+                            {% else %}
+                                {{ (file_size / 1024 / 1024 / 1024) | round(1) }} GB
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🏷️</span>
+                        <span>{{ file_type }}</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mt-6 mb-4">
+                    <div class="space-x-2">
+                        <a href="{{ url_for('explore', path=file_path) }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                            Download
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- File Preview Section -->
+                <div class="preview-container {{ 'bg-gray-900' if theme == 'dark' else 'bg-white' }}">
+                    {% if preview_type == 'text' %}
+                        <!-- Text file preview with syntax highlighting -->
+                        <div class="source-code">{{ content|safe }}</div>
+                    
+                    {% elif preview_type == 'image' %}
+                        <!-- Image preview -->
+                        <div class="p-4 text-center">
+                            <img src="data:{{ file_type }};base64,{{ image_data }}" alt="{{ file_name }}" class="preview-image">
+                        </div>
+                    
+                    {% elif preview_type == 'svg' %}
+                        <!-- SVG preview -->
+                        <div class="p-4 text-center">
+                            {{ svg_content|safe }}
+                        </div>
+                    
+                    {% elif preview_type == 'pdf' %}
+                        <!-- PDF preview -->
+                        <div class="p-0">
+                            <iframe src="{{ pdf_url }}#toolbar=0" class="pdf-container" frameborder="0"></iframe>
+                        </div>
+                    
+                    {% elif preview_type == 'unsupported' %}
+                        <!-- Unsupported file type -->
+                        <div class="p-8 text-center {{ 'text-gray-400' if theme == 'dark' else 'text-gray-600' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 {{ 'text-gray-600' if theme == 'dark' else 'text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <h3 class="text-lg font-medium mb-2">Preview not available</h3>
+                            <p>This file type ({{ file_type }}) cannot be previewed in the browser.</p>
+                            <a href="{{ url_for('explore', path=file_path) }}" class="inline-block mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                Download File
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Theme switcher button -->
+    <div class="theme-switch" id="theme-switch">
+        <!-- Sun icon for dark mode -->
+        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.758a.75.75 0 001.06-1.061l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
+        </svg>
+        <!-- Moon icon for light mode -->
+        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
+        </svg>
+    </div>
+    
+    <!-- Theme switcher script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeSwitch = document.getElementById('theme-switch');
+            const htmlElement = document.documentElement;
+            
+            themeSwitch.addEventListener('click', function() {
+                // Toggle theme class
+                if (htmlElement.classList.contains('theme-dark')) {
+                    htmlElement.classList.remove('theme-dark');
+                    htmlElement.classList.add('theme-light');
+                    updateTheme('light');
+                } else {
+                    htmlElement.classList.remove('theme-light');
+                    htmlElement.classList.add('theme-dark');
+                    updateTheme('dark');
+                }
+            });
+            
+            function updateTheme(theme) {
+                // Save theme preference via AJAX
+                fetch('/theme/toggle-theme')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Theme updated:', data.theme);
+                    })
+                    .catch(error => {
+                        console.error('Error updating theme:', error);
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
