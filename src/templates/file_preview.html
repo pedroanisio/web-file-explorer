@@ -12,38 +12,49 @@
         max-width: 100%;
         overflow: auto;
         border: 1px solid #ddd;
-        border-radius: 4px;
+        border-radius: 0.5rem;
         margin-top: 20px;
+        border-color: #e5e7eb;
     }
+    
+    .theme-dark .preview-container {
+        border-color: #4b5563;
+    }
+    
     .source-code {
-        font-family: monospace;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
         font-size: 14px;
         line-height: 1.5;
         padding: 15px;
         overflow-x: auto;
     }
+    
     .source-code .linenos {
-        color: #999;
+        color: #9ca3af;
         padding-right: 12px;
         text-align: right;
         user-select: none;
-        border-right: 1px solid #ddd;
+        border-right: 1px solid #e5e7eb;
         margin-right: 12px;
     }
+    
     .theme-dark .source-code .linenos {
-        color: #666;
-        border-right-color: #444;
+        color: #6b7280;
+        border-right-color: #4b5563;
     }
+    
     .preview-image {
         max-width: 100%;
         max-height: 70vh;
         margin: 0 auto;
         display: block;
     }
+    
     .pdf-container {
         width: 100%;
         height: 70vh;
     }
+    
     .file-info {
         display: flex;
         flex-wrap: wrap;
@@ -51,13 +62,39 @@
         margin-top: 15px;
         font-size: 14px;
     }
+    
     .info-item {
         display: flex;
         align-items: center;
     }
+    
     .info-icon {
         margin-right: 8px;
         font-size: 16px;
+    }
+    
+    /* Download button */
+    .download-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background-color: #3b82f6;
+        color: white;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+    
+    .download-button:hover {
+        background-color: #2563eb;
+    }
+    
+    .theme-dark .download-button {
+        background-color: #3b82f6;
+    }
+    
+    .theme-dark .download-button:hover {
+        background-color: #2563eb;
     }
     
     /* Responsive adjustments */
@@ -66,12 +103,24 @@
             flex-direction: column;
             gap: 10px;
         }
+        
+        .button-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+        
+        .button-row .download-button {
+            width: 100%;
+            justify-content: center;
+        }
     }
     
     /* Dark mode adjustments */
     .theme-dark .preview-container {
-        border-color: #4a5568;
+        border-color: #4b5563;
     }
+    
     .theme-dark .source-code {
         background-color: #1a202c;
     }
@@ -79,48 +128,84 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-<div class="breadcrumb flex items-center mb-4">
-    <a href="{{ url_for('explore', path='/'.join(file_path.split('/')[:-1])) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">Home</a>
+<nav aria-label="Breadcrumb" class="breadcrumb flex flex-wrap items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-4 overflow-x-auto">
+    <a href="{{ url_for('explore', path='/'.join(file_path.split('/')[:-1])) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+        Home
+    </a>
     
     {% set path_segments = file_path.split('/') %}
     {% set accumulated_path = '' %}
     {% for segment in path_segments[:-1] %}
         {% if segment %}
             {% set accumulated_path = accumulated_path + segment + '/' %}
-            <span class="mx-2 text-gray-500">/</span>
-            <a href="{{ url_for('explore', path=accumulated_path) }}" class="{{ 'text-blue-400 hover:text-blue-300' if theme == 'dark' else 'text-blue-600 hover:text-blue-800' }}">{{ segment }}</a>
+            <span class="mx-2 text-gray-500 dark:text-gray-400">/</span>
+            <a href="{{ url_for('explore', path=accumulated_path) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 truncate max-w-xs">{{ segment }}</a>
         {% endif %}
     {% endfor %}
     
-    <span class="mx-2 text-gray-500">/</span>
-    <span class="text-gray-500 dark:text-gray-400">{{ path_segments[-1] }}</span>
-</div>
+    <span class="mx-2 text-gray-500 dark:text-gray-400">/</span>
+    <span class="text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ path_segments[-1] }}</span>
+</nav>
 {% endblock %}
 
 {% block content %}
 <div class="content-container">
     <div class="card mb-8">
-        <div class="card-header">
-            <h2 class="card-title">{{ file_name }}</h2>
+        <div class="card-header flex-wrap">
+            <div class="flex items-center">
+                {% if preview_type == 'text' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-500 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>
+                {% elif preview_type == 'image' or preview_type == 'svg' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-500 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                    </svg>
+                {% elif preview_type == 'pdf' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500 dark:text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                        <path d="M8 10a1 1 0 10-2 0v4a1 1 0 102 0v-4zm3 1a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm5-1a1 1 0 10-2 0v4a1 1 0 102 0v-4z" />
+                    </svg>
+                {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                    </svg>
+                {% endif %}
+                <h2 class="card-title">{{ file_name }}</h2>
+            </div>
             
-            <div class="flex space-x-2">
-                <a href="{{ url_for('explore', path=file_path) }}" class="btn-blue">
+            <div class="flex items-center space-x-2 mt-2 md:mt-0">
+                <a href="{{ url_for('explore', path=file_path) }}" class="download-button">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                     Download
                 </a>
+                
+                <a href="{{ url_for('explore', path='/'.join(file_path.split('/')[:-1])) }}" class="btn-gray">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Back to Files
+                </a>
             </div>
         </div>
         
         <div class="card-body">
-            <div class="file-info {{ 'text-gray-400' if theme == 'dark' else 'text-gray-600' }} mb-6">
+            <div class="file-info text-gray-600 dark:text-gray-400 mb-6 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                 <div class="info-item">
-                    <span class="info-icon">📁</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                    </svg>
                     <span>{{ file_path }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-icon">📊</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                    </svg>
                     <span>
                         {% if file_size < 1024 %}
                             {{ file_size }} bytes
@@ -134,7 +219,9 @@
                     </span>
                 </div>
                 <div class="info-item">
-                    <span class="info-icon">🏷️</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                    </svg>
                     <span>{{ file_type }}</span>
                 </div>
             </div>
@@ -170,8 +257,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                         <h3 class="text-lg font-medium mb-2">Preview not available</h3>
-                        <p>This file type ({{ file_type }}) cannot be previewed in the browser.</p>
-                        <a href="{{ url_for('explore', path=file_path) }}" class="btn-blue mt-4">
+                        <p class="mb-4">This file type ({{ file_type }}) cannot be previewed in the browser.</p>
+                        <a href="{{ url_for('explore', path=file_path) }}" class="download-button inline-flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
                             Download File
                         </a>
                     </div>
