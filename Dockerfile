@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -10,7 +10,8 @@ COPY src/plugins/requirements.txt /app/src/plugins/requirements.txt
 
 # Install pip and plugin dependencies
 RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir -r /app/src/plugins/requirements.txt
+    pip install --no-cache-dir -r /app/src/plugins/requirements.txt && \
+    pip install --no-cache-dir setuptools requests
 
 # Now copy the source code (except for the requirements.txt which is already in place)
 COPY --chown=root:root src ./src/
@@ -22,8 +23,8 @@ RUN pip install --no-cache-dir .
 RUN apt-get update && apt-get install -y tree git && \
     rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user and switch to it
-RUN addgroup --system nonroot && adduser --system --ingroup nonroot nonroot
+# Create a non-root user with specific UID/GID 1000
+RUN addgroup --gid 1000 nonroot && adduser --uid 1000 --gid 1000 --disabled-password --gecos "" nonroot
 
 # Set environment variables
 ENV FLASK_APP=src
@@ -39,7 +40,7 @@ RUN mkdir -p /data
 
 # Ensure the requirements file is writeable by the nonroot user
 RUN chown nonroot:nonroot /app/src/plugins/requirements.txt && \
-    chmod 664 /app/src/plugins/requirements.txt
+    chmod 775 /app/src/plugins/requirements.txt
 
 # Expose port 5000
 EXPOSE 5000

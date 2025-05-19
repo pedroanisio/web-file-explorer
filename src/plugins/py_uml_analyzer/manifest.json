@@ -5,6 +5,7 @@
     "description": "Analyzes Python code and extracts class/method information for UML generation",
     "entry_point": "analyzer_plugin",
     "type": "backend",
+    "icon": "🔄",
     "hooks": [
         "file_processor",
         "query_handler"

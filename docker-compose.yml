@@ -1,5 +1,6 @@
 services:
   file-explorer:
+    container_name: webapp-file-explorer
     build: .
     ports:
       - "5099:5000"
@@ -17,10 +18,3 @@ services:
       retries: 3
       start_period: 10s
 
-volumes:
-  plugin-requirements:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${PWD}/src/plugins/requirements.txt
