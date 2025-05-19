@@ -286,8 +286,11 @@ document.addEventListener('DOMContentLoaded', function() {
         contextMenu.classList.add('hidden');
     });
     
+    // Initialize the modal manager with references to DOM elements
+    window.modalManager.initialized = true;
+    
     // Use the global showModal function for this scope
-    const showModal = showModalGlobal;
+    const showModal = window.showModalGlobal;
     
     // Close modal when clicking close button or outside the modal
     closeModal.addEventListener('click', function() {
@@ -304,12 +307,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const toolbarItems = document.querySelectorAll('.toolbar-item');
     
     toolbarItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', async function(e) {
+            e.preventDefault(); // Prevent default action
+            
             const pluginId = this.getAttribute('data-plugin-id');
             const currentPath = this.getAttribute('data-current-path');
             
             if (pluginId && currentPath) {
-                executePlugin(pluginId, currentPath);
+                try {
+                    await executePlugin(pluginId, currentPath);
+                } catch (error) {
+                    console.error("Error executing plugin:", error);
+                    alert("Failed to execute plugin: " + error.message);
+                }
             }
         });
     });
@@ -415,15 +425,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Define showModal globally so it can be used by executePlugin
-let showModalGlobal;
+// Define a modal management object globally
+window.modalManager = {
+    initialized: false,
+    
+    // Initialize modal references when needed
+    getElements: function() {
+        const elements = {
+            modal: document.getElementById('modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalContent: document.getElementById('modal-content'),
+            modalOverlay: document.getElementById('modal-overlay')
+        };
+        
+        return elements;
+    },
+    
+    // Check if all required modal elements exist
+    checkElements: function() {
+        const elements = this.getElements();
+        return elements.modal && elements.modalTitle && 
+               elements.modalContent && elements.modalOverlay;
+    }
+};
 
-// Define showModalGlobal before using it
+// Define showModal globally so it can be used by executePlugin
 window.showModalGlobal = function(title, content, isError = false, isHtml = false) {
-    const modalTitle = document.getElementById('modal-title');
-    const modalContent = document.getElementById('modal-content');
-    const modalOverlay = document.getElementById('modal-overlay');
-    const modal = document.getElementById('modal');
+    // Make sure DOM is loaded before continuing
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            window.showModalGlobal(title, content, isError, isHtml);
+        });
+        return;
+    }
+    
+    // Get fresh references to modal elements
+    const elements = window.modalManager.getElements();
+    const { modalTitle, modalContent, modalOverlay, modal } = elements;
     
     if (!modalTitle || !modalContent || !modalOverlay || !modal) {
         console.error('Modal elements not found. DOM might not be fully loaded.');
@@ -492,75 +530,6 @@ window.showModalGlobal = function(title, content, isError = false, isHtml = fals
     }, 100);
 };
 
-document.addEventListener('DOMContentLoaded', function() {
-        const modalTitle = document.getElementById('modal-title');
-        const modalContent = document.getElementById('modal-content');
-        const modalOverlay = document.getElementById('modal-overlay');
-        
-        modalTitle.textContent = title;
-        
-        if (isError) {
-            modalContent.innerHTML = `<div class="error-message">${content}</div>`;
-            modalContent.classList.add('with-copy-button');
-            modalContent.classList.remove('html-content');
-            
-            // Add copy button for errors
-            let copyButton = modalContent.parentNode.querySelector('.modal-copy-button');
-            if (!copyButton) {
-                copyButton = document.createElement('button');
-                copyButton.textContent = 'Copy';
-                copyButton.className = 'modal-copy-button copy-button';
-                modalContent.parentNode.appendChild(copyButton);
-            }
-        } else if (isHtml) {
-            modalContent.innerHTML = content;
-            modalContent.classList.remove('with-copy-button');
-            modalContent.classList.add('html-content');
-            
-            // Remove any existing copy button for HTML content
-            let copyButton = modalContent.parentNode.querySelector('.modal-copy-button');
-            if (copyButton) {
-                copyButton.remove();
-            }
-        } else {
-            modalContent.textContent = content;
-            modalContent.classList.add('with-copy-button');
-            modalContent.classList.remove('html-content');
-            
-            // Add copy button for plain text
-            let copyButton = modalContent.parentNode.querySelector('.modal-copy-button');
-            if (!copyButton) {
-                copyButton = document.createElement('button');
-                copyButton.textContent = 'Copy';
-                copyButton.className = 'modal-copy-button copy-button';
-                modalContent.parentNode.appendChild(copyButton);
-            }
-        }
-        
-        modalOverlay.style.display = 'flex';
-        
-        // Apply any necessary height adjustments for better display
-        const windowHeight = window.innerHeight;
-        const modalHeight = windowHeight * 0.92;
-        const modal = document.getElementById('modal');
-        modal.style.height = `${modalHeight}px`;
-        
-        // Dynamically adjust modal-body height based on header
-        const headerHeight = modal.querySelector('.modal-header').offsetHeight;
-        modal.querySelector('.modal-body').style.height = `${modalHeight - headerHeight}px`;
-        
-        // Initialize any charts that might be in the modal
-        setTimeout(() => {
-            if (window.Plotly && isHtml) {
-                const plots = document.querySelectorAll('.js-plotly-plot');
-                plots.forEach(plot => {
-                    window.Plotly.Plots.resize(plot);
-                });
-            }
-        }, 100);
-    };
-});
-
 /**
  * Execute a plugin for a specific path
  * 
@@ -569,8 +538,16 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 async function executePlugin(pluginId, path) {
     try {
+        // Ensure DOM is ready before executing
+        if (document.readyState !== 'complete' && document.readyState !== 'interactive') {
+            // Return a promise that resolves when DOM is ready
+            await new Promise(resolve => {
+                document.addEventListener('DOMContentLoaded', resolve);
+            });
+        }
+        
         // Show loading indicator in modal
-        showModalGlobal('Processing...', '<div class="flex justify-center items-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>', true);
+        window.showModalGlobal('Processing...', '<div class="flex justify-center items-center p-8"><div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>', true);
         
         // Fetch plugin result using the existing endpoint format
         const response = await fetch(`/plugins/execute/${pluginId}?path=${encodeURIComponent(path)}`);
@@ -586,13 +563,13 @@ async function executePlugin(pluginId, path) {
             const isHtml = (data.content_type && data.content_type === 'html') || data.is_html === true;
             
             // Update the modal with the plugin output
-            showModalGlobal(data.title || pluginId, data.output, isHtml);
+            window.showModalGlobal(data.title || pluginId, data.output, isHtml);
         } else {
             // Show error in modal
-            showModalGlobal('Error', data.error || 'Unknown error occurred', false);
+            window.showModalGlobal('Error', data.error || 'Unknown error occurred', false);
         }
     } catch (error) {
         console.error('Error executing plugin:', error);
-        showModalGlobal('Error', `Failed to execute plugin: ${error.message}`, false);
+        window.showModalGlobal('Error', `Failed to execute plugin: ${error.message}`, false);
     }
 }
