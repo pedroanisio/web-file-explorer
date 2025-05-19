@@ -32,7 +32,8 @@ dependencies = [
     "python-dotenv>=0.20.0",
     "werkzeug>=2.0.0",
     "python-magic",
-    "pygments"
+    "pygments",
+    "pydantic>=2.0.0"
 ]
 
 [project.urls]

@@ -7,6 +7,8 @@ import datetime
 import logging
 from .plugins import PluginManager
 from .app_extensions import setup_enhancements
+from .api_models import QueryRequest, ProcessRequest
+from pydantic import ValidationError
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -236,17 +238,23 @@ def plugin_query(plugin_id):
     """
     if not hasattr(app, 'plugin_manager') or not app.plugin_manager.registry or plugin_id not in app.plugin_manager.registry.plugins:
         return jsonify({"error": "Plugin not found"}), 404
-        
-    data = request.json
-    query = data.get('query', '')
-    context = data.get('context', {})
-    
-    # Add the base directory to the context
-    context['base_dir'] = app.config.get('BASE_DIR')
-    
+
+    try:
+        payload = QueryRequest.model_validate(request.get_json() or {})
+    except ValidationError as exc:
+        return jsonify({"error": "Invalid request format", "details": exc.errors()}), 400
+
+    # Enrich context with base_dir
+    context = {**payload.context, "base_dir": app.config.get('BASE_DIR')}
+
     # Execute the plugin using the query_handler hook
-    result = app.plugin_manager.execute_plugin(plugin_id, hook_name='query_handler', query=query, context=context)
-    
+    result = app.plugin_manager.execute_plugin(
+        plugin_id,
+        hook_name='query_handler',
+        query=payload.query,
+        context=context
+    )
+
     return jsonify(result)
 
 @app.route('/api/plugins/<plugin_id>/process', methods=['POST'])
@@ -262,47 +270,54 @@ def plugin_process_file(plugin_id):
     """
     if not hasattr(app, 'plugin_manager') or not app.plugin_manager.registry or plugin_id not in app.plugin_manager.registry.plugins:
         return jsonify({"error": "Plugin not found"}), 404
-        
-    data = request.json
-    file_path = data.get('path', '')
-    
+
+    try:
+        payload = ProcessRequest.model_validate(request.get_json() or {})
+    except ValidationError as exc:
+        return jsonify({"error": "Invalid request format", "details": exc.errors()}), 400
+
+    file_path = payload.path
+
     # Security check to prevent directory traversal attacks
     base_dir = app.config.get('BASE_DIR')
     if not base_dir:
         logger.error("BASE_DIR is not configured in the application.")
         return jsonify({"error": "Application base directory not configured."}), 500
-        
+
     abs_path = os.path.abspath(os.path.join(base_dir, file_path))
     if not abs_path.startswith(os.path.abspath(base_dir)):
         return jsonify({"error": "Invalid path"}), 403
-    
+
     if not os.path.exists(abs_path):
         return jsonify({"error": "File not found"}), 404
-        
+
     try:
         with open(abs_path, 'r') as f:
             content = f.read()
-            
+
         # Execute the plugin using the file_processor hook
         result = app.plugin_manager.execute_plugin(
-            plugin_id, 
+            plugin_id,
             hook_name='file_processor',
             file_path=abs_path,
             file_content=content,
-            metadata=data.get('metadata', {})
+            metadata=payload.metadata
         )
-        
-        # Check if we got a result or if it was an error message about not responding to the hook
-        if isinstance(result, dict) and result.get('error') and 'did not respond to hook' in result.get('error'):
-            # Try to get a more specific response from the plugin
+
+        # Fallback to direct call if hook not handled
+        if (
+            isinstance(result, dict)
+            and result.get('error')
+            and 'did not respond to hook' in result.get('error')
+        ):
             plugin_instance = app.plugin_manager.registry.get_plugin(plugin_id)
             if hasattr(plugin_instance, 'on_file_processor'):
                 direct_result = plugin_instance.on_file_processor(
-                    abs_path, content, data.get('metadata', {})
+                    abs_path, content, payload.metadata
                 )
                 if direct_result:
                     return jsonify(direct_result)
-        
+
         return jsonify(result)
     except Exception as e:
         logger.error(f"Error processing file with plugin {plugin_id}: {e}")

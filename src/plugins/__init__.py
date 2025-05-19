@@ -9,6 +9,8 @@ import logging
 import sys
 import traceback
 from collections import defaultdict
+from pydantic import ValidationError
+from .models import PluginManifest
 
 # Import the plugin base classes
 try:
@@ -97,19 +99,21 @@ class PluginManager:
             try:
                 logger.debug(f"Loading manifest from {manifest_path}")
                 with open(manifest_path, 'r') as f:
-                    manifest = json.load(f)
-                
-                logger.debug(f"Manifest loaded: {manifest.get('id', 'unknown')}")
-                
-                # Check for required fields
-                required_fields = ["id", "name", "version", "entry_point"]
-                if not all(field in manifest for field in required_fields):
-                    missing = [field for field in required_fields if field not in manifest]
-                    logger.warning(f"Manifest in {plugin_path} missing required fields: {missing}")
+                    manifest_data = json.load(f)
+
+                # Validate using Pydantic
+                try:
+                    manifest_model = PluginManifest.model_validate(manifest_data)
+                except ValidationError as exc:
+                    logger.error(f"Invalid manifest.json in {plugin_path}: {exc}")
                     continue
-                
+
+                manifest = manifest_model.model_dump()
+
                 # Log detailed manifest info
-                logger.debug(f"Plugin details: ID={manifest['id']}, Name={manifest['name']}, Version={manifest['version']}")
+                logger.debug(
+                    f"Plugin details: ID={manifest['id']}, Name={manifest['name']}, Version={manifest['version']}"
+                )
                     
                 # Handle different plugin types
                 plugin_type = manifest.get("type", "ui")
@@ -136,8 +140,8 @@ class PluginManager:
         logger.debug(f"Loading UI plugin: {plugin_name} from {plugin_path}")
         try:
             # Check for UI-specific required fields
-            if "icon" not in manifest:
-                logger.warning(f"UI plugin manifest in {plugin_path} missing 'icon' field")
+            if not manifest.get("icon"):
+                logger.warning(f"UI plugin manifest in {plugin_path} missing or empty 'icon' field")
                 return
             
             # Check for dependencies (UI plugins can have dependencies too)
