@@ -20,6 +20,13 @@ def get_default_patterns():
     """Returns the default list of exclusion patterns."""
     return DEFAULT_PATTERNS
 
+def get_settings():
+    """Return plugin settings."""
+    config = get_config()
+    return {
+        "exclude_patterns": config.get("exclude_patterns", DEFAULT_PATTERNS)
+    }
+
 def get_config():
     """Get the current configuration."""
     config_file = Path(__file__).parent / "config.json"
@@ -220,7 +227,7 @@ def execute(path, **kwargs):
             "success": True,
             "output": output_with_copy,
             "title": "Code Dump Results",
-            "is_html": True
+            "content_type": "html"
         }
     except subprocess.CalledProcessError as e:
         logger.error(f"CalledProcessError: {e}", exc_info=True)
