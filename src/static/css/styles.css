@@ -109,3 +109,9 @@
     border-radius: 4px;
     margin-bottom: 10px;
 }
+
+/* Multi-select styles */
+.select-column {
+    text-align: center;
+    width: 24px;
+}
