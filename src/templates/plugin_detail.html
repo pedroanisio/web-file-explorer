@@ -6,6 +6,25 @@
     <title>{{ plugin.name }} Configuration - Web File Explorer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.5;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            min-height: calc(100vh - 40px);
+        }
+        
         .plugin-header {
             display: flex;
             align-items: center;
@@ -15,37 +34,46 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        
         .plugin-icon {
             font-size: 2.5rem;
             margin-right: 15px;
             color: #3498db;
         }
+        
         .plugin-info h1 {
             margin: 0;
             font-size: 1.5rem;
             color: #2c3e50;
         }
+        
         .plugin-version {
             font-size: 0.8rem;
             color: #7f8c8d;
             margin-top: 2px;
         }
+        
         .plugin-description {
             color: #555;
             margin-top: 5px;
         }
-        .config-container {
-            padding: 20px;
-        }
+        
         .back-link {
             display: inline-block;
             margin-bottom: 20px;
             color: #3498db;
             text-decoration: none;
+            font-weight: 500;
         }
+        
         .back-link:hover {
             text-decoration: underline;
         }
+        
+        .config-container {
+            padding: 20px;
+        }
+        
         .config-section {
             background: white;
             border-radius: 8px;
@@ -53,21 +81,25 @@
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        
         .config-section h2 {
             margin-top: 0;
             color: #2c3e50;
             font-size: 1.2rem;
             margin-bottom: 15px;
         }
+        
         .form-group {
             margin-bottom: 15px;
         }
+        
         .form-group label {
             display: block;
             margin-bottom: 5px;
             color: #34495e;
             font-weight: 500;
         }
+        
         .form-control {
             width: 100%;
             padding: 8px 12px;
@@ -75,17 +107,20 @@
             border-radius: 4px;
             font-size: 14px;
         }
+        
         .form-control:focus {
             outline: none;
             border-color: #3498db;
             box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
         }
+        
         .button-row {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
         }
+        
         .save-button {
             background: #3498db;
             color: white;
@@ -96,10 +131,12 @@
             font-weight: 600;
             transition: all 0.2s;
         }
+        
         .save-button:hover {
             background: #2980b9;
             transform: translateY(-1px);
         }
+        
         .cancel-button {
             background: #95a5a6;
             color: white;
@@ -110,11 +147,13 @@
             font-weight: 600;
             transition: all 0.2s;
         }
+        
         .cancel-button:hover {
             background: #7f8c8d;
             transform: translateY(-1px);
         }
     </style>
+    {% block additional_styles %}{% endblock %}
 </head>
 <body>
     <div class="container">
@@ -130,27 +169,26 @@
         </div>
         
         <div class="config-container">
-            {% if plugin.id == 'code_dump' %}
-                {% include 'code_dump/templates/config.html' %}
-            {% else %}
-                <div class="config-section">
-                    <h2>Plugin Settings</h2>
-                    <form method="POST" action="{{ url_for('plugin_config.save_plugin_settings', plugin_id=plugin.id) }}">
-                        {% for key, value in plugin.settings.items() %}
-                        <div class="form-group">
-                            <label for="{{ key }}">{{ key|title }}</label>
-                            <input type="text" id="{{ key }}" name="{{ key }}" value="{{ value }}" class="form-control">
-                        </div>
-                        {% endfor %}
-                        
-                        <div class="button-row">
-                            <a href="{{ url_for('plugin_config.index') }}" class="cancel-button">Cancel</a>
-                            <button type="submit" class="save-button">Save Settings</button>
-                        </div>
-                    </form>
-                </div>
-            {% endif %}
+            {% block content %}
+            <div class="config-section">
+                <h2>Plugin Settings</h2>
+                <form method="POST" action="{{ url_for('plugin_config.save_plugin_settings', plugin_id=plugin.id) }}">
+                    {% for key, value in plugin.settings.items() %}
+                    <div class="form-group">
+                        <label for="{{ key }}">{{ key|title }}</label>
+                        <input type="text" id="{{ key }}" name="{{ key }}" value="{{ value }}" class="form-control">
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="button-row">
+                        <a href="{{ url_for('plugin_config.index') }}" class="cancel-button">Cancel</a>
+                        <button type="submit" class="save-button">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+            {% endblock %}
         </div>
     </div>
+    {% block scripts %}{% endblock %}
 </body>
 </html> 

@@ -2,7 +2,7 @@
 Plugin configuration page for the Web File Explorer.
 Provides a UI for configuring plugin settings.
 """
-from flask import render_template, request, jsonify, Blueprint, current_app, abort
+from flask import render_template, request, jsonify, Blueprint, current_app, abort, redirect, url_for
 import os
 import json
 import logging
@@ -123,8 +123,19 @@ def save_plugin_settings(plugin_id):
     
     # Get the submitted settings
     try:
-        settings = request.json
+        if request.is_json:
+            settings = request.get_json()
+        else:
+            # Handle form data
+            settings = {}
+            # Handle special case for exclude_patterns which is a list
+            if 'exclude_patterns' in request.form:
+                settings['exclude_patterns'] = request.form.getlist('exclude_patterns')
+            else:
+                # Handle regular form fields
+                settings = {k: v for k, v in request.form.items()}
     except Exception as e:
+        logger.error(f"Error processing settings data: {e}")
         return jsonify({"success": False, "error": f"Invalid settings format: {str(e)}"}), 400
     
     # Check if it's a UI plugin
@@ -155,6 +166,8 @@ def save_plugin_settings(plugin_id):
                 
                 with open(manifest_path, 'w') as f:
                     json.dump(manifest_data, f, indent=4)
+                    
+                logger.info(f"Saved settings to manifest.json for plugin {plugin_id}")
         except Exception as e:
             logger.warning(f"Could not save settings to manifest.json: {e}")
             # Continue anyway, settings are updated in memory
@@ -172,7 +185,11 @@ def save_plugin_settings(plugin_id):
     if not updated:
         return jsonify({"success": False, "error": f"Plugin {plugin_id} not found or does not support settings"}), 404
     
-    return jsonify({"success": True, "message": "Settings saved successfully", "plugin_type": plugin_type})
+    if request.is_json:
+        return jsonify({"success": True, "message": "Settings saved successfully", "plugin_type": plugin_type})
+    else:
+        # Redirect back to the plugin configuration page for form submissions
+        return redirect(url_for('plugin_config.index'))
 
 def register_blueprint(app):
     """Register the plugin configuration blueprint with the Flask app"""
