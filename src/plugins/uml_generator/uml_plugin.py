@@ -4,11 +4,9 @@ Generates UML diagrams from Python code using the Python UML Analyzer plugin.
 """
 import os
 import json
-import subprocess
-import logging
 import requests
-import tempfile
 from urllib.parse import quote
+from string import Template
 
 # Setup logging
 logger = logging.getLogger("uml_generator")
@@ -242,64 +240,56 @@ def encode_plantuml(plantuml_code):
     return quote(plantuml_code)
 
 def generate_output_html(plantuml_code, uml_image_url, classes, path):
-    """
-    Generate HTML output with the UML diagram
-    
-    Args:
-        plantuml_code (str): PlantUML code
-        uml_image_url (str): URL to the UML diagram image
-        classes (list): List of class information dictionaries
-        path (str): Directory path that was analyzed
-        
-    Returns:
-        str: HTML content
-    """
+    """Generate HTML output without f-string brace conflicts."""
+
     class_count = len(classes)
-    file_count = len(set(cls.get('file_path', '') for cls in classes))
-    
-    html = f"""
+    file_count = len({cls.get('file_path', '') for cls in classes})
+
+    # HTML template with $placeholder syntax so literal braces remain untouched
+    html_template = Template(
+        r"""
     <div class="uml-diagram-container">
         <div class="uml-header">
             <h2>UML Class Diagram</h2>
             <div class="uml-stats">
-                <span>Directory: {path}</span>
-                <span>Files: {file_count}</span>
-                <span>Classes: {class_count}</span>
+                <span>Directory: $path</span>
+                <span>Files: $file_count</span>
+                <span>Classes: $class_count</span>
             </div>
         </div>
-        
+
         <div class="uml-diagram">
-            <img src="{uml_image_url}" alt="UML Class Diagram" style="max-width: 100%; height: auto;">
+            <img src="$uml_image_url" alt="UML Class Diagram" style="max-width: 100%; height: auto;">
         </div>
-        
+
         <div class="uml-tabs">
             <div class="tab-buttons">
                 <button class="tab-button active" onclick="showTab('diagram')">Diagram</button>
                 <button class="tab-button" onclick="showTab('plantuml')">PlantUML Code</button>
                 <button class="tab-button" onclick="showTab('classes')">Class Details</button>
             </div>
-            
+
             <div id="diagram" class="tab-content active">
                 <p>The UML diagram above shows the classes and their relationships in the analyzed Python code.</p>
             </div>
-            
+
             <div id="plantuml" class="tab-content">
                 <div class="code-header">
                     <h3>PlantUML Code</h3>
                     <button onclick="copyToClipboard('plantuml-code')">Copy</button>
                 </div>
-                <pre id="plantuml-code" class="code-block">{plantuml_code}</pre>
+                <pre id="plantuml-code" class="code-block">$plantuml_code</pre>
             </div>
-            
+
             <div id="classes" class="tab-content">
                 <h3>Class Details</h3>
                 <div class="class-list">
-                    {generate_class_details_html(classes)}
+                    $class_details
                 </div>
             </div>
         </div>
     </div>
-    
+
     <style>
     .uml-diagram-container {
         font-family: Arial, sans-serif;
@@ -470,49 +460,48 @@ def generate_output_html(plantuml_code, uml_image_url, classes, path):
         color: #27ae60;
     }
     </style>
-    
+
     <script>
-    function showTab(tabId) {{
-        /* Hide all tabs */
+    function showTab(tabId) {
         var tabs = document.getElementsByClassName('tab-content');
-        for (var i = 0; i < tabs.length; i++) {{
+        for (var i = 0; i < tabs.length; i++) {
             tabs[i].classList.remove('active');
-        }}
-        
-        // Remove active class from all buttons
+        }
         var buttons = document.getElementsByClassName('tab-button');
-        for (var i = 0; i < buttons.length; i++) {{
+        for (var i = 0; i < buttons.length; i++) {
             buttons[i].classList.remove('active');
-        }}
-        
-        // Show selected tab
+        }
         document.getElementById(tabId).classList.add('active');
-        
-        // Add active class to clicked button
-        var activeButton = document.querySelector('.tab-button[onclick="showTab(\''+tabId+'\')"]'); 
-        activeButton.classList.add('active');
-    }}
-    
-    function copyToClipboard(elementId) {{
+        var activeButton = document.querySelector('.tab-button[onclick="showTab(\''+tabId+'\')"]');
+        if (activeButton) activeButton.classList.add('active');
+    }
+    function copyToClipboard(elementId) {
         var element = document.getElementById(elementId);
         var text = element.textContent;
-        
-        navigator.clipboard.writeText(text).then(function() {{
-            // Success feedback
+        navigator.clipboard.writeText(text).then(function() {
             var button = element.previousElementSibling.querySelector('button');
             var originalText = button.textContent;
             button.textContent = 'Copied!';
-            setTimeout(function() {{
+            setTimeout(function() {
                 button.textContent = originalText;
-            }}, 2000);
-        }}, function() {{
-            // Error feedback
+            }, 2000);
+        }, function() {
             alert('Failed to copy text');
-        }});
-    }}
+        });
+    }
     </script>
     """
-    
+    )
+
+    html = html_template.substitute(
+        path=path,
+        file_count=file_count,
+        class_count=class_count,
+        uml_image_url=uml_image_url,
+        plantuml_code=plantuml_code,
+        class_details=generate_class_details_html(classes),
+    )
+
     return html
 
 def generate_class_details_html(classes):
