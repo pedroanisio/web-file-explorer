@@ -1,20 +1,40 @@
+version: '3.8'
+
 services:
   file-explorer:
     container_name: webapp-file-explorer
     build: .
+    image: python-file-explorer:${VERSION:-latest}
     ports:
-      - "5099:5000"
+      - "${PORT:-5099}:5000"
     volumes:
       - ${HOST_DIR:-./data}:/data
-      - ./src/plugins:/app/src/plugins
+      - ${PLUGINS_DIR:-./src/plugins}:/app/src/plugins
     environment:
       - FLASK_DEBUG=${FLASK_DEBUG:-0}
       - FLASK_FILE_EXPLORER_BASE_DIR=/data
+      - TZ=${TZ:-UTC}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '${CPU_LIMIT:-1}'
+          memory: ${MEMORY_LIMIT:-1G}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 

@@ -412,3 +412,13 @@ def download_plugin_file():
                     as_attachment=True,
                     download_name=filename or os.path.basename(file_path),
                     mimetype='text/plain')
+
+# Health check endpoint for Docker/monitoring
+@app.route('/health')
+def health_check():
+    """Health check endpoint for monitoring and container health checks"""
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.datetime.now().isoformat(),
+        "version": getattr(app, 'version', '0.1.0')
+    }), 200
