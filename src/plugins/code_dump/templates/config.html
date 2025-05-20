@@ -183,7 +183,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const div = document.createElement('div');
         div.className = 'pattern-item';
         div.innerHTML = `
-            <input type="checkbox" id="${pattern}" name="exclude_patterns" value="${pattern}" checked>
+            <input type="checkbox" 
+                  id="${pattern}" 
+                  name="exclude_patterns" 
+                  value="${pattern}" 
+                  aria-label="Exclude pattern: ${pattern}"
+                  checked>
             <label for="${pattern}">${pattern}</label>
         `;
         patternGrid.appendChild(div);

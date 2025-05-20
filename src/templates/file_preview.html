@@ -6,16 +6,16 @@
 {{ super() }}
 <style>
     /* Syntax highlighting styles from Pygments */
-    {{ highlight_css|safe if highlight_css }} /* */
+    {{ highlight_css|safe if highlight_css }}
     
     /* Specific preview styles that might not be fully covered by Tailwind utilities */
     /* .preview-container is defined in tailwind-styles.css via .card */
     
-    .preview-image { /* */
+    .preview-image {
         @apply max-w-full max-h-[70vh] mx-auto block object-contain;
     }
     
-    .pdf-container iframe { /* Ensure iframe fills the container */ /* */
+    .pdf-container iframe {
         @apply w-full h-full border-0;
     }
 
@@ -105,7 +105,8 @@
                 {% elif preview_type == 'svg' %}
                     <div class="p-4 text-center svg-preview-container max-h-[70vh] overflow-auto"> {{ svg_content|safe }} </div>
                 {% elif preview_type == 'pdf' %}
-                    <div class="pdf-container h-[70vh] md:h-[80vh]"> <iframe src="{{ pdf_url }}#toolbar=0&navpanes=0" title="{{ file_name }} PDF Preview"></iframe>
+                    <div class="pdf-container h-[70vh] md:h-[80vh]">
+                        <iframe src="{{ pdf_url }}#toolbar=0&navpanes=0" title="{{ file_name }} PDF Preview"></iframe>
                     </div>
                 {% elif preview_type == 'unsupported' %}
                     <div class="p-8 text-center text-gray-600 dark:text-gray-400"> <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />

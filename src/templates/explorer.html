@@ -170,7 +170,12 @@
                     {% for dir in dirs %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <td class="select-column hidden p-3">
-                            <input type="checkbox" class="select-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:checked:bg-blue-600 focus:ring-blue-500" data-path="{{ dir.path }}">
+                            <input type="checkbox" 
+                                  class="select-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:checked:bg-blue-600 focus:ring-blue-500" 
+                                  data-path="{{ dir.path }}"
+                                  aria-label="Select folder: {{ dir.name }}"
+                                  id="select-dir-{{ loop.index }}">
+                            <label for="select-dir-{{ loop.index }}" class="sr-only">Select folder: {{ dir.name }}</label>
                         </td>
                         <td class="p-3">
                             <a href="{{ url_for('explore', path=dir.path) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
@@ -188,7 +193,12 @@
                     {% for file in files %}
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors file-row" data-file-path="{{ file.path }}">
                         <td class="select-column hidden p-3">
-                            <input type="checkbox" class="select-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:checked:bg-blue-600 focus:ring-blue-500" data-path="{{ file.path }}">
+                            <input type="checkbox" 
+                                  class="select-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 dark:border-gray-600 dark:checked:bg-blue-600 focus:ring-blue-500" 
+                                  data-path="{{ file.path }}"
+                                  aria-label="Select file: {{ file.name }}"
+                                  id="select-file-{{ loop.index }}">
+                            <label for="select-file-{{ loop.index }}" class="sr-only">Select file: {{ file.name }}</label>
                         </td>
                         <td class="p-3">
                             <div class="flex items-center">
@@ -281,7 +291,7 @@
                     <div class="loading-animation mb-4"></div>
                     <p class="text-gray-600 dark:text-gray-400">Loading preview...</p>
                 </div>
-                <iframe id="preview-frame" class="w-full h-[500px] hidden border-0" sandbox="allow-same-origin"></iframe>
+                <iframe id="preview-frame" class="w-full h-[500px] hidden border-0" sandbox="allow-same-origin" title="File preview content"></iframe>
             </div>
         </div>
     </div>

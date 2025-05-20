@@ -15,6 +15,7 @@
                            name="exclude_patterns" 
                            value="{{ pattern }}"
                            class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2"
+                           aria-label="Exclude pattern: {{ pattern }}"
                            checked>
                     <label for="pattern_{{ loop.index }}" class="text-sm text-gray-700 dark:text-gray-200 truncate">{{ pattern }}</label>
                 </div>
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
                    name="exclude_patterns" 
                    value="${patternValue}"
                    class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2"
+                   aria-label="Exclude pattern: ${patternValue}"
                    checked>
             <label for="pattern_${newIndex}" class="text-sm text-gray-700 dark:text-gray-200 truncate">${patternValue}</label>
         `;

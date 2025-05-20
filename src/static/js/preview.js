@@ -93,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const cardTitle = document.querySelector('#preview-pane .card-title');
       if (cardTitle && fileName) {
         cardTitle.textContent = 'Preview: ' + fileName;
+        // Also update iframe title for better accessibility
+        previewFrame.setAttribute('title', `Preview of ${fileName}`);
       }
       
       // Set up iframe load event
