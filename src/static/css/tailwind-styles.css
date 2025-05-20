@@ -236,9 +236,9 @@ body {
 /* Theme switcher with smoother transitions */
 .theme-switch {
   position: fixed;
-  bottom: var(--spacing-md);
-  right: var(--spacing-md);
-  z-index: 50;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 40;
   border-radius: var(--radius-full);
   padding: var(--spacing-sm);
   box-shadow: var(--shadow-lg);
@@ -778,12 +778,10 @@ body {
 .header-container {
   position: sticky;
   top: 0;
-  z-index: 10;
-  padding: 1.25rem 1.25rem 0;
-  border-bottom: 1px solid var(--border-light);
+  z-index: 30;
   background-color: var(--neutral-50);
-  backdrop-filter: blur(8px);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  border-bottom: 1px solid var(--border-light);
+  padding: 1rem 1rem 0;
 }
 
 /* Add shadow when scrolling */
@@ -797,8 +795,8 @@ body {
 }
 
 .theme-dark .header-container {
-  border-color: var(--border-dark);
   background-color: var(--neutral-800);
+  border-color: var(--border-dark);
 }
 
 /* Enhanced breadcrumb navigation */
@@ -2656,5 +2654,140 @@ body.modal-open {
   /* Higher quality icons */
   .folder-icon, .file-icon {
     transform: scale(1.15);
+  }
+}
+
+/* Fix flexbox container issues */
+.min-h-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* Fix header container issues */
+.header-container {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background-color: var(--neutral-50);
+  border-bottom: 1px solid var(--border-light);
+  padding: 1rem 1rem 0;
+}
+
+.theme-dark .header-container {
+  background-color: var(--neutral-800);
+  border-color: var(--border-dark);
+}
+
+/* Fix header content issues */
+.header-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Fix container layout */
+.content-wrapper {
+  flex: 1;
+  padding: 1rem;
+  overflow: auto;
+}
+
+/* Fix the favorites bar layout */
+.favorites-bar {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.favorites-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure proper file list display */
+.directory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Fix file/folder item styling */
+.file-item, 
+.folder-item {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-md);
+  transition: all 0.2s var(--ease-out);
+  cursor: pointer;
+}
+
+/* Fix dark mode toggle positioning */
+.theme-switch {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 40;
+}
+
+/* Improved modal content handling for HTML */
+.modal-content.html-content {
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  overflow: auto;
+  max-height: 80vh;
+}
+
+/* Ensure that all HTML content is properly styled */
+.modal-content.html-content * {
+  max-width: 100%;
+}
+
+/* Fix specific Plotly SVG rendering */
+.modal-content.html-content .js-plotly-plot {
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* Style adjustments for Git plugin output */
+.modal-content.html-content .container {
+  max-width: 100%;
+  padding: 0;
+}
+
+.modal-content.html-content .chart-container {
+  height: auto;
+  min-height: 350px;
+  width: 100%;
+  margin: 15px 0;
+}
+
+/* Plugin charts responsiveness fixes */
+@media (max-width: 768px) {
+  .modal-content.html-content .row {
+    flex-direction: column;
+  }
+  
+  .modal-content.html-content .col {
+    width: 100%;
+    padding: 0.5rem;
+  }
+  
+  .modal-content.html-content .chart-container {
+    min-height: 250px;
   }
 }

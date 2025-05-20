@@ -1108,3 +1108,96 @@
 .toast-exiting {
     animation: toast-exit 0.5s var(--ease-in) forwards;
 }
+
+/* Button stylings - addressing inconsistencies */
+.btn-blue, 
+button.btn-blue, 
+a.btn-blue,
+#add-favorite-btn {
+    /* Consistent button styling */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+    background-color: var(--primary-600);
+    color: white;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.btn-blue:hover,
+button.btn-blue:hover,
+a.btn-blue:hover,
+#add-favorite-btn:hover {
+    background-color: var(--primary-700);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-blue:focus,
+button.btn-blue:focus,
+a.btn-blue:focus,
+#add-favorite-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-200);
+}
+
+/* Fix toolbar element alignment */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    background-color: var(--neutral-200);
+    align-items: center;
+}
+
+.theme-dark .toolbar {
+    background-color: var(--neutral-700);
+}
+
+/* Fix navigation and header issues */
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    width: 100%;
+}
+
+/* Fix breadcrumb display issues */
+.breadcrumb-path {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    align-items: center;
+}
+
+.breadcrumb-path::-webkit-scrollbar {
+    display: none;
+}
+
+/* Fixes for controls and button alignment */
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Ensure consistent button icon alignment */
+button svg, 
+.btn svg {
+    flex-shrink: 0;
+}

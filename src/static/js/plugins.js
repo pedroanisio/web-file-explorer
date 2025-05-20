@@ -175,8 +175,18 @@ window.modalManager = {
             errorDiv.textContent = content;
             this.modalContent.appendChild(errorDiv);
         } else if (isHtml) {
+            // Ensure HTML content is properly rendered
+            console.log("Setting HTML content:", content.substring(0, 100) + "...");
+            
+            // Make sure div has proper styling for HTML content
+            this.modalContent.classList.add('html-content');
+            
+            // Set the HTML content
             this.modalContent.innerHTML = content;
-            this.modalContent.classList.add('html-content'); //
+            
+            // Add debugging to check if content was set properly
+            console.log("Modal content after setting HTML:", 
+                this.modalContent.childNodes.length + " child nodes");
         } else {
             this.modalContent.textContent = content; // Defaults to pre-wrap in CSS
         }
@@ -199,7 +209,6 @@ window.modalManager = {
             }
         }
 
-
         document.body.classList.add('modal-open'); //
         this.modalOverlay.style.display = 'flex'; //
         setTimeout(() => {
@@ -210,7 +219,16 @@ window.modalManager = {
         setTimeout(() => {
             if (window.Plotly && isHtml) {
                 const plots = this.modalContent.querySelectorAll('.js-plotly-plot');
-                plots.forEach(plot => window.Plotly.Plots.resize(plot)); //
+                if (plots.length > 0) {
+                    console.log(`Found ${plots.length} Plotly charts to resize`);
+                    plots.forEach(plot => {
+                        try {
+                            window.Plotly.Plots.resize(plot);
+                        } catch (error) {
+                            console.error("Error resizing Plotly chart:", error);
+                        }
+                    });
+                }
             }
         }, 350); // Ensure transition is complete
     },
@@ -480,8 +498,24 @@ async function executePlugin(pluginId, path) {
                 // Show success message
                 window.showToast(data.message || 'Download started!', 'success');
             } else {
-                const isHtml = (data.content_type && data.content_type.toLowerCase() === 'text/html') || data.is_html === true; //
-                modalManager.show(data.title || pluginId, data.output, { isHtml: isHtml, showCopyButton: !isHtml, copyText: data.output });
+                // Fix for HTML content type - ensure content is properly marked as HTML
+                const isHtml = data.content_type === "html" || 
+                               (data.content_type && data.content_type.toLowerCase() === 'text/html') || 
+                               data.is_html === true;
+                
+                // For debugging
+                console.log("Plugin response:", {
+                    pluginId,
+                    contentType: data.content_type,
+                    isHtml: isHtml,
+                    outputLength: data.output ? data.output.length : 0
+                });
+                
+                modalManager.show(data.title || pluginId, data.output, { 
+                    isHtml: isHtml, 
+                    showCopyButton: !isHtml, 
+                    copyText: data.output 
+                });
             }
         } else {
             modalManager.show('Error', data.error || 'Unknown error occurred while executing plugin.', { isError: true, showCopyButton: true, copyText: data.error }); //
