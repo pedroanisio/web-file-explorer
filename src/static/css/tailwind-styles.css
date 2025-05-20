@@ -2268,3 +2268,393 @@ body {
 body.modal-open {
     overflow: hidden;
 }
+
+/* 
+ * RESPONSIVE DESIGN IMPROVEMENTS
+ * Comprehensive mobile-first approach with enhanced mobile UI
+ */
+@media (max-width: 768px) {
+  /* Global layout adjustments */
+  body {
+    font-size: 0.9375rem; /* Slightly larger base font for readability */
+  }
+  
+  /* Container sizing */
+  .explorer-container {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Header and navigation */
+  .header-container {
+    padding: 0.75rem 0.75rem 0;
+  }
+  
+  .header-container.compact {
+    padding: 0.5rem 0.5rem 0;
+  }
+  
+  /* Collapsible breadcrumb for small screens */
+  .breadcrumb {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
+  
+  .breadcrumb::-webkit-scrollbar {
+    display: none; /* Safari/Chrome */
+  }
+  
+  /* Collapsed breadcrumb with ellipsis for middle paths */
+  .breadcrumb.collapsed .breadcrumb-item:not(:first-child):not(:last-child):not(.current) {
+    display: none;
+  }
+  
+  .breadcrumb.collapsed .breadcrumb-ellipsis {
+    display: inline-flex;
+  }
+  
+  .breadcrumb .breadcrumb-ellipsis {
+    display: none;
+    align-items: center;
+    color: var(--neutral-500);
+    margin: 0 0.25rem;
+  }
+  
+  /* Compact controls for mobile */
+  .controls {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .sort-options {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .sort-options::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .search-form {
+    max-width: 100%;
+  }
+  
+  /* Mobile-optimized file browser */
+  .content-container {
+    padding: 0.75rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+  
+  /* Mobile version defaults to list view */
+  .file-grid-view {
+    display: none !important;
+  }
+  
+  /* List items optimized for touch */
+  .folder-item, .file-item {
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.375rem;
+  }
+  
+  /* Larger touch targets */
+  .folder-item, .file-item, .toolbar-item, .btn, .preview-control-btn {
+    min-height: 2.75rem; /* 44px minimum for touch targets */
+  }
+  
+  /* Better folder animations for mobile */
+  .folder-contents {
+    padding-left: 1rem; /* Less indentation on mobile */
+  }
+  
+  /* Table improvements for mobile */
+  .table th, .table td {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  /* Hide less important columns on mobile */
+  .table .size-column,
+  .table .modified-column,
+  .table .permissions-column {
+    display: none;
+  }
+  
+  /* Mobile-friendly card layout */
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  /* Preview handling on mobile - full screen overlay instead of side panel */
+  .preview-pane {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 100;
+    border-left: none;
+    padding: 0.75rem;
+    animation: fadeIn 0.3s var(--ease-out);
+    overflow-y: auto;
+  }
+  
+  .preview-header {
+    position: sticky;
+    top: 0;
+    background-color: var(--neutral-50);
+    z-index: 2;
+    padding: 0.75rem 0;
+  }
+  
+  .theme-dark .preview-header {
+    background-color: var(--neutral-800);
+  }
+  
+  .preview-close-btn {
+    display: block;
+    padding: 0.5rem;
+    border-radius: 50%;
+    background-color: var(--neutral-200);
+    color: var(--neutral-700);
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 3;
+  }
+  
+  .theme-dark .preview-close-btn {
+    background-color: var(--neutral-700);
+    color: var(--neutral-300);
+  }
+  
+  /* Mobile file preview sizing */
+  .preview-image img,
+  .preview-code pre,
+  .preview-text,
+  .preview-pdf {
+    max-height: 80vh;
+  }
+  
+  /* Mobile context menu */
+  .context-menu,
+  #file-context-menu.context-menu {
+    min-width: 70vw;
+    max-width: 90vw;
+    left: 50% !important;
+    bottom: 1rem !important;
+    top: auto !important;
+    transform: translateX(-50%) scale(0.95);
+    transform-origin: bottom center;
+  }
+  
+  .context-menu.active,
+  #file-context-menu.context-menu.active {
+    transform: translateX(-50%) scale(1);
+  }
+  
+  .context-menu-item,
+  #file-context-menu li {
+    padding: 0.75rem 1rem;
+    min-height: 2.75rem;
+  }
+  
+  /* Mobile-friendly submenu handling - use modal approach instead */
+  .context-submenu,
+  #file-context-menu .submenu {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    width: 100vw;
+    max-height: 70vh;
+    overflow-y: auto;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    transform: translateY(100%);
+    z-index: 2001;
+  }
+  
+  .context-menu-item.has-submenu:active .context-submenu,
+  #file-context-menu li.has-submenu:active .submenu {
+    transform: translateY(0);
+  }
+  
+  /* Mobile modals */
+  .modal {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  .modal-header {
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    background-color: var(--neutral-50);
+    z-index: 10;
+  }
+  
+  .theme-dark .modal-header {
+    background-color: var(--neutral-800);
+  }
+  
+  .modal-body {
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    padding: 1rem;
+  }
+  
+  .modal-footer {
+    padding: 1rem;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--neutral-50);
+    border-top: 1px solid var(--border-light);
+    z-index: 10;
+  }
+  
+  .theme-dark .modal-footer {
+    background-color: var(--neutral-800);
+    border-color: var(--border-dark);
+  }
+  
+  /* Bottom sheet style for mobile modals */
+  .modal.bottom-sheet {
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    height: auto;
+    max-height: 85vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    transform: translateY(100%);
+  }
+  
+  .modal-overlay.active .modal.bottom-sheet {
+    transform: translateY(0);
+  }
+  
+  /* Image viewer for mobile */
+  .image-lightbox {
+    padding: 0;
+  }
+  
+  .image-lightbox-controls {
+    bottom: 1rem;
+  }
+  
+  .image-lightbox-close {
+    top: 1rem;
+    right: 1rem;
+  }
+  
+  /* Mobile confirm dialogs */
+  .confirm-dialog-content {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .confirm-dialog-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .explorer-container {
+    max-width: 90vw;
+  }
+  
+  .preview-pane {
+    padding: 1rem;
+  }
+  
+  /* Two-column layout for folder items on tablets */
+  .directory-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+/* Landscape orientation optimizations for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .header-container {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background-color: var(--neutral-50);
+  }
+  
+  .theme-dark .header-container {
+    background-color: var(--neutral-800);
+  }
+  
+  .content-container {
+    max-height: calc(100vh - 120px);
+  }
+  
+  /* Two-column layout for landscape mode */
+  .directory-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  /* Simplified breadcrumb for landscape */
+  .breadcrumb {
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* High-density displays (retina) optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper borders */
+  .card, .btn, .table, .breadcrumb, .preview-pane {
+    border-width: 0.5px;
+  }
+  
+  /* Higher quality icons */
+  .folder-icon, .file-icon {
+    transform: scale(1.15);
+  }
+}

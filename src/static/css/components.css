@@ -21,6 +21,24 @@
     @apply h-4 w-4; /* Ensure icons are sized appropriately */
 }
 
+/* Responsive improvements for copy button */
+@media (max-width: 768px) {
+    .copy-button {
+        padding: 0.5rem 0.75rem; /* Larger touch targets on mobile */
+        min-height: 2.5rem;
+        min-width: 2.5rem;
+    }
+    
+    /* For small screens, option to show icon only */
+    .copy-button.icon-only span {
+        display: none;
+    }
+    
+    /* Feedback on tap */
+    .copy-button:active {
+        transform: scale(0.95);
+    }
+}
 
 /* File Explorer Specific Components */
 .directory-list {
@@ -289,26 +307,130 @@
 
 /* Favorites Bar */
 .favorites-bar {
-    @apply flex flex-wrap gap-2 mb-4;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scroll-behavior: smooth;
 }
 
 .favorite-item {
-    @apply flex items-center gap-1 px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-sm transition-all hover:shadow-md;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-lg);
+    background-color: var(--neutral-200);
+    font-size: 0.875rem;
+    transition: all 0.2s var(--ease-out);
+    white-space: nowrap;
+}
+
+.theme-dark .favorite-item {
+    background-color: var(--neutral-700);
+}
+
+.favorite-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
 }
 
 .favorite-item a {
-    @apply text-blue-600 dark:text-blue-400 hover:underline flex items-center;
+    color: var(--primary-600);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.theme-dark .favorite-item a {
+    color: var(--primary-400);
+}
+
+.favorite-item a:hover {
+    text-decoration: underline;
 }
 
 .favorite-item a svg {
-    @apply h-4 w-4 mr-1;
+    height: 1rem;
+    width: 1rem;
+    margin-right: 0.25rem;
 }
 
 .favorite-item button.remove-favorite {
-    @apply ml-1 p-1 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300;
+    margin-left: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 50%;
+    color: var(--danger-500);
+    background: transparent;
+    transition: all 0.2s var(--ease-out);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+.favorite-item button.remove-favorite:hover {
+    background-color: var(--neutral-300);
+    color: var(--danger-700);
+}
+
+.theme-dark .favorite-item button.remove-favorite {
+    color: var(--danger-400);
+}
+
+.theme-dark .favorite-item button.remove-favorite:hover {
+    background-color: var(--neutral-600);
+    color: var(--danger-300);
+}
+
 .favorite-item button.remove-favorite svg {
-    @apply h-4 w-4;
+    height: 1rem;
+    width: 1rem;
+}
+
+/* Mobile responsive favorites */
+@media (max-width: 768px) {
+    .favorites-bar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .favorites-bar::-webkit-scrollbar {
+        display: none; /* Safari/Chrome */
+    }
+    
+    .favorite-item {
+        flex-shrink: 0;
+        padding: 0.5rem 0.625rem;
+    }
+    
+    /* Optimized for touch */
+    .favorite-item button.remove-favorite {
+        min-height: 1.75rem;
+        min-width: 1.75rem;
+    }
+    
+    /* Add indicators when scrollable */
+    .favorites-bar.scrollable::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 2rem;
+        background: linear-gradient(to right, transparent, var(--neutral-50));
+        pointer-events: none;
+    }
+    
+    .theme-dark .favorites-bar.scrollable::after {
+        background: linear-gradient(to right, transparent, var(--neutral-900));
+    }
 }
 
 /* Shake animation for favorites button and invalid inputs */
@@ -320,6 +442,65 @@
 
 .shake {
     animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Mobile improvements for context menu */
+@media (max-width: 768px) {
+    .context-menu-item svg,
+    #file-context-menu li svg {
+        height: 1.25rem;
+        width: 1.25rem;
+        margin-right: 0.75rem;
+    }
+    
+    /* Add mobile affordances */
+    .context-menu-item.has-submenu::after,
+    #file-context-menu li.has-submenu::after {
+        content: '›';
+        font-size: 1.25rem;
+    }
+    
+    /* Add bottom safe area for iOS */
+    .context-submenu,
+    #file-context-menu .submenu {
+        padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
+    
+    /* Handle keyboard shortcuts display on mobile */
+    .context-menu-shortcut,
+    #file-context-menu .shortcut {
+        font-size: 0.7rem;
+        opacity: 0.7;
+    }
+}
+
+/* Mobile improvements for loading overlay */
+@media (max-width: 768px) {
+    .loading-modal {
+        width: 85%;
+    }
+    
+    .image-lightbox-container {
+        width: 100%;
+    }
+    
+    /* Adjust toast container position for mobile devices with notches */
+    #toast-container {
+        bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+        right: calc(1rem + env(safe-area-inset-right, 0px));
+        left: calc(1rem + env(safe-area-inset-left, 0px));
+    }
+    
+    /* Full-width toast messages */
+    .toast-message {
+        width: 100%;
+    }
+    
+    /* iOS safe area for bottom modals */
+    .modal.bottom-sheet,
+    .confirm-dialog.bottom-sheet .confirm-dialog-content {
+        padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
 }
 
 /* Confirmation Dialog/Modal with Animations */
