@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Browse and manage files via a web interface." />
-    <!-- Apply stored theme before CSS to avoid FOUC -->
-    <script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <meta name="description" content="Browse and manage files via a web interface." /> <script>
         (function() {
             const storedTheme = localStorage.getItem('theme');
-            if (storedTheme === 'dark' || (storedTheme === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (storedTheme === 'dark' || (storedTheme === null && prefersDark)) {
                 document.documentElement.classList.remove('theme-light');
                 document.documentElement.classList.add('theme-dark');
             } else {
@@ -17,146 +15,96 @@
                 document.documentElement.classList.add('theme-light');
             }
         })();
-    </script>
-    <title>{% block title %}File Explorer{% endblock %}</title>
+    </script> <title>{% block title %}File Explorer{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     {% block head %}{% endblock %}
 </head>
-<body class="{{ 'bg-gray-900 text-gray-100' if theme == 'dark' else 'bg-gray-100 text-gray-800' }}">
-    <div class="min-h-screen">
-        <div class="w-full max-w-screen-2xl px-4 mx-auto">
-            <div class="header-container">
-                <div class="nav-bar flex justify-between items-start md:items-center mb-4 flex-wrap md:flex-nowrap space-y-2 md:space-y-0 py-4">
-                    <h1 class="text-2xl font-bold {{ 'text-gray-100' if theme == 'dark' else 'text-gray-800' }}">
-                        <a href="{{ url_for('explore', path='') }}" class="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 {{ 'text-blue-400' if theme == 'dark' else 'text-blue-600' }}" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+<body class="antialiased font-sans"> <div class="min-h-screen flex flex-col">
+        <div class="w-full max-w-screen-2xl px-4 mx-auto flex-grow"> <header class="header-container"> <div class="nav-bar flex justify-between items-start md:items-center mb-4 flex-wrap md:flex-nowrap space-y-2 md:space-y-0 py-4"> <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                        <a href="{{ url_for('explore', path='') }}" class="flex items-center gap-2 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor"> <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
                             </svg>
                             File Explorer
-                        </a>
-                    </h1>
+                        </a> </h1>
                     
-                    <div class="flex items-center space-x-2">
-                        <a href="{{ url_for('plugin_config.index') }}" class="btn-blue">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-                            </svg>
+                    <div class="flex items-center space-x-2"> <a href="{{ url_for('plugin_config.index') }}" class="btn btn-blue"> <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /> </svg>
                             Plugins
-                        </a>
-                    </div>
+                        </a> </div>
                 </div>
                 
-                {% block breadcrumbs %}{% endblock %}
-                
-                {% block toolbar %}{% endblock %}
-            </div>
+                {% block breadcrumbs %}{% endblock %} {% block toolbar %}{% endblock %}
+            </header>
             
-            <div class="content-wrapper">
-                {% block content %}{% endblock %}
-            </div>
+            <main class="content-wrapper py-4"> {% block content %}{% endblock %} </main>
         </div>
     </div>
     
-    <!-- Footer -->
-    <footer class="mt-8 py-4 {{ 'bg-gray-900 text-gray-300' if theme == 'dark' else 'bg-gray-200 text-gray-600' }}">
-        <div class="container mx-auto px-4 text-center text-sm">
-            <p>File Explorer | Made with Flask</p>
-        </div>
+    <footer class="py-4 bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400"> <div class="max-w-screen-2xl mx-auto px-4 text-center text-sm">
+            <p>File Explorer | Made with Flask & Tailwind CSS</p> </div>
     </footer>
     
-    <!-- Theme switcher button with improved animation -->
-    <div class="theme-switch" id="theme-switch" role="button" aria-label="Toggle dark mode">
-        <!-- Sun icon for dark mode -->
-        <svg class="sun-icon" role="img" aria-label="Sun icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.758a.75.75 0 001.06-1.061l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
+    <div class="theme-switch" id="theme-switch" role="button" aria-label="Toggle dark mode"> <svg class="sun-icon" role="img" aria-label="Sun icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"> <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.758a.75.75 0 001.06-1.061l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
         </svg>
-        <!-- Moon icon for light mode -->
-        <svg class="moon-icon" role="img" aria-label="Moon icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
+        <svg class="moon-icon" role="img" aria-label="Moon icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"> <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
         </svg>
     </div>
     
     {% block modals %}
-    <!-- Include reusable modal component -->
-    {% include "modal.html" %}
-    
-    <!-- Context menu for file actions -->
-    <ul id="file-context-menu" class="context-menu hidden">
-        <li data-action="open" class="flex items-center px-4 py-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-            </svg>
-            Open
-        </li>
-        <li data-action="download" class="flex items-center px-4 py-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-            Download
-        </li>
-        <li data-action="copy" class="flex items-center px-4 py-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z" />
-                <path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM15 11h2a1 1 0 110 2h-2v-2z" />
-            </svg>
-            Copy Path
-        </li>
-    </ul>
+    {% include "modal.html" %} <ul id="file-context-menu" class="context-menu hidden"> <li data-action="open"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>Open / Preview</li> <li data-action="download"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>Download</li> <li data-action="copy"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z" /><path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM15 11h2a1 1 0 110 2h-2v-2z" /></svg>Copy Path</li> </ul>
     {% endblock %}
     
-    <script src="{{ url_for('static', filename='js/plugins.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/favorites.js') }}" defer></script>
-    {% block scripts %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/plugins.js') }}" defer></script> <script src="{{ url_for('static', filename='js/favorites.js') }}" defer></script> {% block scripts %}{% endblock %}
 
-    <!-- Improved theme switcher script with system preference detection -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const themeSwitch = document.getElementById('theme-switch');
+            const themeSwitch = document.getElementById('theme-switch'); //
             const htmlElement = document.documentElement;
             
-            // Function to set the theme and save preference
-            function setTheme(theme) {
+            function applyTheme(theme) {
                 if (theme === 'dark') {
                     htmlElement.classList.remove('theme-light');
-                    htmlElement.classList.add('theme-dark');
+                    htmlElement.classList.add('theme-dark'); //
                 } else {
                     htmlElement.classList.remove('theme-dark');
-                    htmlElement.classList.add('theme-light');
+                    htmlElement.classList.add('theme-light'); //
                 }
-                localStorage.setItem('theme', theme);
-                
-                // Update theme via AJAX
-                fetch('/theme/toggle-theme')
-                    .then(response => response.json())
-                    .catch(error => {
-                        console.error('Error updating theme:', error);
-                    });
+            }
+
+            function setThemePreference(theme) {
+                applyTheme(theme);
+                localStorage.setItem('theme', theme); //
+                // Notify backend about the theme change
+                fetch('/theme/toggle-theme', { // This endpoint in app_extensions.py expects a GET and updates session
+                    method: 'GET', // Assuming the backend is designed for GET or can handle it
+                }).catch(error => console.error('Error syncing theme with server:', error)); //
             }
             
-            // Toggle theme when clicking the switch
-            themeSwitch.addEventListener('click', function() {
-                const isDark = htmlElement.classList.contains('theme-dark');
-                setTheme(isDark ? 'light' : 'dark');
-            });
+            if (themeSwitch) {
+                themeSwitch.addEventListener('click', function() {
+                    const isDark = htmlElement.classList.contains('theme-dark');
+                    setThemePreference(isDark ? 'light' : 'dark'); //
+                });
+            }
             
-            // Initialize based on stored preference or system preference
-            const storedTheme = localStorage.getItem('theme');
+            // Initialize theme based on stored preference or system setting
+            const storedTheme = localStorage.getItem('theme'); //
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             
             if (storedTheme) {
-                setTheme(storedTheme);
+                applyTheme(storedTheme); //
             } else if (prefersDark) {
-                setTheme('dark');
+                applyTheme('dark'); //
+            } else {
+                applyTheme('light'); // Default
             }
             
             // Listen for system preference changes
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                if (!localStorage.getItem('theme')) {
-                    setTheme(e.matches ? 'dark' : 'light');
+                if (!localStorage.getItem('theme')) { // Only if no explicit user preference
+                    applyTheme(e.matches ? 'dark' : 'light'); //
                 }
             });
         });
-    </script>
-</body>
+    </script> </body>
 </html>

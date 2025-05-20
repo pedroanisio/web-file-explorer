@@ -1,487 +1,72 @@
-<!DOCTYPE html>
-<html lang="en" class="{{ 'theme-dark' if theme == 'dark' else 'theme-light' }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ plugin.name }} Configuration - Web File Explorer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
-    <script>
-        (function() {
-            const storedTheme = localStorage.getItem('theme');
-            if (storedTheme === 'dark' || (storedTheme === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.remove('theme-light');
-                document.documentElement.classList.add('theme-dark');
-            } else {
-                document.documentElement.classList.remove('theme-dark');
-                document.documentElement.classList.add('theme-light');
-            }
-        })();
-    </script>
+{% extends "_base.html" %}
+
+{% block title %}{{ plugin.name }} Configuration - File Explorer{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    {# Add any plugin detail specific head elements here if needed #}
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.5;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        
-        .theme-light body {
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        
-        .theme-dark body {
-            background-color: #1a202c;
-            color: #f7fafc;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            border-radius: 8px;
-            min-height: calc(100vh - 120px);
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .theme-light .container {
-            background-color: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .theme-dark .container {
-            background-color: #2d3748;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        .plugin-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 20px;
-            border-radius: 8px;
-            transition: background-color 0.3s ease;
-        }
-        
-        .theme-light .plugin-header {
-            background-color: #f8f9fa;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .theme-dark .plugin-header {
-            background-color: #2d3748;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        
-        .plugin-icon {
-            font-size: 2.5rem;
-            margin-right: 15px;
-            transition: color 0.3s ease;
-        }
-        
-        .theme-light .plugin-icon {
-            color: #3498db;
-        }
-        
-        .theme-dark .plugin-icon {
-            color: #4299e1;
-        }
-        
-        .plugin-info h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            transition: color 0.3s ease;
-        }
-        
-        .theme-light .plugin-info h1 {
-            color: #2c3e50;
-        }
-        
-        .theme-dark .plugin-info h1 {
-            color: #f7fafc;
-        }
-        
-        .plugin-version {
-            font-size: 0.8rem;
-            transition: color 0.3s ease;
-        }
-        
-        .theme-light .plugin-version {
-            color: #7f8c8d;
-        }
-        
-        .theme-dark .plugin-version {
-            color: #a0aec0;
-        }
-        
-        .plugin-description {
-            margin-top: 5px;
-            transition: color 0.3s ease;
-        }
-        
-        .theme-light .plugin-description {
-            color: #555;
-        }
-        
-        .theme-dark .plugin-description {
-            color: #e2e8f0;
-        }
-        
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 16px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        
-        .theme-light .back-link {
-            background-color: #f1f5f9;
-            color: #3498db;
-        }
-        
-        .theme-dark .back-link {
-            background-color: #1e293b;
-            color: #4299e1;
-        }
-        
-        .theme-light .back-link:hover {
-            background-color: #e2e8f0;
-            color: #2563eb;
-        }
-        
-        .theme-dark .back-link:hover {
-            background-color: #2d3748;
-            color: #60a5fa;
-        }
-        
-        .config-container {
-            padding: 20px;
-        }
-        
-        .config-section {
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .theme-light .config-section {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .theme-dark .config-section {
-            background: #374151;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .config-section h2 {
-            margin-top: 0;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            transition: color 0.3s ease;
-        }
-        
-        .theme-light .config-section h2 {
-            color: #2c3e50;
-        }
-        
-        .theme-dark .config-section h2 {
-            color: #f7fafc;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-        
-        .theme-light .form-group label {
-            color: #34495e;
-        }
-        
-        .theme-dark .form-group label {
-            color: #e2e8f0;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        
-        .theme-light .form-control {
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            color: #333;
-        }
-        
-        .theme-dark .form-control {
-            background-color: #1a202c;
-            border: 1px solid #4a5568;
-            color: #f7fafc;
-        }
-        
-        .theme-light .form-control:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
-        }
-        
-        .theme-dark .form-control:focus {
-            outline: none;
-            border-color: #4299e1;
-            box-shadow: 0 0 0 2px rgba(66,153,225,0.2);
-        }
-        
-        .button-row {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        .button svg {
-            margin-right: 8px;
-            width: 16px;
-            height: 16px;
-        }
-        
-        .primary-button {
-            background-color: #3498db;
-            color: white;
-        }
-        
-        .primary-button:hover {
-            background-color: #2980b9;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .cancel-button {
-            background-color: #95a5a6;
-            color: white;
-        }
-        
-        .cancel-button:hover {
-            background-color: #7f8c8d;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            .plugin-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .plugin-icon {
-                margin-bottom: 10px;
-            }
-            
-            .button-row {
-                flex-direction: column-reverse;
-            }
-            
-            .button {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-        
-        /* Theme switcher */
-        .theme-switch {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 50;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-        
-        .theme-light .theme-switch {
-            background-color: #f8f9fa;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .theme-dark .theme-switch {
-            background-color: #2d3748;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        .theme-switch:hover {
-            transform: scale(1.1);
-        }
-        
-        .sun-icon, .moon-icon {
-            width: 24px;
-            height: 24px;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        
-        .sun-icon {
-            color: #f59e0b;
-            opacity: 0;
-            transform: scale(0.5);
-            position: absolute;
-        }
-        
-        .moon-icon {
-            color: #4b5563;
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        .theme-dark .sun-icon {
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        .theme-dark .moon-icon {
-            opacity: 0;
-            transform: scale(0.5);
-        }
+        /* Minimal specific styles if Tailwind classes are not enough */
+        /* For example, if there's a very unique layout for plugin details */
     </style>
-    {% block additional_styles %}{% endblock %}
-</head>
-<body class="{{ 'bg-gray-900 text-gray-100' if theme == 'dark' else 'bg-gray-100 text-gray-800' }}">
-    <div class="container">
-        <a href="{{ url_for('plugin_config.index') }}" class="back-link">
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8 px-4">
+    <div class="mb-6">
+        <a href="{{ url_for('plugin_config.index') }}" class="btn btn-gray btn-sm mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
             </svg>
             Back to Plugins
         </a>
-        
-        <div class="plugin-header">
-            <div class="plugin-icon">{{ plugin.icon }}</div>
-            <div class="plugin-info">
-                <h1>{{ plugin.name }}</h1>
-                <div class="plugin-version">v{{ plugin.version }}</div>
-                <div class="plugin-description">{{ plugin.description }}</div>
+    </div>
+
+    <div class="card"> <div class="card-header items-start sm:items-center flex-col sm:flex-row"> <div class="flex items-center gap-4">
+                <div class="text-4xl text-blue-500 dark:text-blue-400"> {{ plugin.icon|safe if plugin.icon else '⚙️' }}
+                </div>
+                <div class="plugin-info">
+                    <h1 class="card-title text-2xl">{{ plugin.name }}</h1> <p class="text-sm text-gray-500 dark:text-gray-400">v{{ plugin.version }}</p> </div>
             </div>
-        </div>
+            <p class="mt-2 sm:mt-0 text-gray-600 dark:text-gray-300">{{ plugin.description }}</p> </div>
         
-        <div class="config-container">
-            {% block content %}
-            <div class="config-section">
-                <h2>Plugin Settings</h2>
-                <form method="POST" action="{{ url_for('plugin_config.save_plugin_settings', plugin_id=plugin.id) }}">
-                    {% for key, value in plugin.settings.items() %}
-                    <div class="form-group">
-                        <label for="{{ key }}">{{ key|title }}</label>
-                        <input type="text" id="{{ key }}" name="{{ key }}" value="{{ value }}" class="form-control">
-                    </div>
-                    {% endfor %}
-                    
-                    <div class="button-row">
-                        <a href="{{ url_for('plugin_config.index') }}" class="button cancel-button">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                            Cancel
-                        </a>
-                        <button type="submit" class="button primary-button">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                            </svg>
-                            Save Settings
-                        </button>
-                    </div>
-                </form>
+        <div class="card-body">
+            {% block plugin_specific_config %}
+            <div class="config-section border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-gray-50 dark:bg-gray-800/50"> <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Plugin Settings</h2> {% if plugin.settings %}
+                    <form method="POST" action="{{ url_for('plugin_config.save_plugin_settings', plugin_id=plugin.id) }}">
+                        {% for key, value in plugin.settings.items() %}
+                        <div class="form-group mb-4"> <label for="{{ key }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ key|replace('_', ' ')|title }}</label> {% if value is boolean %}
+                                <select id="{{ key }}" name="{{ key }}" class="form-control mt-1 block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option value="true" {% if value %}selected{% endif %}>Enabled</option>
+                                    <option value="false" {% if not value %}selected{% endif %}>Disabled</option>
+                                </select>
+                            {% elif value is list %}
+                                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Edit list values (one per line):</p>
+                                 <textarea id="{{ key }}" name="{{ key }}" rows="{{ value|length + 2 }}" class="form-control mt-1 block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm whitespace-pre">{{ value|join('\n') }}</textarea>
+                            {% else %}
+                                <input type="text" id="{{ key }}" name="{{ key }}" value="{{ value }}" class="form-control mt-1 block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"> {% endif %}
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="button-row mt-6 flex flex-col sm:flex-row justify-end gap-3"> <a href="{{ url_for('plugin_config.index') }}" class="btn btn-gray w-full sm:w-auto justify-center"> <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor"> <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /> </svg>
+                                Cancel
+                            </a> <button type="submit" class="btn btn-blue w-full sm:w-auto justify-center"> <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor"> <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                Save Settings
+                            </button> </div>
+                    </form>
+                {% else %}
+                    <p class="text-gray-600 dark:text-gray-400">This plugin does not have any configurable settings.</p>
+                {% endif %}
             </div>
             {% endblock %}
         </div>
     </div>
-    
-    <!-- Theme switcher button -->
-    <div class="theme-switch" id="theme-switch">
-        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
-        </svg>
-        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-        </svg>
-    </div>
-    
-    {% block scripts %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeSwitch = document.getElementById('theme-switch');
-            const htmlElement = document.documentElement;
-            
-            // Function to set the theme and save preference
-            function setTheme(theme) {
-                if (theme === 'dark') {
-                    htmlElement.classList.remove('theme-light');
-                    htmlElement.classList.add('theme-dark');
-                } else {
-                    htmlElement.classList.remove('theme-dark');
-                    htmlElement.classList.add('theme-light');
-                }
-                localStorage.setItem('theme', theme);
-                
-                // Update theme via AJAX
-                fetch('/theme/toggle-theme')
-                    .then(response => response.json())
-                    .catch(error => {
-                        console.error('Error updating theme:', error);
-                    });
-            }
-            
-            // Toggle theme when clicking the switch
-            themeSwitch.addEventListener('click', function() {
-                const isDark = htmlElement.classList.contains('theme-dark');
-                setTheme(isDark ? 'light' : 'dark');
-            });
-            
-            // Initialize based on stored preference or system preference
-            const storedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            if (storedTheme) {
-                setTheme(storedTheme);
-            } else if (prefersDark) {
-                setTheme('dark');
-            }
-            
-            // Listen for system preference changes
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                if (!localStorage.getItem('theme')) {
-                    setTheme(e.matches ? 'dark' : 'light');
-                }
-            });
-        });
-    </script>
-    {% endblock %}
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    {# Add any plugin detail specific scripts here if needed #}
+    {# The theme switcher script is inherited from _base.html and does not need to be repeated #}
+{% endblock %}

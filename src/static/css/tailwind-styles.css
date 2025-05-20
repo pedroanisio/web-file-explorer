@@ -1,508 +1,577 @@
-/* Updated tailwind-styles.css - Combined with Tailwind CSS */
+/* src/static/css/tailwind-styles.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Import custom components defined with @apply */
+@import "./components.css";
 
 /* Custom variables with improved dark mode support */
 :root {
   --primary-color: #3498db;
   --primary-dark: #2980b9;
   --secondary-color: #2c3e50;
-  --success-color: #27ae60;
-  --danger-color: #e74c3c;
-  --warning-color: #f39c12;
-  --light-bg: #f8f9fa;
-  --dark-bg: #1a202c;
-  --light-text: #333;
-  --dark-text: #f8f9fa;
-  --light-border: #eee;
-  --dark-border: #4a5568;
-  --radius-sm: 4px;
-  --radius-md: 5px;
-  --radius-lg: 8px;
-  --modal-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  --spacing-sm: 10px;
-  --spacing-md: 15px;
-  --switch-size: 40px;
-  --icon-size: 24px;
+  --success-color: #27ae60; /* */
+  --danger-color: #e74c3c; /* */
+  --warning-color: #f39c12; /* */
+  --light-bg: #f8f9fa; /* */
+  --dark-bg: #1a202c; /* */
+  --light-text: #333; /* */
+  --dark-text: #f8f9fa; /* */
+  --light-border: #e5e7eb; /* Updated from #eee */
+  --dark-border: #4a5568; /* */
+  --radius-sm: 4px; /* */
+  --radius-md: 5px; /* */
+  --radius-lg: 8px; /* */
+  --modal-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* */
+  --spacing-sm: 10px; /* */
+  --spacing-md: 15px; /* */
+  --switch-size: 40px; /* */
+  --icon-size: 24px; /* */
 }
 
 /* Dark mode overrides with more consistent values */
 .theme-dark {
-  --primary-color: #4299e1;
-  --primary-dark: #3182ce;
-  --secondary-color: #a0aec0;
-  --success-color: #48bb78;
-  --danger-color: #f56565;
-  --warning-color: #ed8936;
-  --light-bg: #1a202c;
-  --dark-bg: #0d1117;
-  --light-text: #f8f9fa;
-  --dark-text: #f8f9fa;
-  --light-border: #4a5568;
-  --dark-border: #2d3748;
+  --primary-color: #4299e1; /* */
+  --primary-dark: #3182ce; /* */
+  --secondary-color: #a0aec0; /* */
+  --success-color: #48bb78; /* */
+  --danger-color: #f56565; /* */
+  --warning-color: #ed8936; /* */
+  --light-bg: #1a202c; /* */ /* This is confusing, should be the card/container bg in dark mode */
+  --dark-bg: #0d1117; /* This is the body bg in dark mode */
+  --light-text: #f8f9fa; /* */
+  --dark-text: #f8f9fa; /* */
+  --light-border: #4a5568; /* */
+  --dark-border: #2d3748; /* */
 }
 
 /* Theme-specific color classes with improved scope */
 .bg-theme-primary {
-  background-color: var(--primary-color);
+  background-color: var(--primary-color); /* */
 }
 .text-theme-primary {
-  color: var(--primary-color);
+  color: var(--primary-color); /* */
 }
 .border-theme-primary {
-  border-color: var(--primary-color);
+  border-color: var(--primary-color); /* */
 }
 .bg-theme-secondary {
-  background-color: var(--secondary-color);
+  background-color: var(--secondary-color); /* */
 }
 .text-theme-secondary {
-  color: var(--secondary-color);
+  color: var(--secondary-color); /* */
 }
 
 /* Base styles with proper dark mode transitions */
 body {
-  transition: background-color 0.3s ease, color 0.3s ease;
+  @apply bg-gray-100 text-gray-800;
+  transition: background-color 0.3s ease, color 0.3s ease; /* */
 }
 
 /* Dark mode styles with consistent color schemes */
-.theme-dark {
-  @apply text-gray-100;
-  background-color: var(--dark-bg);
+.theme-dark body {
+  @apply bg-gray-900 text-gray-100; /* Consistent with _base.html */ /* */
 }
-.theme-dark .container,
-.theme-dark .card,
-.theme-dark .modal,
-.theme-dark .dropdown-menu {
-  @apply bg-gray-800 text-gray-100;
+
+.theme-dark .container-bg { /* Use this for main page container background */
+  @apply bg-gray-800 text-gray-100; /* */ /* Original .container */
 }
+
+.theme-dark .card-bg { /* Use this for card backgrounds */
+   @apply bg-gray-800 text-gray-100; /* */ /* Original .card */
+}
+
+.theme-dark .modal-bg { /* Use this for modal backgrounds */
+ @apply bg-gray-800 text-gray-100; /* */ /* Original .modal */
+}
+
+.theme-dark .dropdown-menu-bg { /* Use for dropdowns */
+ @apply bg-gray-800 text-gray-100; /* */ /* Original .dropdown-menu */
+}
+
+
 .theme-dark .table th {
-  @apply bg-gray-700;
+  @apply bg-gray-700 border-gray-600; /* */
 }
 .theme-dark .table td {
-  @apply border-gray-700;
+  @apply border-gray-700; /* */
 }
 .theme-dark .table tr:hover {
-  @apply bg-gray-700;
+  @apply bg-gray-700; /* */
 }
-.theme-dark a {
-  @apply text-blue-400;
+.theme-dark a:not(.btn):not(.btn-blue):not(.btn-gray) { /* Ensure buttons are not overridden */
+  @apply text-blue-400; /* */
 }
-.theme-dark a:hover {
-  @apply text-blue-300;
+.theme-dark a:not(.btn):not(.btn-blue):not(.btn-gray):hover {
+  @apply text-blue-300; /* */
 }
-.theme-dark .plugin-card {
-  @apply bg-gray-800 shadow-lg border border-gray-700;
+.theme-dark .plugin-card { /* Specific to plugin card if needed, otherwise use .card-bg */
+  @apply bg-gray-800 shadow-lg border border-gray-700; /* */
 }
-.theme-dark .settings-form {
-  @apply bg-gray-800 border-gray-700;
+.theme-dark .settings-form { /* Specific to settings form if needed */
+  @apply bg-gray-800 border-gray-700; /* */
 }
 .theme-dark .form-control {
-  @apply bg-gray-700 border-gray-600 text-gray-100;
+  @apply bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400; /* */
 }
 .theme-dark .form-control:focus {
-  @apply border-blue-500;
+  @apply border-blue-500 ring-blue-500; /* */
 }
-.theme-dark .breadcrumb {
-  @apply bg-gray-700;
+.theme-dark .breadcrumb-bg { /* Applied to breadcrumb container */
+  @apply bg-gray-700; /* */ /* Original .breadcrumb */
 }
-.theme-dark .source-code {
-  @apply bg-gray-900 text-gray-100;
+.theme-dark .source-code-bg { /* Applied to source code preview container */
+  @apply bg-gray-900 text-gray-100; /* */ /* Original .source-code */
 }
+.theme-dark .source-code .linenos {
+    @apply text-gray-500 border-r-gray-700; /* */
+}
+
 
 /* Improved theme switcher with smoother transitions */
 .theme-switch {
-  @apply fixed bottom-5 right-5 z-50 rounded-full p-2 shadow-lg cursor-pointer;
-  width: var(--switch-size);
-  height: var(--switch-size);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  background-color: #fff;
+  @apply fixed bottom-5 right-5 z-50 rounded-full p-2 shadow-lg cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out; /* */
+  width: var(--switch-size); /* */
+  height: var(--switch-size); /* */
+  background-color: #fff; /* */
 }
 .theme-dark .theme-switch {
-  background-color: #1a202c;
+  background-color: #2d3748; /* More distinct from body background */
 }
 .theme-switch:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  transform: scale(1.1); /* */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* */
 }
 .theme-dark .theme-switch:hover {
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); /* */
 }
 .theme-switch .sun-icon,
 .theme-switch .moon-icon {
-  width: var(--icon-size);
-  height: var(--icon-size);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  width: var(--icon-size); /* */
+  height: var(--icon-size); /* */
+  transition: opacity 0.3s ease, transform 0.3s ease; /* */
+  position: absolute; /* Allow smooth transition between icons */
 }
 .theme-switch .sun-icon {
-  @apply text-amber-400;
-  opacity: 0;
-  transform: scale(0.7);
-  position: absolute;
+  @apply text-amber-400; /* */
 }
 .theme-switch .moon-icon {
-  @apply text-gray-700;
-  opacity: 1;
-  transform: scale(1);
+  @apply text-gray-700; /* */
 }
+
+/* Light theme active icons */
+.theme-light .theme-switch .sun-icon {
+  opacity: 0; /* */
+  transform: scale(0.7) rotate(-90deg); /* */
+}
+.theme-light .theme-switch .moon-icon {
+  opacity: 1; /* */
+  transform: scale(1) rotate(0deg);
+}
+
+/* Dark theme active icons */
 .theme-dark .theme-switch .sun-icon {
-  opacity: 1;
-  transform: scale(1);
+  opacity: 1; /* */
+  transform: scale(1) rotate(0deg);
 }
 .theme-dark .theme-switch .moon-icon {
-  opacity: 0;
-  transform: scale(0.7);
+  opacity: 0; /* */
+  transform: scale(0.7) rotate(90deg); /* */
 }
+
 
 /* Toolbar styles - Enhanced with Tailwind and better consistency */
 .toolbar {
-  @apply flex flex-wrap gap-2 p-3 mb-4 rounded transition-colors;
-  background-color: #f3f4f6;
+  @apply flex flex-wrap gap-2 p-3 mb-4 rounded transition-colors duration-300 ease-in-out bg-gray-200; /* */ /* Lightened default bg */
 }
 .theme-dark .toolbar {
-  background-color: #2d3748;
+  @apply bg-gray-700; /* Darker and distinct from main dark bg */
 }
 .toolbar-item {
-  @apply flex items-center gap-1 px-4 py-3 border rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer text-sm;
-  background-color: #fff;
-  border-color: #e5e7eb;
+  @apply flex items-center gap-2 px-3 py-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer text-sm font-medium; /* */ /* Added font-medium */
+  background-color: #fff; /* */
+  border-color: #e5e7eb; /* */
+  @apply text-gray-700 dark:text-gray-200;
 }
 .theme-dark .toolbar-item {
-  background-color: #1e293b;
-  border-color: #4b5563;
-  color: #e5e7eb;
+  background-color: #2d3748; /* */ /* Darker than toolbar bg */
+  border-color: #4a5568; /* */
+  color: #e5e7eb; /* */
 }
-.toolbar-item-icon {
-  @apply text-lg;
+.toolbar-item-icon { /* For SVG icons or font icons inside toolbar items */
+  @apply h-5 w-5; /* */ /* Adjusted size */
 }
+.toolbar-item.disabled {
+    @apply opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800;
+}
+.toolbar-item.disabled:hover {
+    @apply opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800;
+}
+.toolbar-item svg.animate-spin { /* For loading spinners in buttons */
+    @apply -ml-1 mr-2 h-4 w-4;
+}
+
 
 /* Modal styles - Enhanced with Tailwind and better dark mode */
 .modal-overlay {
-  @apply fixed inset-0 hidden z-50 items-center justify-center p-4 transition-all duration-300;
-  background-color: rgba(0, 0, 0, 0.5);
+  @apply fixed inset-0 hidden z-50 items-center justify-center p-4 transition-opacity duration-300 ease-in-out; /* */
+  background-color: rgba(0, 0, 0, 0.6); /* */ /* Slightly darker overlay */
+}
+.modal-overlay.active { /* JS will add/remove this class */
+    @apply flex opacity-100;
 }
 .theme-dark .modal-overlay {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8); /* */ /* Even darker for dark mode */
 }
 .modal {
-  @apply rounded-lg w-11/12 max-w-4xl max-h-[90vh] flex flex-col shadow-xl transition-all duration-300;
-  background-color: #fff;
-  transform: scale(0.95);
+  @apply rounded-lg w-11/12 max-w-3xl max-h-[90vh] flex flex-col shadow-xl transition-transform duration-300 ease-in-out; /* */
+  background-color: #fff; /* */
+  transform: scale(0.95) translateY(-20px); /* */ /* Initial state for animation */
 }
 .modal-overlay.active .modal {
-  transform: scale(1);
+  transform: scale(1) translateY(0); /* */ /* Final state for animation */
 }
 .theme-dark .modal {
-  background-color: #1e293b;
+  @apply bg-gray-800; /* */ /* Using card-bg semantic */
 }
 .modal-header {
-  @apply p-4 flex justify-between items-center;
-  border-bottom: 1px solid #e5e7eb;
+  @apply p-4 flex justify-between items-center border-b; /* */
+  border-color: var(--light-border); /* */
 }
 .theme-dark .modal-header {
-  border-bottom-color: #4b5563;
+  border-bottom-color: var(--dark-border); /* */
 }
 .modal-title {
-  @apply m-0 text-xl font-bold;
-  color: #111827;
+  @apply m-0 text-xl font-semibold; /* */
+  color: var(--light-text); /* */
 }
 .theme-dark .modal-title {
-  color: #f3f4f6;
+  color: var(--dark-text); /* */
 }
 .modal-close {
-  @apply bg-transparent border-0 text-2xl cursor-pointer;
-  color: #6b7280;
+  @apply bg-transparent border-0 text-2xl cursor-pointer p-1 -mr-2 -mt-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700; /* Added padding and hover bg */
+  color: #6b7280; /* */
 }
 .modal-close:hover {
-  color: #111827;
+  color: #111827; /* */
 }
 .theme-dark .modal-close {
-  color: #9ca3af;
+  color: #9ca3af; /* */
 }
 .theme-dark .modal-close:hover {
-  color: #f3f4f6;
+  color: #f3f4f6; /* */
 }
 .modal-body {
-  @apply p-4 overflow-y-auto flex-grow;
+  @apply p-4 overflow-y-auto flex-grow; /* */
 }
-.modal-content {
-  @apply whitespace-pre-wrap font-mono text-sm p-3 rounded border overflow-auto max-h-[60vh];
-  background-color: #f9fafb;
-  border-color: #e5e7eb;
+.modal-content { /* For general text content within modal-body */
+  @apply whitespace-pre-wrap text-sm p-3 rounded border; /* */
+  background-color: #f9fafb; /* */
+  border-color: var(--light-border); /* */
+  color: var(--light-text);
+  max-height: 60vh; /* */
+  overflow: auto; /* */
 }
 .theme-dark .modal-content {
-  background-color: #111827;
-  border-color: #374151;
-  color: #e5e7eb;
+  background-color: #1f2937; /* */ /* Slightly different from modal bg for contrast */
+  border-color: var(--dark-border); /* */
+  color: var(--dark-text); /* */
 }
+.modal-content.html-content { /* For when modal content is raw HTML */
+    @apply p-0 border-0 bg-transparent dark:bg-transparent; /* */
+}
+.modal-copy-button { /* Added this class for copy buttons inside modals */
+    @apply absolute top-3 right-12; /* Position relative to modal-body or a wrapper */
+    @apply inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-md border text-xs font-medium transition-colors duration-150 ease-in-out cursor-pointer;
+    @apply bg-emerald-500 text-white border-transparent hover:bg-emerald-600 focus:ring-2 focus:ring-emerald-300;
+    @apply dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700 dark:focus:ring-emerald-800;
+}
+
 
 /* Enhanced table styles */
 .table {
-  @apply w-full border-collapse;
+  @apply w-full border-collapse; /* */
 }
 .table th {
-  @apply text-left p-3 font-semibold;
-  border-bottom: 2px solid #e5e7eb;
-  background-color: #f9fafb;
-  color: #374151;
+  @apply text-left p-3 font-semibold border-b-2; /* */
+  border-bottom-color: var(--light-border); /* */
+  background-color: #f9fafb; /* */
+  color: #374151; /* */
 }
 .theme-dark .table th {
-  border-bottom-color: #4b5563;
-  background-color: #1f2937;
-  color: #e5e7eb;
+  border-bottom-color: var(--dark-border); /* */
+  background-color: #2d3748; /* */ /* Darker header */
+  color: #e5e7eb; /* */
 }
 .table td {
-  @apply p-3;
-  border-bottom: 1px solid #e5e7eb;
+  @apply p-3 border-b; /* */
+  border-bottom-color: var(--light-border); /* */
 }
 .theme-dark .table td {
-  border-bottom-color: #4b5563;
+  border-bottom-color: var(--dark-border); /* */
 }
 .table tr:hover {
-  background-color: #f3f4f6;
+  background-color: #f3f4f6; /* */
 }
 .theme-dark .table tr:hover {
-  background-color: #2d3748;
+  background-color: #2d3748; /* */
+}
+.table .select-column { /* Specific for select column in tables */
+    @apply w-10 p-3 text-center; /* */
+}
+.table .select-column.hidden {
+    @apply hidden;
 }
 
 /* File Explorer specific styles with better icons */
-.folder-icon {
-  @apply mr-2;
-  color: #eab308;
+.folder-icon { /* Applied to SVG or icon element */
+  @apply mr-2 h-5 w-5; /* */
+  color: #eab308; /* */
 }
 .theme-dark .folder-icon {
-  color: #fbbf24;
+  color: #fbbf24; /* */
 }
-.file-icon {
-  @apply mr-2;
-  color: #3b82f6;
+.file-icon { /* Applied to SVG or icon element */
+  @apply mr-2 h-5 w-5; /* */
+  color: #3b82f6; /* */
 }
 .theme-dark .file-icon {
-  color: #60a5fa;
+  color: #60a5fa; /* */
 }
-.container {
-  @apply max-w-6xl mx-auto rounded-lg shadow-md p-0 flex flex-col h-screen;
-  background-color: #fff;
+/* Generic container for the main content area of the explorer */
+.explorer-container {
+  @apply max-w-7xl mx-auto rounded-lg shadow-md p-0 flex flex-col; /* Max width adjusted */
+  /* Height management for full screen feel might be better handled by specific layout needs */
+  /* background-color: #fff; */ /* Handled by body and .theme-dark body */
 }
-.theme-dark .container {
-  background-color: #1e293b;
+.theme-dark .explorer-container {
+  /* background-color: #1e293b; */ /* */ /* Handled by .theme-dark .container-bg */
 }
-.header-container {
-  @apply sticky top-0 z-10 p-5 pb-0 border-b;
-  background-color: #fff;
-  border-color: #e5e7eb;
+.header-container { /* For breadcrumbs, toolbar area */
+  @apply sticky top-0 z-10 p-5 pb-0 border-b; /* */
+  background-color: inherit; /* Inherit from parent body or container-bg */
+  border-color: var(--light-border); /* */
 }
 .theme-dark .header-container {
-  background-color: #1e293b;
-  border-color: #4b5563;
+  border-color: var(--dark-border); /* */
 }
-.breadcrumb {
-  @apply p-3 rounded mb-4;
-  background-color: #f3f4f6;
+.breadcrumb { /* The breadcrumb bar itself */
+  @apply p-3 rounded-lg mb-4 text-sm; /* */
+  background-color: #f3f4f6; /* */
 }
 .theme-dark .breadcrumb {
-  background-color: #2d3748;
+  @apply bg-gray-700; /* */ /* Using breadcrumb-bg semantic */
 }
-.controls {
-  @apply flex justify-between mb-4 flex-wrap gap-2;
+.breadcrumb a, .breadcrumb span {
+    @apply truncate max-w-[150px] sm:max-w-xs; /* Ensure breadcrumb segments don't overflow aggressively */
+}
+.controls { /* Container for sort options, search, actions */
+  @apply flex justify-between items-center mb-4 flex-wrap gap-2; /* */
 }
 .sort-options {
-  @apply flex gap-3 items-center flex-wrap mb-3;
+  @apply flex gap-3 items-center flex-wrap mb-3; /* */
 }
 .search-form {
-  @apply flex-grow max-w-sm;
+  @apply flex-grow max-w-sm relative; /* */ /* Added relative for clear button */
 }
 .search-form input {
-  @apply w-full p-2 border rounded transition-colors duration-200;
-  border-color: #d1d5db;
-  background-color: #fff;
-  color: #1f2937;
+  @apply w-full p-2 border rounded transition-colors duration-200; /* */
+  border-color: var(--light-border); /* */
+  background-color: #fff; /* */
+  color: var(--light-text); /* */
 }
 .theme-dark .search-form input {
-  border-color: #4b5563;
-  background-color: #1f2937;
-  color: #f9fafb;
+  border-color: var(--dark-border); /* */
+  background-color: #2d3748; /* */ /* Darker input field */
+  color: var(--dark-text); /* */
 }
 .search-form input:focus {
-  @apply outline-none ring-2 ring-blue-500 border-blue-500;
+  @apply outline-none ring-2 ring-blue-500 border-blue-500; /* */
 }
-.content-container {
-  @apply flex-grow overflow-y-auto p-5;
+.search-form .clear-search { /* For the 'x' button in search input */
+    @apply absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200;
+}
+.content-container { /* Wraps the main file table and preview pane */
+  @apply flex-grow overflow-y-auto p-5; /* */
 }
 
-/* Improved card styling with consistent spacing */
+
+/* Improved card styling */
 .card {
-  @apply rounded-lg shadow border overflow-hidden;
-  background-color: #fff;
-  border-color: #e5e7eb;
+  @apply rounded-lg shadow border overflow-hidden; /* */
+  background-color: #fff; /* */
+  border-color: var(--light-border); /* */
 }
 .theme-dark .card {
-  background-color: #1e293b;
-  border-color: #4b5563;
+  @apply bg-gray-800; /* */ /* Using .card-bg semantic */
+  border-color: var(--dark-border); /* */
 }
 .card-header {
-  @apply flex justify-between items-center p-4;
-  border-bottom: 1px solid #e5e7eb;
+  @apply flex justify-between items-center p-4 border-b; /* */
+  border-bottom-color: var(--light-border); /* */
 }
 .theme-dark .card-header {
-  border-bottom-color: #4b5563;
+  border-bottom-color: var(--dark-border); /* */
 }
 .card-title {
-  @apply font-semibold text-lg m-0;
-  color: #111827;
+  @apply font-semibold text-lg m-0; /* */
+  color: var(--light-text); /* */
 }
 .theme-dark .card-title {
-  color: #f3f4f6;
+  color: var(--dark-text); /* */
 }
 .card-body {
-  @apply p-4;
+  @apply p-4; /* */
 }
+
 
 /* Improved button styling */
 .btn {
-  @apply px-3 py-2 rounded-md inline-flex items-center justify-center text-sm font-medium transition-colors border border-transparent;
+  @apply px-4 py-2 rounded-md inline-flex items-center justify-center text-sm font-medium transition-colors duration-150 ease-in-out border border-transparent; /* */ /* Added default font size, more padding */
+  /* Base button, no specific colors */
 }
 .btn-blue {
-  @apply btn text-white;
-  background-color: #3b82f6;
-}
-.btn-blue:hover {
-  background-color: #2563eb;
-}
-.theme-dark .btn-blue {
-  background-color: #3b82f6;
-}
-.theme-dark .btn-blue:hover {
-  background-color: #2563eb;
+  @apply btn text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800; /* */ /* Tailwind's blue palette */
 }
 .btn-gray {
-  @apply btn;
-  background-color: #f3f4f6;
-  color: #1f2937;
-  border-color: #d1d5db;
-}
-.btn-gray:hover {
-  background-color: #e5e7eb;
+  @apply btn text-gray-700 bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-200 dark:text-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 dark:focus:ring-gray-700; /* */ /* Tailwind's gray palette */
+  border-color: #d1d5db; /* */
 }
 .theme-dark .btn-gray {
-  background-color: #2d3748;
-  color: #e5e7eb;
-  border-color: #4b5563;
+  border-color: #4b5563; /* */
 }
-.theme-dark .btn-gray:hover {
-  background-color: #1f2937;
+.btn-red { /* Example for a destructive action button */
+    @apply btn text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800;
 }
+.btn-green { /* Example for a success action button */
+    @apply btn text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800;
+}
+.btn-sm { /* Smaller button variant */
+    @apply px-3 py-1.5 text-xs;
+}
+.btn-lg { /* Larger button variant */
+    @apply px-6 py-3 text-base;
+}
+.btn-icon { /* For buttons that are just an icon */
+    @apply p-2;
+}
+.btn-icon svg {
+    @apply h-5 w-5;
+}
+
 
 /* Badge component styles with consistent colors */
 .badge {
-  @apply inline-block px-2 py-0.5 text-xs font-semibold rounded;
+  @apply inline-block px-2.5 py-1 text-xs font-semibold rounded-full; /* */ /* Adjusted padding and rounded-full */
 }
 .badge-success {
-  @apply badge;
-  background-color: #dcfce7;
-  color: #166534;
-}
-.theme-dark .badge-success {
-  background-color: #064e3b;
-  color: #6ee7b7;
+  @apply badge bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300; /* */ /* Tailwind's green palette */
 }
 .badge-warning {
-  @apply badge;
-  background-color: #fef3c7;
-  color: #92400e;
-}
-.theme-dark .badge-warning {
-  background-color: #783c00;
-  color: #fcd34d;
+  @apply badge bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300; /* */ /* Tailwind's yellow palette */
 }
 .badge-blue {
-  @apply badge;
-  background-color: #dbeafe;
-  color: #1e40af;
+  @apply badge bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300; /* */ /* Tailwind's blue palette */
 }
-.theme-dark .badge-blue {
-  background-color: #1e3a8a;
-  color: #93c5fd;
+.badge-secondary { /* For general informational badges */
+  @apply badge bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300; /* */ /* Tailwind's gray palette */
 }
-.badge-secondary {
-  @apply badge;
-  background-color: #f3f4f6;
-  color: #4b5563;
-}
-.theme-dark .badge-secondary {
-  background-color: #374151;
-  color: #d1d5db;
+.badge-danger { /* For error or critical badges */
+  @apply badge bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300;
 }
 
-/* Error message styling */
+
+/* Error message styling - Centralized here */
 .error-message {
-  @apply p-4 mb-4 rounded border;
-  color: #b91c1c;
-  background-color: #fee2e2;
-  border-color: #fca5a5;
+  @apply p-4 mb-4 rounded-md border text-sm; /* */
+  color: #b91c1c; /* */ /* from Tailwind red-800 */
+  background-color: #fee2e2; /* */ /* from Tailwind red-100 */
+  border-color: #fca5a5; /* */ /* from Tailwind red-300 */
 }
 .theme-dark .error-message {
-  color: #f87171;
-  background-color: #7f1d1d;
-  border-color: #b91c1c;
+  color: #f87171; /* */ /* from Tailwind red-400 */
+  background-color: #450a0a; /* */ /* from Tailwind red-900 or darker */
+  border-color: #b91c1c; /* */ /* from Tailwind red-700 */
 }
 
+
 /* Preview pane styles */
-.preview-pane {
-  @apply border-l px-4;
-  border-color: #d1d5db;
+.preview-pane { /* The container for the preview iframe/content */
+  @apply border-l px-4 py-0 md:py-4; /* */ /* Adjusted padding */
+  border-color: var(--light-border); /* */
 }
 .theme-dark .preview-pane {
-  border-color: #4b5563;
+  border-color: var(--dark-border); /* */
 }
-.loading-indicator {
-  @apply text-center p-4;
+.preview-loading { /* The loading indicator itself within the preview pane */
+  @apply text-center p-4 flex flex-col items-center justify-center; /* */
 }
+
 
 /* Responsive improvements */
 @media (max-width: 768px) {
   .controls {
-    @apply flex-col gap-4;
+    @apply flex-col gap-4 items-stretch; /* */ /* Stretch items for better mobile layout */
   }
   .search-form {
-    @apply max-w-full;
+    @apply max-w-full; /* */
   }
-  .nav-bar {
-    @apply flex-col items-start space-y-2;
+  .nav-bar { /* From _base.html */
+    @apply flex-col items-start space-y-2; /* */
   }
   .toolbar {
-    @apply flex-col;
+    @apply flex-col items-stretch; /* */ /* Stretch toolbar items */
   }
   .toolbar-item {
-    @apply w-full justify-start;
+    @apply w-full justify-start; /* */
   }
   .breadcrumb {
-    @apply overflow-x-auto whitespace-nowrap pb-2;
+    @apply overflow-x-auto whitespace-nowrap pb-2; /* */
+  }
+  .breadcrumb-path { /* Ensure breadcrumb items don't wrap too much on mobile */
+    @apply flex-nowrap overflow-hidden;
   }
   .preview-pane {
-    @apply border-l-0 border-t px-0 pt-4 mt-4;
+    @apply border-l-0 border-t px-0 pt-4 mt-4; /* */
   }
-  .card-header {
-    @apply flex-col items-start gap-2;
+  .card-header { /* For cards with complex headers */
+    @apply flex-col items-start gap-2; /* */
   }
-  .card-header > div:last-child {
-    @apply w-full flex justify-end;
+  .card-header > div:last-child { /* Assuming actions are in the last div */
+    @apply w-full flex justify-end mt-2; /* */
   }
-  .table th:not(:first-child):not(:nth-child(2)) {
-    @apply hidden;
-  }
-  .table td:not(:first-child):not(:nth-child(2)) {
-    @apply hidden;
+  /* Simplify table for mobile if needed, but current explorer.html handles this by hiding columns */
+  /* .table th:not(:first-child):not(:nth-child(2)) { @apply hidden; } */ /* */
+  /* .table td:not(:first-child):not(:nth-child(2)) { @apply hidden; } */ /* */
+  .modal { /* Make modal more full-screen on mobile */
+    @apply w-full max-w-full h-full max-h-full rounded-none;
   }
 }
 
 /* Transition utilities */
 .transition-all {
-  transition-property: all;
+  transition-property: all; /* */
 }
 .duration-300 {
-  transition-duration: 300ms;
+  transition-duration: 300ms; /* */
+}
+
+/* Pulse animation for copy buttons or loading states */
+@keyframes pulse-animation { /* Renamed to avoid conflict if Tailwind has 'pulse' */
+    0%, 100% { opacity: 1; } /* */
+    50% { opacity: .6; } /* */
+}
+.animate-pulse-strong { /* More visible pulse */
+    animation: pulse-animation 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* */
+}
+
+/* General purpose hidden class */
+.hidden {
+    display: none !important;
+}
+
+/* For body when modal is open to prevent background scroll */
+body.modal-open {
+    @apply overflow-hidden;
 }

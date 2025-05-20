@@ -7,6 +7,8 @@ import os
 import html
 import logging
 import json
+import tempfile
+from datetime import datetime
 from pathlib import Path
 
 # Default exclusion patterns
@@ -77,13 +79,13 @@ def build_find_command(path, exclude_patterns):
 
 def execute(path, **kwargs):
     """
-    Execute the code dump command on the given path.
+    Execute the code dump command on the given path and generate a downloadable file.
     
     Args:
         path (str): Directory path to scan for code files.
         
     Returns:
-        dict: A dictionary containing the result of the command.
+        dict: A dictionary containing the result of the command and download information.
     """
     try:
         logger = logging.getLogger(__name__)
@@ -124,67 +126,31 @@ def execute(path, **kwargs):
                 "output": result.stderr
             }
         
-        # Format the output for HTML display
-        output_html = html.escape(result.stdout)
+        # Generate a filename based on the folder name and timestamp
+        folder_name = os.path.basename(os.path.normpath(path))
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{folder_name}_{timestamp}.dump.txt"
         
-        # Add a copy button with enhanced styling and functionality
-        output_with_copy = f"""
-        <div class="code-dump-container card">
-            <div class="code-dump-header card-header">
-                <h3 class="card-title">Code Dump Results</h3>
-                <button id="copy-button" class="btn-blue">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                    </svg>
-                    Copy All Code
-                </button>
-            </div>
-            <div class="card-body p-0">
-                <pre id="code-dump-content" class="source-code">{output_html}</pre>
-            </div>
-        </div>
+        # Create a temporary file with the output
+        temp_dir = tempfile.gettempdir()
+        file_path = os.path.join(temp_dir, filename)
         
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {{
-            const copyButton = document.getElementById('copy-button');
-            const codeContent = document.getElementById('code-dump-content');
-            
-            copyButton.addEventListener('click', function() {{
-                const originalText = copyButton.innerHTML;
-                
-                // Create a temporary textarea element to copy the text
-                const textArea = document.createElement('textarea');
-                textArea.value = codeContent.textContent;
-                document.body.appendChild(textArea);
-                textArea.select();
-                
-                try {{
-                    const successful = document.execCommand('copy');
-                    if (successful) {{
-                        copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg> Copied!';
-                        
-                        setTimeout(function() {{
-                            copyButton.innerHTML = originalText;
-                        }}, 2000);
-                    }}
-                }} catch (err) {{
-                    console.error('Failed to copy: ', err);
-                }}
-                
-                document.body.removeChild(textArea);
-            }});
-        }});
-        </script>
-        """
+        with open(file_path, 'w') as f:
+            f.write(result.stdout)
         
+        logger.info(f"Created dump file at: {file_path}")
+        
+        # Return a response that will initiate a download
         return {
             "success": True,
-            "output": output_with_copy,
-            "title": "Code Dump Results",
-            "content_type": "html",
-            "is_html": True
+            "download": {
+                "file_path": file_path,
+                "filename": filename,
+                "content_type": "text/plain"
+            },
+            "message": f"Code dump created successfully. Downloading {filename}..."
         }
+        
     except subprocess.CalledProcessError as e:
         logger.error(f"CalledProcessError: {e}", exc_info=True)
         return {

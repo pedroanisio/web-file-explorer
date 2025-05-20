@@ -1,222 +1,239 @@
 /**
- * Enhanced plugin system for the file explorer
+ * Enhanced plugin system and common UI utilities for the file explorer
  */
 
-// Global functions for the Code Dump plugin
-window.copyCodeDump = function() {
-    const codeContent = document.getElementById('code-dump-content').textContent;
-    const copyStatus = document.getElementById('copy-status');
-    const copyBtn = document.getElementById('copy-button');
-    const originalText = copyBtn.innerHTML;
-    
-    // Copy the text using the Clipboard API if available
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(codeContent)
-            .then(() => {
-                copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg> Copied!';
-                if (copyStatus) {
-                    copyStatus.textContent = 'Code copied to clipboard';
-                    copyStatus.className = 'copy-status success';
+// --- Start: Global Utilities (could be moved to a separate utils.js if project grows) ---
+
+/**
+ * Shows a toast notification.
+ * @param {string} message - The message to display.
+ * @param {string} type - Type of toast: 'success' (default), 'error', 'warning'.
+ * @param {number} duration - How long the toast stays visible (in ms).
+ */
+window.showToast = function(message, type = 'success', duration = 3000) {
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        // Styling for toast-container is in components.css
+        document.body.appendChild(toastContainer);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-message'; // Base class
+    let iconSvg = '';
+
+    switch (type) {
+        case 'error':
+            toast.classList.add('toast-error');
+            iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-10a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm0 4a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" /></svg>`;
+            break;
+        case 'warning':
+            toast.classList.add('toast-warning');
+            iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>`; //
+            break;
+        case 'success':
+        default:
+            // Default to success, .toast-message already has success colors
+            iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>`; //
+            break;
+    }
+
+    toast.innerHTML = `${iconSvg}<span>${message}</span>`;
+    toastContainer.appendChild(toast);
+
+    // Animate toast in
+    setTimeout(() => {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+    }, 10);
+
+    // Remove toast after delay
+    setTimeout(() => {
+        toast.style.transform = 'translateX(110%)'; // Slide out
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            if (toast.parentNode === toastContainer) { // Check if still child
+                toastContainer.removeChild(toast);
+            }
+            if (toastContainer.children.length === 0) {
+                if (toastContainer.parentNode === document.body) { // Check if still child
+                    document.body.removeChild(toastContainer);
                 }
-            })
-            .catch(err => {
-                console.error('Failed to copy: ', err);
-                // Fall back to the older method
-                window.fallbackCopyToClipboard(codeContent);
-            });
-    } else {
-        // Fall back to the older method for browsers that don't support clipboard API
-        window.fallbackCopyToClipboard(codeContent);
+            }
+        }, 300); // Wait for animation
+    }, duration);
+};
+
+
+/**
+ * Copies text to the clipboard.
+ * @param {string} text - The text to copy.
+ * @param {HTMLElement} [button] - Optional button element to give feedback on.
+ * @param {string} [successMessage] - Optional message for the button on success.
+ * @returns {Promise<void>}
+ */
+window.copyTextToClipboard = async function(text, button, successMessage = 'Copied!') {
+    const originalButtonText = button ? button.innerHTML : '';
+    const iconSuccess = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
+    const iconError = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>`;
+
+    function setButtonFeedback(msg, icon = iconSuccess) {
+        if (button) button.innerHTML = `${icon} ${msg}`;
     }
-    
-    // Revert button text after a delay
-    setTimeout(() => {
-        copyBtn.innerHTML = originalText;
-        if (copyStatus) {
+
+    function resetButtonText() {
+        if (button) button.innerHTML = originalButtonText;
+    }
+
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            setButtonFeedback(successMessage);
+            showToast('Text copied to clipboard', 'success');
+        } else {
+            // Fallback for insecure contexts or older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed'; // Prevent scrolling to bottom
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            if (successful) {
+                setButtonFeedback(successMessage);
+                showToast('Text copied to clipboard (fallback)', 'success');
+            } else {
+                throw new Error('Fallback copy command failed.');
+            }
+        }
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+        setButtonFeedback('Failed', iconError);
+        showToast('Failed to copy text.', 'error');
+    } finally {
+        if (button) {
+            setTimeout(resetButtonText, 2000);
+        }
+    }
+};
+
+// --- End: Global Utilities ---
+
+
+// --- Modal Management ---
+window.modalManager = {
+    modalOverlay: null,
+    modal: null,
+    modalTitle: null,
+    modalContent: null,
+    modalCloseButton: null,
+    copyButton: null, // Reference to the modal's copy button
+
+    init: function() {
+        this.modalOverlay = document.getElementById('modal-overlay');
+        this.modal = document.getElementById('modal');
+        this.modalTitle = document.getElementById('modal-title');
+        this.modalContent = document.getElementById('modal-content'); // This is the <pre> or <div> inside modal-body
+        this.modalCloseButton = document.getElementById('modal-close');
+
+        if (this.modalOverlay) {
+            this.modalOverlay.addEventListener('click', (e) => {
+                if (e.target === this.modalOverlay) this.hide();
+            });
+        }
+        if (this.modalCloseButton) {
+            this.modalCloseButton.addEventListener('click', () => this.hide());
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.modalOverlay && this.modalOverlay.classList.contains('active')) {
+                this.hide();
+            }
+        });
+    },
+
+    show: function(title, content, { isError = false, isHtml = false, showCopyButton = false, copyText = '' } = {}) {
+        if (!this.modalOverlay || !this.modal || !this.modalTitle || !this.modalContent) {
+            console.error('Modal elements not found. Cannot display modal.');
+            return;
+        }
+
+        this.modalTitle.textContent = title;
+        this.modalContent.classList.remove('error-message', 'html-content', 'with-copy-button'); // Reset classes
+
+        // Remove existing copy button if present
+        if (this.copyButton && this.copyButton.parentNode) {
+            this.copyButton.parentNode.removeChild(this.copyButton);
+            this.copyButton = null;
+        }
+
+        if (isError) {
+            this.modalContent.innerHTML = ''; // Clear previous content
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message'; // Styled by tailwind-styles.css
+            errorDiv.textContent = content;
+            this.modalContent.appendChild(errorDiv);
+        } else if (isHtml) {
+            this.modalContent.innerHTML = content;
+            this.modalContent.classList.add('html-content'); //
+        } else {
+            this.modalContent.textContent = content; // Defaults to pre-wrap in CSS
+        }
+
+        if (showCopyButton && !isHtml) { // Typically don't show copy for raw HTML display
+            this.modalContent.classList.add('with-copy-button'); // Adds padding if needed
+            this.copyButton = document.createElement('button');
+            this.copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>Copy`; //
+            this.copyButton.className = 'btn btn-blue btn-sm modal-copy-button'; // Use global button styles
+            // The .modal-copy-button class can be used for specific positioning if needed by tailwind-styles.css
+
+            const textToCopy = copyText || content;
+            this.copyButton.addEventListener('click', () => window.copyTextToClipboard(textToCopy, this.copyButton));
+            
+            // Prepend to modal-body, or append to modal-header for different placement
+            if(this.modalBody) { // Assuming modalBody is the direct parent of modalContent
+                 this.modalBody.insertBefore(this.copyButton, this.modalContent); // Place before content
+            } else {
+                 this.modal.querySelector('.modal-header').appendChild(this.copyButton); // Fallback: header
+            }
+        }
+
+
+        document.body.classList.add('modal-open'); //
+        this.modalOverlay.style.display = 'flex'; //
+        setTimeout(() => {
+            this.modalOverlay.classList.add('active'); //
+        }, 10);
+
+        // Resize Plotly charts if any, after modal is fully visible
+        setTimeout(() => {
+            if (window.Plotly && isHtml) {
+                const plots = this.modalContent.querySelectorAll('.js-plotly-plot');
+                plots.forEach(plot => window.Plotly.Plots.resize(plot)); //
+            }
+        }, 350); // Ensure transition is complete
+    },
+
+    hide: function() {
+        if (this.modalOverlay) {
+            this.modalOverlay.classList.remove('active');
             setTimeout(() => {
-                copyStatus.textContent = '';
-            }, 2000);
+                this.modalOverlay.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                if (this.modalContent) this.modalContent.innerHTML = ''; // Clear content
+                if (this.modalTitle) this.modalTitle.textContent = 'Modal Title'; // Reset title
+            }, 300); // Match CSS transition duration
         }
-    }, 2000);
+    }
 };
+// --- End: Modal Management ---
 
-window.fallbackCopyToClipboard = function(text) {
-    // Create a temporary textarea to copy from
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed'; // Prevent scrolling to bottom
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    
-    try {
-        const successful = document.execCommand('copy');
-        const copyStatus = document.getElementById('copy-status');
-        const copyBtn = document.getElementById('copy-button');
-        
-        if (successful) {
-            copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg> Copied!';
-            if (copyStatus) {
-                copyStatus.textContent = 'Code copied to clipboard';
-                copyStatus.className = 'copy-status success';
-            }
-        } else {
-            if (copyStatus) {
-                copyStatus.textContent = 'Unable to copy code';
-                copyStatus.className = 'copy-status error';
-            }
-        }
-    } catch (err) {
-        console.error('Failed to copy: ', err);
-        if (document.getElementById('copy-status')) {
-            document.getElementById('copy-status').textContent = 'Copy failed: ' + err;
-            document.getElementById('copy-status').className = 'copy-status error';
-        }
-    }
-    
-    document.body.removeChild(textarea);
-};
-
-// Function to copy text to clipboard with visual feedback
-function copyToClipboard(text, button) {
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text)
-            .then(() => {
-                button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg> Copied!';
-                setTimeout(() => {
-                    button.textContent = 'Copy';
-                }, 2000);
-            })
-            .catch(err => {
-                console.error('Failed to copy: ', err);
-                fallbackCopyTextToClipboard(text, button);
-            });
-    } else {
-        fallbackCopyTextToClipboard(text, button);
-    }
-}
-
-// Fallback copy method for browsers that don't support clipboard API
-function fallbackCopyTextToClipboard(text, button) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    
-    try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-            button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg> Copied!';
-        } else {
-            button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> Failed';
-        }
-    } catch (err) {
-        console.error('Failed to copy: ', err);
-        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> Failed';
-    }
-    
-    document.body.removeChild(textarea);
-    setTimeout(() => {
-        button.textContent = 'Copy';
-    }, 2000);
-}
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Set up modal
-    const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modal-title');
-    const modalContent = document.getElementById('modal-content');
-    const modalOverlay = document.getElementById('modal-overlay');
-    const closeModal = document.querySelector('.modal-close');
-    
-    // Add CSS for the copy button and improved modal
-    const style = document.createElement('style');
-    style.textContent = `
-        .copy-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: background-color 0.2s;
-        }
-        .theme-dark .copy-button {
-            background-color: #38a169;
-        }
-        .copy-button:hover {
-            background-color: #45a049;
-        }
-        .theme-dark .copy-button:hover {
-            background-color: #2f855a;
-        }
-        .copy-status {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .copy-status.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .theme-dark .copy-status.success {
-            background-color: #1c4532;
-            color: #9ae6b4;
-        }
-        .copy-status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .theme-dark .copy-status.error {
-            background-color: #742a2a;
-            color: #feb2b2;
-        }
-        .modal-content.with-copy-button {
-            padding-top: 40px;
-        }
-        .modal-content.html-content {
-            padding: 0;
-        }
-        .loading-animation {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #3498db;
-            animation: spin 1s ease-in-out infinite;
-        }
-        .theme-dark .loading-animation {
-            border-color: rgba(45, 55, 72, 0.3);
-            border-top-color: #4299e1;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Set up click event delegation for the copy button
-    document.addEventListener('click', function(event) {
-        if (event.target && event.target.id === 'copy-button') {
-            window.copyCodeDump();
-        } else if (event.target && event.target.classList.contains('modal-copy-button')) {
-            const textToCopy = event.target.closest('.modal-body').querySelector('.modal-content').innerText;
-            copyToClipboard(textToCopy, event.target);
-        }
-    });
+    modalManager.init(); // Initialize modal manager
+    modalManager.modalBody = document.getElementById('modal-body'); // Assign modalBody
+
 
     // Context menu for file actions
     const contextMenu = document.getElementById('file-context-menu');
@@ -226,248 +243,70 @@ document.addEventListener('DOMContentLoaded', function() {
         row.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             contextFilePath = this.getAttribute('data-file-path');
-            
-            // Position the menu near the cursor
+            if (!contextMenu || !contextFilePath) return;
+
             contextMenu.style.top = `${e.pageY}px`;
             contextMenu.style.left = `${e.pageX}px`;
             contextMenu.classList.remove('hidden');
-            
-            // Add active class to the row
-            this.classList.add('bg-gray-100');
-            if (document.documentElement.classList.contains('theme-dark')) {
-                this.classList.add('bg-gray-700');
-            }
+
+            // Remove active class from other rows and add to this one
+            document.querySelectorAll('tr.file-row.active-row').forEach(activeRow => activeRow.classList.remove('active-row', 'bg-gray-100', 'dark:bg-gray-700'));
+            this.classList.add('active-row', 'bg-gray-100', 'dark:bg-gray-700'); //
         });
     });
 
     document.addEventListener('click', function(e) {
-        if (!contextMenu.contains(e.target)) {
+        if (contextMenu && !contextMenu.contains(e.target) && !e.target.closest('tr.file-row')) {
             contextMenu.classList.add('hidden');
-            // Remove active class from all rows
-            document.querySelectorAll('tr.file-row').forEach(row => {
-                row.classList.remove('bg-gray-100', 'bg-gray-700');
-            });
+            document.querySelectorAll('tr.file-row.active-row').forEach(row => row.classList.remove('active-row', 'bg-gray-100', 'dark:bg-gray-700'));
         }
     });
 
-    contextMenu.addEventListener('click', function(e) {
-        const action = e.target.closest('li')?.getAttribute('data-action');
-        if (!action) return;
+    if (contextMenu) {
+        contextMenu.addEventListener('click', function(e) {
+            const actionItem = e.target.closest('li');
+            if (!actionItem) return;
+            const action = actionItem.getAttribute('data-action');
+            if (!action || !contextFilePath) return;
 
-        if (action === 'open') {
-            window.open(`/preview/${encodeURIComponent(contextFilePath)}`, '_blank');
-        } else if (action === 'download') {
-            window.open(`/explore/${encodeURIComponent(contextFilePath)}`, '_blank');
-        } else if (action === 'copy') {
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(contextFilePath)
-                    .then(() => {
-                        showToast('Path copied to clipboard');
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy: ', err);
-                        fallbackCopyPathToClipboard(contextFilePath);
-                    });
-            } else {
-                fallbackCopyPathToClipboard(contextFilePath);
+            if (action === 'open') { //
+                // Assuming preview URL is needed, or adjust as per actual open action
+                const previewUrl = `/preview/${encodeURIComponent(contextFilePath)}`;
+                window.open(previewUrl, '_blank');
+            } else if (action === 'download') { //
+                 window.open(`/explore/${encodeURIComponent(contextFilePath)}`, '_self'); // Use _self to trigger browser download for the file
+            } else if (action === 'copy') { //
+                window.copyTextToClipboard(contextFilePath, actionItem.querySelector('button')); // Pass a button like element if available for feedback
             }
-        }
 
-        contextMenu.classList.add('hidden');
-        // Remove active class from all rows
-        document.querySelectorAll('tr.file-row').forEach(row => {
-            row.classList.remove('bg-gray-100', 'bg-gray-700');
-        });
-    });
-    
-    function fallbackCopyPathToClipboard(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                showToast('Path copied to clipboard');
-            } else {
-                showToast('Failed to copy path', true);
-            }
-        } catch (err) {
-            console.error('Failed to copy: ', err);
-            showToast('Failed to copy path: ' + err, true);
-        }
-        
-        document.body.removeChild(textarea);
-    }
-    
-    function showToast(message, isError = false) {
-        // Create toast container if it doesn't exist
-        let toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.id = 'toast-container';
-            toastContainer.style.position = 'fixed';
-            toastContainer.style.bottom = '20px';
-            toastContainer.style.right = '20px';
-            toastContainer.style.zIndex = '9999';
-            document.body.appendChild(toastContainer);
-        }
-        
-        // Create toast
-        const toast = document.createElement('div');
-        toast.className = `py-2 px-4 rounded shadow-lg mb-3 transition-all duration-300 transform translate-x-full ${isError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`;
-        toast.textContent = message;
-        toastContainer.appendChild(toast);
-        
-        // Animate toast in
-        setTimeout(() => {
-            toast.style.transform = 'translateX(0)';
-        }, 10);
-        
-        // Remove toast after delay
-        setTimeout(() => {
-            toast.style.transform = 'translateX(full)';
-            toast.style.opacity = '0';
-            setTimeout(() => {
-                toastContainer.removeChild(toast);
-                // If no more toasts, remove container
-                if (toastContainer.children.length === 0) {
-                    document.body.removeChild(toastContainer);
-                }
-            }, 300);
-        }, 3000);
-    }
-    
-    // Initialize the modal manager with references to DOM elements
-    window.modalManager = {
-        initialized: true,
-        getElements: function() {
-            return {
-                modal: document.getElementById('modal'),
-                modalTitle: document.getElementById('modal-title'),
-                modalContent: document.getElementById('modal-content'),
-                modalOverlay: document.getElementById('modal-overlay'),
-                modalCloseButton: document.getElementById('modal-close')
-            };
-        }
-    };
-    
-    // Define global showModal function
-    window.showModalGlobal = function(title, content, isError = false, isHtml = false) {
-        const elements = window.modalManager.getElements();
-        
-        if (!elements.modalOverlay || !elements.modal || !elements.modalTitle || !elements.modalContent) {
-            console.error('Modal elements not found. Cannot display modal.');
-            return;
-        }
-        
-        elements.modalTitle.textContent = title;
-        
-        if (isError) {
-            elements.modalContent.innerHTML = `<div class="error-message">${content}</div>`;
-            elements.modalContent.classList.add('with-copy-button');
-            elements.modalContent.classList.remove('html-content');
-            
-            let copyButton = elements.modalContent.parentNode.querySelector('.modal-copy-button');
-            if (!copyButton) {
-                copyButton = document.createElement('button');
-                copyButton.textContent = 'Copy';
-                copyButton.className = 'modal-copy-button copy-button';
-                elements.modalContent.parentNode.appendChild(copyButton);
-            }
-        } else if (isHtml) {
-            elements.modalContent.innerHTML = content;
-            elements.modalContent.classList.remove('with-copy-button');
-            elements.modalContent.classList.add('html-content');
-            
-            let copyButton = elements.modalContent.parentNode.querySelector('.modal-copy-button');
-            if (copyButton) {
-                copyButton.remove();
-            }
-        } else {
-            elements.modalContent.textContent = content;
-            elements.modalContent.classList.add('with-copy-button');
-            elements.modalContent.classList.remove('html-content');
-            
-            let copyButton = elements.modalContent.parentNode.querySelector('.modal-copy-button');
-            if (!copyButton) {
-                copyButton = document.createElement('button');
-                copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>Copy';
-                copyButton.className = 'modal-copy-button copy-button';
-                elements.modalContent.parentNode.appendChild(copyButton);
-            }
-        }
-        
-        document.body.classList.add('modal-open'); // Prevent background scrolling
-        elements.modalOverlay.style.display = 'flex'; // Show the overlay
-        
-        // Add active class after a small delay to trigger transition
-        setTimeout(() => {
-            elements.modalOverlay.classList.add('active');
-        }, 10);
-        
-        // Resize any plotly charts after modal is shown
-        setTimeout(() => {
-            if (window.Plotly && isHtml) {
-                const plots = document.querySelectorAll('.js-plotly-plot');
-                plots.forEach(plot => {
-                    window.Plotly.Plots.resize(plot);
-                });
-            }
-        }, 300);
-    };
-    
-    // Close modal when clicking close button or outside the modal
-    if (closeModal) {
-        closeModal.addEventListener('click', function() {
-            modalOverlay.classList.remove('active');
-            setTimeout(() => {
-                modalOverlay.style.display = 'none';
-                document.body.classList.remove('modal-open');
-            }, 300);
+            contextMenu.classList.add('hidden');
+            document.querySelectorAll('tr.file-row.active-row').forEach(row => row.classList.remove('active-row', 'bg-gray-100', 'dark:bg-gray-700'));
         });
     }
-    
-    if (modalOverlay) {
-        modalOverlay.addEventListener('click', function(e) {
-            if (e.target === modalOverlay) {
-                modalOverlay.classList.remove('active');
-                setTimeout(() => {
-                    modalOverlay.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                }, 300);
-            }
-        });
-    }
-    
+
     // Handle plugin toolbar items with loading indicator
     const toolbarItems = document.querySelectorAll('.toolbar-item');
-    
     toolbarItems.forEach(item => {
         item.addEventListener('click', async function(e) {
-            e.preventDefault(); // Prevent default action
-            
+            e.preventDefault();
+            if (this.classList.contains('disabled')) return;
+
             const pluginId = this.getAttribute('data-plugin-id');
             const currentPath = this.getAttribute('data-current-path');
-            
-            if (pluginId && currentPath) {
-                // Disable the button during execution
-                this.classList.add('opacity-50', 'cursor-not-allowed');
+
+            if (pluginId && typeof currentPath !== 'undefined') { // currentPath can be empty string for root
+                this.classList.add('disabled'); //
                 const originalText = this.innerHTML;
-                this.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
-                
+                this.innerHTML = `<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`; //
+
                 try {
                     await executePlugin(pluginId, currentPath);
                 } catch (error) {
                     console.error("Error executing plugin:", error);
-                    showToast("Failed to execute plugin: " + error.message, true);
+                    window.showToast("Failed to execute plugin: " + error.message, 'error'); //
                 } finally {
-                    // Re-enable the button
-                    this.classList.remove('opacity-50', 'cursor-not-allowed');
-                    this.innerHTML = originalText;
+                    this.classList.remove('disabled');
+                    this.innerHTML = originalText; //
                 }
             }
         });
@@ -479,32 +318,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectAllBtn = document.getElementById('select-all');
     const deselectAllBtn = document.getElementById('deselect-all');
     const downloadSelectedBtn = document.getElementById('download-selected');
-    const selectedCount = document.getElementById('selected-count');
+    const selectedCountSpan = document.getElementById('selected-count'); //
 
     function getCheckboxes() {
-        return Array.from(document.querySelectorAll('.select-checkbox'));
+        return Array.from(document.querySelectorAll('.select-checkbox')); //
     }
 
     function updateSelectedCount() {
-        const count = getCheckboxes().filter(cb => cb.checked).length;
-        if (selectedCount) {
-            selectedCount.textContent = count;
+        if (!selectedCountSpan) return;
+        const count = getCheckboxes().filter(cb => cb.checked).length; //
+        selectedCountSpan.textContent = count; //
+        if (downloadSelectedBtn) {
+            downloadSelectedBtn.disabled = count === 0;
+            if (count === 0) {
+                downloadSelectedBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                downloadSelectedBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         }
     }
 
     if (selectToggle && selectionActions) {
         selectToggle.addEventListener('click', () => {
-            const active = selectionActions.classList.toggle('hidden') === false;
+            const isSelectionActive = selectionActions.classList.toggle('hidden');
+            const isActive = !isSelectionActive; // if hidden is false, it's active
+
             document.querySelectorAll('.select-column').forEach(col => {
-                if (active) {
-                    col.classList.remove('hidden');
-                } else {
-                    col.classList.add('hidden');
+                col.classList.toggle('hidden', !isActive); //
+                if (!isActive) { // If cancelling selection
                     const input = col.querySelector('input[type="checkbox"]');
-                    if (input) input.checked = false;
+                    if (input) input.checked = false; //
                 }
             });
-            selectToggle.textContent = active ? 'Cancel' : 'Select';
+            selectToggle.textContent = isActive ? 'Cancel Select' : 'Select Items'; //
             updateSelectedCount();
         });
     }
@@ -512,91 +358,80 @@ document.addEventListener('DOMContentLoaded', function() {
     if (selectAllBtn) {
         selectAllBtn.addEventListener('click', () => {
             getCheckboxes().forEach(cb => cb.checked = true);
-            updateSelectedCount();
+            updateSelectedCount(); //
         });
     }
 
     if (deselectAllBtn) {
         deselectAllBtn.addEventListener('click', () => {
             getCheckboxes().forEach(cb => cb.checked = false);
-            updateSelectedCount();
+            updateSelectedCount(); //
         });
     }
 
     if (downloadSelectedBtn) {
+        downloadSelectedBtn.disabled = true; // Initially disable
+        downloadSelectedBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
         downloadSelectedBtn.addEventListener('click', () => {
             const paths = getCheckboxes().filter(cb => cb.checked).map(cb => cb.dataset.path);
             if (!paths.length) {
-                showToast('No files selected', true);
+                window.showToast('No files selected', 'warning'); //
                 return;
             }
-            
-            // Show loading state
-            downloadSelectedBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            const originalText = downloadSelectedBtn.innerHTML;
-            downloadSelectedBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Creating zip...`;
-            
+
+            downloadSelectedBtn.classList.add('opacity-50', 'cursor-not-allowed'); //
+            const originalBtnText = downloadSelectedBtn.innerHTML;
+            downloadSelectedBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Creating zip...`; //
+
             fetch('/download-selected', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paths })
+                body: JSON.stringify({ paths }) //
             })
-                .then(resp => {
-                    if (!resp.ok) {
-                        throw new Error('Download failed: ' + resp.statusText);
-                    }
-                    return resp.blob();
-                })
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'selected_files.zip';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                    showToast('Download started!');
-                })
-                .catch(err => {
-                    console.error('Download failed', err);
-                    showToast('Download failed: ' + err.message, true);
-                })
-                .finally(() => {
-                    // Restore button state
-                    downloadSelectedBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    downloadSelectedBtn.innerHTML = originalText;
-                });
+            .then(resp => {
+                if (!resp.ok) { //
+                    return resp.json().then(err => { throw new Error(err.error || 'Download failed: ' + resp.statusText); });
+                }
+                return resp.blob(); //
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'selected_files.zip'; //
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                window.showToast('Download started!', 'success'); //
+            })
+            .catch(err => {
+                console.error('Download failed', err);
+                window.showToast(err.message, 'error'); //
+            })
+            .finally(() => {
+                downloadSelectedBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                downloadSelectedBtn.innerHTML = originalBtnText; //
+                updateSelectedCount(); // Re-evaluate disabled state
+            });
         });
     }
 
     document.addEventListener('change', function(e) {
         if (e.target && e.target.classList.contains('select-checkbox')) {
-            updateSelectedCount();
+            updateSelectedCount(); //
         }
     });
-    
-    // When window is resized, fix the modal position and size
+
+    // Window resize handler for modals (if specific adjustments are needed beyond CSS)
     window.addEventListener('resize', function() {
-        if (modalOverlay && modalOverlay.style.display === 'flex') {
-            const windowHeight = window.innerHeight;
-            const windowWidth = window.innerWidth;
-            
-            // Adjust modal width on smaller screens
-            if (windowWidth < 768) {
-                modal.style.width = '95%';
-                modal.style.maxWidth = '95%';
-            } else {
-                modal.style.width = 'auto';
-                modal.style.maxWidth = '1200px';
-            }
-            
-            // Resize any plotly charts
+        if (modalManager.modalOverlay && modalManager.modalOverlay.style.display === 'flex') { //
+            // Currently, CSS handles responsiveness. Add JS logic if needed.
+            // Example: Adjust Plotly charts inside a modal
             if (window.Plotly) {
-                const plots = document.querySelectorAll('.js-plotly-plot');
-                plots.forEach(plot => {
-                    window.Plotly.Plots.resize(plot);
-                });
+                const plots = modalManager.modalContent.querySelectorAll('.js-plotly-plot');
+                plots.forEach(plot => window.Plotly.Plots.resize(plot)); //
             }
         }
     });
@@ -604,39 +439,55 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /**
  * Execute a plugin for a specific path
- * 
  * @param {string} pluginId - The ID of the plugin to execute
  * @param {string} path - The path to process
  */
 async function executePlugin(pluginId, path) {
-    // Show loading modal while processing
-    window.showModalGlobal('Processing...', `
-        <div class="flex justify-center items-center p-8">
+    const loadingModalContent = `
+        <div class="loading-modal">
             <div class="loading-animation"></div>
-            <div class="ml-4 text-lg text-gray-600 dark:text-gray-300">
+            <div class="ml-4 text-lg text-gray-700 dark:text-gray-300">
                 Running ${pluginId.replace(/_/g, ' ')}...
             </div>
-        </div>
-    `, false, true);
+        </div>`; //
     
+    // Show a non-blocking loading indicator or a simplified modal
+    // For this example, we'll use the main modal but make it clear it's loading
+    modalManager.show('Processing...', loadingModalContent, { isHtml: true }); //
+
     try {
-        const response = await fetch(`/plugins/execute/${pluginId}?path=${encodeURIComponent(path)}`);
-        
+        const response = await fetch(`/plugins/execute/${pluginId}?path=${encodeURIComponent(path)}`); //
         if (!response.ok) {
-            const errorText = await response.text();
+            const errorText = await response.text(); //
             throw new Error(`Server responded with ${response.status}: ${response.statusText}. Details: ${errorText}`);
         }
-        
-        const data = await response.json();
-        
+
+        const data = await response.json(); //
         if (data.success) {
-            const isHtml = (data.content_type && data.content_type.toLowerCase() === 'text/html') || data.is_html === true;
-            window.showModalGlobal(data.title || pluginId, data.output, false, isHtml);
+            // Check if this is a download response
+            if (data.download) {
+                // Hide the loading modal
+                modalManager.hide();
+                
+                // Create a temporary anchor to trigger the download
+                const a = document.createElement('a');
+                a.href = `/download-plugin-file?file_path=${encodeURIComponent(data.download.file_path)}&filename=${encodeURIComponent(data.download.filename)}`;
+                a.download = data.download.filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                
+                // Show success message
+                window.showToast(data.message || 'Download started!', 'success');
+            } else {
+                const isHtml = (data.content_type && data.content_type.toLowerCase() === 'text/html') || data.is_html === true; //
+                modalManager.show(data.title || pluginId, data.output, { isHtml: isHtml, showCopyButton: !isHtml, copyText: data.output });
+            }
         } else {
-            window.showModalGlobal('Error', data.error || 'Unknown error occurred while executing plugin.', true);
+            modalManager.show('Error', data.error || 'Unknown error occurred while executing plugin.', { isError: true, showCopyButton: true, copyText: data.error }); //
         }
     } catch (error) {
         console.error('Error executing plugin:', error);
-        window.showModalGlobal('Client-Side Error', `Failed to execute plugin: ${error.message}`, true);
+        modalManager.show('Client-Side Error', `Failed to execute plugin: ${error.message}`, { isError: true, showCopyButton: true, copyText: error.message }); //
     }
 }

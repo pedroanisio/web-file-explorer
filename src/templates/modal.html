@@ -1,173 +1,63 @@
-<!-- Modal Component -->
-<div class="modal-overlay" id="modal-overlay">
-    <div class="modal" id="modal" aria-modal="true" role="dialog">
-        <div class="modal-header">
-            <h2 class="modal-title" id="modal-title">Modal Title</h2>
-            <button class="modal-close" id="modal-close" aria-label="Close modal">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-        <div class="modal-body" id="modal-body">
-            <div id="modal-content" class="modal-content"></div>
-        </div>
+<div class="modal-overlay" id="modal-overlay" aria-hidden="true"> <div class="modal" id="modal" aria-modal="true" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Modal Title</h2>
+        <button class="modal-close" id="modal-close" aria-label="Close modal">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
+    <div class="modal-body" id="modal-body">
+        {# The modal-copy-button will be added here by JS if needed #}
+        <div id="modal-content" class="modal-content"></div> </div>
 </div>
-
+</div>
 <script>
-    // Modal functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modal = document.getElementById('modal');
-        const closeBtn = document.getElementById('modal-close');
-        
-        // Close modal on overlay click
-        if (modalOverlay) {
-            modalOverlay.addEventListener('click', function(e) {
-                if (e.target === modalOverlay) {
-                    closeModal();
-                }
-            });
-        }
-        
-        // Close modal on close button click
-        if (closeBtn) {
-            closeBtn.addEventListener('click', closeModal);
-        }
-        
-        // Close on Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modalOverlay.style.display === 'flex') {
-                closeModal();
-            }
-        });
-        
-        // Function to close modal
-        function closeModal() {
-            if (modalOverlay) {
-                modalOverlay.classList.remove('active');
-                setTimeout(() => {
-                    modalOverlay.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                }, 300);
-            }
-        }
-        
-        // Function to open modal
-        window.openModal = function(title, content, isHtml = false) {
-            const modalTitle = document.getElementById('modal-title');
-            const modalContent = document.getElementById('modal-content');
-            
-            if (modalTitle) modalTitle.textContent = title;
-            
-            if (modalContent) {
-                if (isHtml) {
-                    modalContent.innerHTML = content;
-                } else {
-                    modalContent.textContent = content;
-                }
-            }
-            
-            if (modalOverlay) {
-                document.body.classList.add('modal-open');
-                modalOverlay.style.display = 'flex';
-                setTimeout(() => {
-                    modalOverlay.classList.add('active');
-                }, 10);
+document.addEventListener('DOMContentLoaded', function() {
+const modalOverlay = document.getElementById('modal-overlay');
+const closeModalBtn = document.getElementById('modal-close');
+
+function hideModal() {
+    if (modalOverlay) {
+        modalOverlay.classList.remove('active');
+        setTimeout(() => {
+            modalOverlay.style.display = 'none';
+            document.body.classList.remove('modal-open');
+             // Clear content if needed by specific modal implementation
+            const modalContentEl = document.getElementById('modal-content');
+            if (modalContentEl) modalContentEl.innerHTML = '';
+        }, 300); // Sync with CSS transition
+    }
+}
+
+if (modalOverlay) {
+    modalOverlay.addEventListener('click', function(e) {
+        if (e.target === modalOverlay) {
+            if (window.modalManager && typeof window.modalManager.hide === 'function') {
+                window.modalManager.hide();
+            } else {
+                hideModal();
             }
         }
     });
+}
+if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+        if (window.modalManager && typeof window.modalManager.hide === 'function') {
+            window.modalManager.hide();
+        } else {
+            hideModal();
+        }
+    });
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modalOverlay && modalOverlay.classList.contains('active')) {
+        if (window.modalManager && typeof window.modalManager.hide === 'function') {
+            window.modalManager.hide();
+        } else {
+            hideModal();
+        }
+    }
+});
+});
 </script>
-
-<style>
-/* Base modal styles for when component CSS isn't loaded */
-body.modal-open {
-    overflow: hidden;
-}
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 50;
-    padding: 1rem;
-    transition: opacity 0.3s ease;
-}
-
-.modal {
-    background-color: white;
-    border-radius: 0.5rem;
-    width: 92%;
-    max-width: 1200px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    overflow: hidden;
-    transition: transform 0.3s ease;
-    transform: scale(0.95);
-}
-
-.modal-overlay.active .modal {
-    transform: scale(1);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.modal-title {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #2d3748;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #718096;
-}
-
-.modal-close:hover {
-    color: #4a5568;
-}
-
-.modal-body {
-    flex: 1;
-    overflow: auto;
-    padding: 1rem;
-}
-
-.theme-dark .modal {
-    background-color: #2d3748;
-}
-
-.theme-dark .modal-header {
-    border-bottom-color: #4a5568;
-}
-
-.theme-dark .modal-title {
-    color: #f7fafc;
-}
-
-.theme-dark .modal-close {
-    color: #a0aec0;
-}
-
-.theme-dark .modal-close:hover {
-    color: #e2e8f0;
-}
-</style>

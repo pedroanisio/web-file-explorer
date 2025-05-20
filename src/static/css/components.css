@@ -1,55 +1,28 @@
+/* src/static/css/components.css */
+
 /* Button Components */
-.btn {
-    @apply inline-flex items-center px-3 py-2 rounded-md font-medium transition-colors;
-}
-
-.btn-blue {
-    @apply btn bg-blue-500 text-white hover:bg-blue-600;
-}
-
-.btn-gray {
-    @apply btn bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600;
-}
+/* Base .btn styles are enhanced in tailwind-styles.css */
 
 /* Card Components */
-.card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow p-5 border border-gray-200 dark:border-gray-700;
-}
-
-.card-header {
-    @apply flex justify-between items-center mb-4;
-}
-
-.card-title {
-    @apply text-lg font-semibold text-gray-800 dark:text-gray-100;
-}
-
-.card-body {
-    @apply text-gray-700 dark:text-gray-300;
-}
+/* Base .card styles are enhanced in tailwind-styles.css */
 
 /* Badge Components */
-.badge {
-    @apply inline-block px-2 py-0.5 text-xs font-semibold rounded;
+/* Base .badge styles are enhanced in tailwind-styles.css */
+
+/* General Copy Button Style */
+.copy-button {
+    @apply inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-md border text-xs font-medium transition-colors duration-150 ease-in-out cursor-pointer;
+    /* Light theme (default) */
+    @apply bg-emerald-500 text-white border-transparent hover:bg-emerald-600 focus:ring-2 focus:ring-emerald-300;
+    /* Dark theme */
+    @apply dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700 dark:focus:ring-emerald-800;
+}
+.copy-button svg {
+    @apply h-4 w-4; /* Ensure icons are sized appropriately */
 }
 
-.badge-success {
-    @apply badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300;
-}
 
-.badge-warning {
-    @apply badge bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300;
-}
-
-.badge-blue {
-    @apply badge bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300;
-}
-
-.badge-secondary {
-    @apply badge bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300;
-}
-
-/* File Explorer Components */
+/* File Explorer Specific Components */
 .directory-list {
     @apply rounded-md divide-y divide-gray-200 dark:divide-gray-700;
 }
@@ -58,120 +31,110 @@
     @apply flex items-center py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
 }
 
-.file-icon {
-    @apply flex-shrink-0 mr-3 text-gray-500 dark:text-gray-400;
-}
-
-.file-name {
-    @apply flex-1 truncate text-sm text-gray-800 dark:text-gray-200;
-}
-
-.file-meta {
-    @apply text-xs text-gray-500 dark:text-gray-400;
-}
-
-/* Breadcrumb */
-.breadcrumb {
-    @apply text-sm mb-4;
-}
-
-/* Preview Components */
-.preview-container {
-    @apply w-full overflow-auto border border-gray-200 dark:border-gray-700 rounded-md mb-4;
-}
-
-.source-code {
-    @apply font-mono text-sm leading-normal p-4 overflow-x-auto bg-white dark:bg-gray-900;
-}
-
-.source-code .linenos {
-    @apply text-right select-none text-gray-500 dark:text-gray-500 pr-3 mr-3 border-r border-gray-200 dark:border-gray-700;
-}
-
-/* Theme Switcher */
-.theme-switch {
-    @apply fixed bottom-4 right-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 shadow-md cursor-pointer z-50;
-}
-
-.theme-dark .sun-icon {
-    @apply block h-6 w-6 text-amber-400;
-}
-
-.theme-dark .moon-icon {
-    @apply hidden;
-}
-
-.theme-light .sun-icon {
-    @apply hidden;
-}
-
-.theme-light .moon-icon {
-    @apply block h-6 w-6 text-gray-700;
-}
-
-/* Modal Components */
-.modal-overlay {
-    @apply fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4;
-}
-
-.modal {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden;
-}
-
-.modal-header {
-    @apply flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700;
-}
-
-.modal-title {
-    @apply text-lg font-semibold text-gray-800 dark:text-gray-100;
-}
-
-.modal-close {
-    @apply text-2xl font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200;
-}
-
-.modal-body {
-    @apply p-4 overflow-auto;
-}
-
-.modal-content {
-    @apply text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap;
-}
-
-/* Context Menu */
-.context-menu {
-    @apply absolute z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 min-w-[160px];
-}
-
-.context-menu li {
-    @apply px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer;
-}
-
-/* Icon placement */
-.icon {
-    @apply h-5 w-5 inline-flex;
-}
-
-/* Code Dump Component */
+/* Code Dump Component - specific styling */
 .code-dump-container {
     @apply max-w-full overflow-hidden my-4;
 }
 
 .code-dump-header {
-    @apply sticky top-0 z-10 bg-white dark:bg-gray-800 shadow-sm;
+    @apply sticky top-0 z-10 bg-white dark:bg-gray-800 shadow-sm flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700;
 }
 
 #code-dump-content {
-    @apply w-full h-[70vh] overflow-y-auto whitespace-pre-wrap;
+    @apply w-full h-[70vh] overflow-y-auto whitespace-pre-wrap p-4 bg-gray-50 dark:bg-gray-900 font-mono text-sm;
 }
 
-/* Copy button animation */
-@keyframes pulse {
-    0% { @apply opacity-100; }
-    50% { @apply opacity-60; }
-    100% { @apply opacity-100; }
+/* Icon base class */
+.icon {
+    @apply h-5 w-5 inline-flex;
 }
 
-.pulse {
-    animation: pulse 1.5s ease-in-out infinite;
-} 
+/* Context menu for #file-context-menu specifically */
+#file-context-menu.context-menu {
+    @apply absolute z-[2000] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg py-1 min-w-[180px];
+}
+
+#file-context-menu li {
+    @apply flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer;
+}
+
+#file-context-menu li svg {
+    @apply mr-2 h-4 w-4;
+}
+
+/* Favorites Bar */
+.favorites-bar {
+    @apply flex flex-wrap gap-2 mb-4;
+}
+
+.favorite-item {
+    @apply flex items-center gap-1 px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-sm transition-all hover:shadow-md;
+}
+
+.favorite-item a {
+    @apply text-blue-600 dark:text-blue-400 hover:underline flex items-center;
+}
+
+.favorite-item a svg {
+    @apply h-4 w-4 mr-1;
+}
+
+.favorite-item button.remove-favorite {
+    @apply ml-1 p-1 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300;
+}
+.favorite-item button.remove-favorite svg {
+    @apply h-4 w-4;
+}
+
+/* Shake animation for favorites button */
+@keyframes shake {
+    0%, 100% { @apply translate-x-0; }
+    10%, 30%, 50%, 70%, 90% { @apply -translate-x-1; }
+    20%, 40%, 60%, 80% { @apply translate-x-1; }
+}
+.shake {
+    animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Loading overlay for plugin execution */
+.loading-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4;
+}
+
+.loading-modal {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 flex items-center gap-4;
+}
+
+.loading-animation {
+    @apply inline-block w-8 h-8 border-4 border-t-blue-500 border-r-blue-500 border-b-transparent border-l-transparent rounded-full animate-spin;
+}
+
+.theme-dark .loading-animation {
+    @apply border-t-blue-400 border-r-blue-400;
+}
+
+/* Toast Notifications */
+#toast-container {
+    @apply fixed bottom-5 right-5 z-[9999] w-auto max-w-sm;
+}
+
+.toast-message {
+    @apply py-3 px-5 rounded-lg shadow-xl mb-3 flex items-center gap-3 text-white transition-all duration-300 transform translate-x-full opacity-0; /* Start off-screen and transparent */
+    /* Default to success */
+    @apply bg-green-500 dark:bg-green-600;
+}
+
+.toast-message.toast-warning {
+    @apply bg-amber-500 dark:bg-amber-600;
+}
+
+.toast-message.toast-error {
+    @apply bg-red-500 dark:bg-red-600;
+}
+
+.toast-message svg {
+    @apply h-5 w-5 flex-shrink-0; /* Added flex-shrink-0 */
+}
+.toast-message span {
+    @apply flex-grow;
+}

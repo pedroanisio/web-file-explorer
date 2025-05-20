@@ -1,209 +1,35 @@
 /* src/static/css/styles.css */
-/* Custom CSS variables that do not conflict with tailwind-styles.css can remain if needed. */
-/* For this exercise, identified conflicting root variables are removed. */
-/* Other variables specific to styles.css and not covered by tailwind-styles.css would be kept. */
+/* This file is for truly global custom styles not covered by Tailwind or components. */
+/* Most styles from the original file have been moved to tailwind-styles.css or components.css */
 
+/* Example of a remaining custom style if absolutely necessary: */
 /*
-Removed conflicting :root variables. These are now primarily managed in tailwind-styles.css
-Original :root {
-    --bg-default: #f5f5f5;
-    --toolbar-bg: #e0e0e0;
-    --toolbar-hover-bg: #d0d0d0;
-    --border-color: #ccc;
-    --border-light: #eee;
-    --border-content: #ddd;
-    --text-color: #333;
-    --muted-color: #888;
-    --error-color: #d9534f;
-    --error-bg: #f8d7da;
-    --error-border: #f5c6cb;
-    --modal-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    --radius-sm: 4px;
-    --radius-md: 5px;
-    --radius-lg: 8px;
-    --spacing-sm: 10px;
-    --spacing-md: 15px;
+.custom-global-style {
+    font-family: 'YourCustomFont', sans-serif;
 }
 */
 
-/* Toolbar styles - Removed as they are handled by tailwind-styles.css and Tailwind classes */
-/*
-.toolbar {
-    display: flex;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) 0;
-    margin-bottom: var(--spacing-md);
-    background-color: var(--bg-default);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
-    flex-wrap: wrap;
-}
+/* Error messages are now styled globally in tailwind-styles.css */
+/* .error-message { ... } */ /* */ /* Removed, will use definitions from tailwind-styles.css */
 
-.toolbar-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    background-color: var(--toolbar-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: background-color 0.2s;
-    font-size: 0.9rem;
-}
+/* Preview pane styles - some specific styles might remain if not covered by Tailwind utility classes */
+/* Most preview pane styling is in tailwind-styles.css and file_preview.html using Tailwind classes */
+/* .preview-pane { ... } */ /* */ /* Check if covered by tailwind-styles.css */
+/* .loading-indicator { ... } */ /* */ /* Check if covered by tailwind-styles.css */
 
-.toolbar-item:hover {
-    background-color: var(--toolbar-hover-bg);
-}
+/* Multi-select styles - if these are simple, they can be utility classes in HTML */
+/* .select-column { ... } */ /* */
 
-.toolbar-item-icon {
-    font-size: 1.2rem;
-}
-*/
+/* Context Menu styles for #file-context-menu are now in components.css to be processed by Tailwind */
+/* #file-context-menu { ... } */ /* */
+/* #file-context-menu li { ... } */ /* */
+/* .theme-dark #file-context-menu { ... } */ /* */
+/* .theme-dark #file-context-menu li:hover { ... } */ /* */
 
-/* Modal styles - Removed as they are primarily handled by tailwind-styles.css, Tailwind classes, and dynamically by plugins.js */
-/*
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-}
+/* Favorites bar styles are now in components.css */
+/* .favorites-bar { ... } */ /* */
+/* .favorite-item button { ... } */ /* */
 
-.modal {
-    background-color: white;
-    border-radius: var(--radius-lg);
-    width: 80%;
-    max-width: 800px;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--modal-shadow);
-}
-
-.modal-header {
-    padding: var(--spacing-md);
-    border-bottom: 1px solid var(--border-light);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-title {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--text-color);
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--muted-color);
-}
-
-.modal-close:hover {
-    color: var(--text-color);
-}
-
-.modal-body {
-    padding: var(--spacing-md);
-    overflow-y: auto;
-    flex-grow: 1;
-}
-
-.modal-content {
-    white-space: pre-wrap;
-    font-family: monospace;
-    font-size: 0.9rem;
-    background-color: var(--bg-default);
-    padding: var(--spacing-sm);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-content);
-    overflow: auto;
-    max-height: 60vh;
-}
-*/
-
-/* Error message styles - Can be kept if not covered by Tailwind components, or integrated. */
-/* plugins.js also adds some styling for .error-message. We should consolidate. */
-/* For now, keeping it to ensure error messages are styled if plugins.js CSS fails or is overridden. */
-.error-message {
-    color: #d9534f; /* Consider using var(--error-color) if defined in a central place */
-    padding: 10px; /* Consider var(--spacing-sm) */
-    background-color: #f8d7da; /* Consider var(--error-bg) */
-    border: 1px solid #f5c6cb; /* Consider var(--error-border) */
-    border-radius: 4px; /* Consider var(--radius-sm) */
-    margin-bottom: 10px; /* Consider var(--spacing-sm) */
-}
-
-/* Preview pane styles - Keeping these as they seem specific and not directly conflicting */
-.preview-pane {
-    border-left: 1px solid #ddd;
-    padding-left: 1rem;
-}
-.loading-indicator {
-    text-align: center;
-    padding: 1rem;
-}
-
-/* Multi-select styles - Keeping these */
-.select-column {
-    text-align: center;
-    width: 24px;
-}
-
-/* Context menu styles - Keeping these, tailwind-styles.css also has .context-menu but with different definitions. This needs careful review. */
-/* For now, assuming these are the primary styles for #file-context-menu specifically. */
-#file-context-menu {
-    position: absolute;
-    z-index: 2000;
-    background: #ffffff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-#file-context-menu li {
-    list-style: none;
-    padding: 6px 12px;
-    cursor: pointer;
-}
-
-#file-context-menu li:hover {
-    background-color: #f0f0f0;
-}
-
-/* Dark theme context menu styles - these directly target #file-context-menu */
-.theme-dark #file-context-menu {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #e2e8f0;
-}
-
-.theme-dark #file-context-menu li:hover {
-    background-color: #4a5568;
-}
-
-/* Favorites bar styles - Keeping these */
-.favorites-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.favorite-item button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    line-height: 1;
+body {
+    /* Base body styles are in tailwind-styles.css */
 }
