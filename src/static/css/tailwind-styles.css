@@ -215,11 +215,21 @@ body {
 
 /* Modal styles - Enhanced with Tailwind and better dark mode */
 .modal-overlay {
-  @apply fixed inset-0 hidden z-50 items-center justify-center p-4 transition-opacity duration-300 ease-in-out; /* */
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  transition-property: opacity;
+  transition-duration: 300ms;
+  transition-timing-function: ease-in-out;
   background-color: rgba(0, 0, 0, 0.6); /* */ /* Slightly darker overlay */
 }
 .modal-overlay.active { /* JS will add/remove this class */
-    @apply flex opacity-100;
+    display: flex;
+    opacity: 1;
 }
 .theme-dark .modal-overlay {
   background-color: rgba(0, 0, 0, 0.8); /* */ /* Even darker for dark mode */
@@ -321,7 +331,7 @@ body {
     @apply w-10 p-3 text-center; /* */
 }
 .table .select-column.hidden {
-    @apply hidden;
+    display: none !important;
 }
 
 /* File Explorer specific styles with better icons */
@@ -573,5 +583,5 @@ body {
 
 /* For body when modal is open to prevent background scroll */
 body.modal-open {
-    @apply overflow-hidden;
+    overflow: hidden;
 }
