@@ -42,16 +42,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 300);
     }
     
-    // Update toggle button text
+    // Update toggle button text based on current state
     if (toggleBtn) {
-      toggleBtn.innerHTML = show ? 
-        `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-14-14zm14 1.414a1 1 0 00-1.414-1.414L5.707 12.879a1 1 0 101.414 1.414l10.586-10.586z" clip-rule="evenodd" />
-        </svg>Hide Preview` : 
-        `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-          <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-        </svg>Preview`;
+      if (show) {
+        toggleBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-14-14zm14 1.414a1 1 0 00-1.414-1.414L5.707 12.879a1 1 0 101.414 1.414l10.586-10.586z" clip-rule="evenodd" />
+          </svg>Hide Preview`;
+      } else {
+        toggleBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+          </svg>Preview`;
+      }
     }
   }
 
