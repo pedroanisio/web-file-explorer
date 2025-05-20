@@ -300,4 +300,126 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/preview.js') }}" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Select functionality
+    const selectToggle = document.getElementById('select-toggle');
+    const selectActions = document.getElementById('selection-actions');
+    const selectAll = document.getElementById('select-all');
+    const deselectAll = document.getElementById('deselect-all');
+    const downloadSelected = document.getElementById('download-selected');
+    const selectedCount = document.getElementById('selected-count');
+    const selectColumns = document.querySelectorAll('.select-column');
+    
+    if (selectToggle && selectActions) {
+        // Toggle selection mode
+        selectToggle.addEventListener('click', function() {
+            const isHidden = selectActions.classList.contains('hidden');
+            
+            if (isHidden) {
+                selectActions.classList.remove('hidden');
+                selectToggle.classList.add('bg-blue-500', 'text-white');
+                selectToggle.classList.remove('bg-gray-200', 'text-gray-700');
+                selectColumns.forEach(col => col.classList.remove('hidden'));
+            } else {
+                selectActions.classList.add('hidden');
+                selectToggle.classList.remove('bg-blue-500', 'text-white');
+                selectToggle.classList.add('bg-gray-200', 'text-gray-700');
+                selectColumns.forEach(col => col.classList.add('hidden'));
+                
+                // Uncheck all checkboxes when exiting selection mode
+                document.querySelectorAll('.select-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                updateSelectedCount();
+            }
+        });
+        
+        // Select all items
+        if (selectAll) {
+            selectAll.addEventListener('click', function() {
+                document.querySelectorAll('.select-checkbox').forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                updateSelectedCount();
+            });
+        }
+        
+        // Deselect all items
+        if (deselectAll) {
+            deselectAll.addEventListener('click', function() {
+                document.querySelectorAll('.select-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                updateSelectedCount();
+            });
+        }
+        
+        // Handle checkbox changes
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('select-checkbox')) {
+                updateSelectedCount();
+            }
+        });
+        
+        // Download selected files
+        if (downloadSelected) {
+            downloadSelected.addEventListener('click', function() {
+                const selectedPaths = [];
+                document.querySelectorAll('.select-checkbox:checked').forEach(checkbox => {
+                    selectedPaths.push(checkbox.dataset.path);
+                });
+                
+                if (selectedPaths.length === 0) {
+                    alert('Please select at least one file or directory to download.');
+                    return;
+                }
+                
+                fetch('/download-selected', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ paths: selectedPaths })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.blob();
+                    }
+                    throw new Error('Network response was not ok');
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'selected_files.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Error downloading selected files:', error);
+                    alert('Error downloading selected files. Please try again.');
+                });
+            });
+        }
+        
+        // Update selected count
+        function updateSelectedCount() {
+            if (selectedCount) {
+                const count = document.querySelectorAll('.select-checkbox:checked').length;
+                selectedCount.textContent = count;
+                
+                if (count > 0) {
+                    downloadSelected.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    downloadSelected.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+        }
+    }
+});
+</script>
 {% endblock %}
