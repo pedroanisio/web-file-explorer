@@ -50,16 +50,241 @@
 }
 
 /* Context menu for #file-context-menu specifically */
+/* Enhanced Context Menu with Animations and Modern Design */
+.context-menu,
 #file-context-menu.context-menu {
-    @apply absolute z-[2000] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg py-1 min-w-[180px];
+    position: absolute;
+    z-index: 2000;
+    background-color: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    padding: 0.5rem;
+    min-width: 220px;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    animation: scaleIn 0.2s var(--ease-bounce) forwards;
+    transform-origin: top left;
 }
 
+/* Dark mode styling */
+.theme-dark .context-menu,
+.theme-dark #file-context-menu.context-menu {
+    background-color: var(--neutral-800);
+    border-color: var(--neutral-700);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Context menu items */
+.context-menu-item,
 #file-context-menu li {
-    @apply flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--neutral-700);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    margin-bottom: 0.125rem;
+    transition: all 0.15s var(--ease-out);
+    position: relative;
 }
 
+/* Item hover states */
+.context-menu-item:hover,
+#file-context-menu li:hover {
+    background-color: var(--neutral-100);
+    color: var(--neutral-900);
+    transform: translateX(2px);
+}
+
+/* Item focus states for keyboard navigation */
+.context-menu-item:focus,
+#file-context-menu li:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-200);
+}
+
+/* Dark mode item styling */
+.theme-dark .context-menu-item,
+.theme-dark #file-context-menu li {
+    color: var(--neutral-300);
+}
+
+.theme-dark .context-menu-item:hover,
+.theme-dark #file-context-menu li:hover {
+    background-color: var(--neutral-700);
+    color: var(--neutral-100);
+}
+
+.theme-dark .context-menu-item:focus,
+.theme-dark #file-context-menu li:focus {
+    box-shadow: 0 0 0 2px var(--primary-700);
+}
+
+/* Icons within menu items */
+.context-menu-item svg,
 #file-context-menu li svg {
-    @apply mr-2 h-4 w-4;
+    margin-right: 0.5rem;
+    height: 1rem;
+    width: 1rem;
+    color: var(--neutral-500);
+    transition: transform 0.2s var(--ease-out);
+}
+
+/* Icon hover animation */
+.context-menu-item:hover svg,
+#file-context-menu li:hover svg {
+    color: var(--primary-500);
+    transform: scale(1.1);
+}
+
+.theme-dark .context-menu-item:hover svg,
+.theme-dark #file-context-menu li:hover svg {
+    color: var(--primary-400);
+}
+
+/* Menu section dividers */
+.context-menu-divider,
+#file-context-menu .divider {
+    height: 1px;
+    background-color: var(--neutral-200);
+    margin: 0.25rem 0;
+}
+
+.theme-dark .context-menu-divider,
+.theme-dark #file-context-menu .divider {
+    background-color: var(--neutral-700);
+}
+
+/* Menu section headers */
+.context-menu-header,
+#file-context-menu .header {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--neutral-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.theme-dark .context-menu-header,
+.theme-dark #file-context-menu .header {
+    color: var(--neutral-400);
+}
+
+/* Destructive actions (like delete) */
+.context-menu-item.destructive,
+#file-context-menu li.destructive {
+    color: var(--danger-600);
+}
+
+.context-menu-item.destructive:hover,
+#file-context-menu li.destructive:hover {
+    background-color: var(--danger-50);
+    color: var(--danger-700);
+}
+
+.theme-dark .context-menu-item.destructive,
+.theme-dark #file-context-menu li.destructive {
+    color: var(--danger-400);
+}
+
+.theme-dark .context-menu-item.destructive:hover,
+.theme-dark #file-context-menu li.destructive:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: var(--danger-300);
+}
+
+/* Disabled items */
+.context-menu-item.disabled,
+#file-context-menu li.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.context-menu-item.disabled:hover,
+#file-context-menu li.disabled:hover {
+    background-color: transparent;
+    transform: none;
+}
+
+/* Item with submenu indicator */
+.context-menu-item.has-submenu::after,
+#file-context-menu li.has-submenu::after {
+    content: '›';
+    position: absolute;
+    right: 0.75rem;
+    opacity: 0.6;
+    font-size: 1rem;
+    transition: transform 0.2s var(--ease-out);
+}
+
+.context-menu-item.has-submenu:hover::after,
+#file-context-menu li.has-submenu:hover::after {
+    opacity: 1;
+    transform: translateX(2px);
+}
+
+/* Submenu container */
+.context-submenu,
+#file-context-menu .submenu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-left: 0.25rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-10px);
+    transition: all 0.3s var(--ease-out);
+}
+
+.context-menu-item.has-submenu:hover .context-submenu,
+#file-context-menu li.has-submenu:hover .submenu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+}
+
+/* Keyboard shortcuts in menu items */
+.context-menu-shortcut,
+#file-context-menu .shortcut {
+    margin-left: auto;
+    padding-left: 1rem;
+    color: var(--neutral-400);
+    font-size: 0.75rem;
+}
+
+.theme-dark .context-menu-shortcut,
+.theme-dark #file-context-menu .shortcut {
+    color: var(--neutral-500);
+}
+
+/* Context menu animations */
+.context-menu-enter,
+#file-context-menu.context-menu-enter {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+.context-menu-enter-active,
+#file-context-menu.context-menu-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.2s, transform 0.2s var(--ease-bounce);
+}
+
+.context-menu-exit,
+#file-context-menu.context-menu-exit {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.context-menu-exit-active,
+#file-context-menu.context-menu-exit-active {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.15s, transform 0.15s var(--ease-in);
 }
 
 /* Favorites Bar */
@@ -86,55 +311,619 @@
     @apply h-4 w-4;
 }
 
-/* Shake animation for favorites button */
+/* Shake animation for favorites button and invalid inputs */
 @keyframes shake {
-    0%, 100% { @apply translate-x-0; }
-    10%, 30%, 50%, 70%, 90% { @apply -translate-x-1; }
-    20%, 40%, 60%, 80% { @apply translate-x-1; }
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
 }
+
 .shake {
     animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
 }
 
-/* Loading overlay for plugin execution */
+/* Confirmation Dialog/Modal with Animations */
+.confirm-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    padding: 1rem;
+    opacity: 0;
+    animation: fadeIn 0.3s var(--ease-out) forwards;
+}
+
+.confirm-dialog-content {
+    background-color: var(--neutral-50);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 28rem;
+    overflow: hidden;
+    transform: scale(0.9) translateY(-20px);
+    opacity: 0;
+    animation: confirmDialogEnter 0.3s var(--ease-bounce) 0.1s forwards;
+}
+
+@keyframes confirmDialogEnter {
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.theme-dark .confirm-dialog-content {
+    background-color: var(--neutral-800);
+}
+
+.confirm-dialog-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.theme-dark .confirm-dialog-header {
+    border-color: var(--border-dark);
+}
+
+.confirm-dialog-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.confirm-dialog-icon.warning {
+    color: var(--warning-500);
+}
+
+.confirm-dialog-icon.danger {
+    color: var(--danger-500);
+}
+
+.confirm-dialog-icon.info {
+    color: var(--primary-500);
+}
+
+.confirm-dialog-icon.success {
+    color: var(--success-500);
+}
+
+.confirm-dialog-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-light);
+    flex-grow: 1;
+}
+
+.theme-dark .confirm-dialog-title {
+    color: var(--text-dark);
+}
+
+.confirm-dialog-body {
+    padding: 1.5rem;
+    color: var(--neutral-600);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.theme-dark .confirm-dialog-body {
+    color: var(--neutral-300);
+}
+
+.confirm-dialog-body p + p {
+    margin-top: 1rem;
+}
+
+.confirm-dialog-footer {
+    padding: 1rem 1.5rem;
+    background-color: var(--neutral-100);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.theme-dark .confirm-dialog-footer {
+    background-color: var(--neutral-850, #141c2b);
+    border-color: var(--border-dark);
+}
+
+.confirm-dialog-btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.15s var(--ease-out);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    min-width: 5rem;
+}
+
+.confirm-dialog-btn-cancel {
+    color: var(--neutral-700);
+    background-color: var(--neutral-200);
+    border: 1px solid var(--neutral-300);
+}
+
+.confirm-dialog-btn-cancel:hover {
+    background-color: var(--neutral-300);
+}
+
+.theme-dark .confirm-dialog-btn-cancel {
+    color: var(--neutral-300);
+    background-color: var(--neutral-700);
+    border-color: var(--neutral-600);
+}
+
+.theme-dark .confirm-dialog-btn-cancel:hover {
+    background-color: var(--neutral-600);
+}
+
+.confirm-dialog-btn-confirm {
+    color: white;
+    background-color: var(--primary-600);
+    border: 1px solid var(--primary-700);
+}
+
+.confirm-dialog-btn-confirm:hover {
+    background-color: var(--primary-700);
+}
+
+.theme-dark .confirm-dialog-btn-confirm {
+    background-color: var(--primary-600);
+    border-color: var(--primary-700);
+}
+
+.theme-dark .confirm-dialog-btn-confirm:hover {
+    background-color: var(--primary-700);
+}
+
+.confirm-dialog-btn-danger {
+    color: white;
+    background-color: var(--danger-500);
+    border: 1px solid var(--danger-600);
+}
+
+.confirm-dialog-btn-danger:hover {
+    background-color: var(--danger-600);
+}
+
+.confirm-dialog-exit {
+    animation: confirmDialogExit 0.2s var(--ease-in) forwards;
+}
+
+.confirm-dialog-content-exit {
+    animation: confirmDialogContentExit 0.2s var(--ease-in) forwards;
+}
+
+@keyframes confirmDialogExit {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes confirmDialogContentExit {
+    to {
+        transform: scale(0.95) translateY(10px);
+        opacity: 0;
+    }
+}
+
+/* Enhanced Loading Overlay with Animation */
 .loading-overlay {
-    @apply fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.3s var(--ease-out);
 }
 
 .loading-modal {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 flex items-center gap-4;
+    background-color: var(--neutral-50);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    max-width: 24rem;
+    width: 100%;
+    animation: scaleIn 0.3s var(--ease-bounce) 0.1s both;
+}
+
+.theme-dark .loading-modal {
+    background-color: var(--neutral-800);
 }
 
 .loading-animation {
-    @apply inline-block w-8 h-8 border-4 border-t-blue-500 border-r-blue-500 border-b-transparent border-l-transparent rounded-full animate-spin;
+    position: relative;
+    width: 4rem;
+    height: 4rem;
 }
 
-.theme-dark .loading-animation {
-    @apply border-t-blue-400 border-r-blue-400;
+.loading-animation::before,
+.loading-animation::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid transparent;
 }
 
-/* Toast Notifications */
+.loading-animation::before {
+    border-top-color: var(--primary-500);
+    border-right-color: var(--primary-500);
+    animation: spin 1s linear infinite;
+}
+
+.loading-animation::after {
+    border-bottom-color: var(--primary-300);
+    border-left-color: var(--primary-300);
+    animation: spin 1.5s linear reverse infinite;
+}
+
+.theme-dark .loading-animation::before {
+    border-top-color: var(--primary-400);
+    border-right-color: var(--primary-400);
+}
+
+.theme-dark .loading-animation::after {
+    border-bottom-color: var(--primary-600);
+    border-left-color: var(--primary-600);
+}
+
+.loading-text {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.theme-dark .loading-text {
+    color: var(--text-dark);
+}
+
+.loading-subtext {
+    color: var(--neutral-500);
+    font-size: 0.875rem;
+    text-align: center;
+    max-width: 20rem;
+}
+
+.theme-dark .loading-subtext {
+    color: var(--neutral-400);
+}
+
+/* Optional loading progress bar */
+.loading-progress {
+    width: 100%;
+    height: 0.5rem;
+    background-color: var(--neutral-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.theme-dark .loading-progress {
+    background-color: var(--neutral-700);
+}
+
+.loading-progress-bar {
+    height: 100%;
+    background-color: var(--primary-500);
+    border-radius: var(--radius-full);
+    transition: width 0.3s var(--ease-out);
+}
+
+.theme-dark .loading-progress-bar {
+    background-color: var(--primary-400);
+}
+
+/* Loading overlay for quick operations */
+.loading-overlay.minimal {
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(1px);
+}
+
+.loading-overlay.minimal .loading-modal {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 1.5rem;
+    flex-direction: row;
+}
+
+.theme-dark .loading-overlay.minimal .loading-modal {
+    background-color: rgba(31, 41, 55, 0.9);
+}
+
+.loading-overlay.minimal .loading-animation {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+/* Image lightbox/modal viewer */
+.image-lightbox {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    animation: fadeIn 0.3s var(--ease-out);
+}
+
+.image-lightbox-container {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.image-lightbox-img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04));
+    animation: scaleIn 0.3s var(--ease-bounce);
+}
+
+.image-lightbox-close {
+    position: absolute;
+    top: -1.5rem;
+    right: -1.5rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    font-size: 1.5rem;
+    border: none;
+}
+
+.image-lightbox-close:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.image-lightbox-controls {
+    position: absolute;
+    bottom: -3rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.image-lightbox-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.image-lightbox-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.image-lightbox-btn svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.image-lightbox-caption {
+    position: absolute;
+    bottom: -2rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: white;
+    font-size: 0.875rem;
+}
+
+/* Enhanced Toast Notifications with Animations */
 #toast-container {
-    @apply fixed bottom-5 right-5 z-[9999] w-auto max-w-sm;
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    z-index: 9999;
+    width: auto;
+    max-width: 24rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none; /* Allow clicking through the container */
 }
 
 .toast-message {
-    @apply py-3 px-5 rounded-lg shadow-xl mb-3 flex items-center gap-3 text-white transition-all duration-300 transform translate-x-full opacity-0; /* Start off-screen and transparent */
-    /* Default to success */
-    @apply bg-green-500 dark:bg-green-600;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+    transform: translateX(calc(100% + 1.5rem)); /* Start off-screen */
+    opacity: 0;
+    transition: all 0.5s var(--ease-out);
+    max-width: 100%;
+    pointer-events: auto; /* Make toast clickable */
+    position: relative;
+    overflow: hidden;
+
+    /* Default toast (success) */
+    background-color: var(--success-500);
+    border-left: 4px solid var(--success-700);
 }
 
+/* Active toast animation */
+.toast-message.active {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Hover effect */
+.toast-message:hover {
+    transform: translateX(0) translateY(-3px);
+    box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04));
+}
+
+/* Toast types */
 .toast-message.toast-warning {
-    @apply bg-amber-500 dark:bg-amber-600;
+    background-color: var(--warning-500);
+    border-left-color: var(--warning-700);
 }
 
 .toast-message.toast-error {
-    @apply bg-red-500 dark:bg-red-600;
+    background-color: var(--danger-500);
+    border-left-color: var(--danger-700);
 }
 
-.toast-message svg {
-    @apply h-5 w-5 flex-shrink-0; /* Added flex-shrink-0 */
+.toast-message.toast-info {
+    background-color: var(--primary-500);
+    border-left-color: var(--primary-700);
 }
+
+/* Toast icons */
+.toast-message svg {
+    height: 1.25rem;
+    width: 1.25rem;
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
 .toast-message span {
-    @apply flex-grow;
+    flex-grow: 1;
+    font-weight: 500;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Close button */
+.toast-close {
+    background: transparent;
+    border: none;
+    color: white;
+    opacity: 0.7;
+    cursor: pointer;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 0.25rem;
+    margin-left: 0.5rem;
+    transition: all 0.2s var(--ease-out);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-close:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Progress bar animation for auto-dismiss */
+.toast-message::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.3);
+    animation: toast-timer 5s linear forwards;
+    width: 100%;
+}
+
+@keyframes toast-timer {
+    to {
+        width: 0%;
+    }
+}
+
+/* Toast for mobile devices */
+@media (max-width: 640px) {
+    #toast-container {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
+    }
+    
+    .toast-message {
+        width: 100%;
+    }
+}
+
+/* Stacked toast animations for multiple notifications */
+.toast-message:nth-child(1) { animation-delay: 0ms; }
+.toast-message:nth-child(2) { animation-delay: 100ms; }
+.toast-message:nth-child(3) { animation-delay: 200ms; }
+.toast-message:nth-child(4) { animation-delay: 300ms; }
+
+/* Entry animation for toasts */
+@keyframes toast-enter {
+    from {
+        transform: translateX(calc(100% + 1.5rem));
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Exit animation for toasts */
+@keyframes toast-exit {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+        max-height: 200px;
+        margin-bottom: 0.5rem;
+        padding: 1rem 1.25rem;
+    }
+    to {
+        transform: translateX(calc(100% + 1.5rem));
+        opacity: 0;
+        max-height: 0;
+        margin-bottom: 0;
+        padding: 0 1.25rem;
+    }
+}
+
+.toast-entering {
+    animation: toast-enter 0.5s var(--ease-out) forwards;
+}
+
+.toast-exiting {
+    animation: toast-exit 0.5s var(--ease-in) forwards;
 }

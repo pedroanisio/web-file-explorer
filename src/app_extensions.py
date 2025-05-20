@@ -47,6 +47,9 @@ def setup_enhancements():
         function: Function to integrate enhancements
     """
     def enhance(app):
+        # Setup session for theme preferences
+        app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-explorer-secret-key-6dmks!!siw9w')
+        
         # Register preview blueprint
         register_file_preview(app)
         
