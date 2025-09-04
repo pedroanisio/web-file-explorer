@@ -422,3 +422,76 @@ def health_check():
         "timestamp": datetime.datetime.now().isoformat(),
         "version": getattr(app, 'version', '0.1.0')
     }), 200
+
+# V2 Plugin Page Mode Route
+@app.route('/plugin/<plugin_id>')
+def plugin_page(plugin_id):
+    """Render V2 plugin as a full page - constrained to current folder"""
+    if not hasattr(app, 'plugin_manager'):
+        abort(500, description="Plugin system not initialized")
+    
+    # Get the current path from query parameter (folder constraint)
+    current_path = request.args.get('path', '')
+    
+    # Check if plugin supports page mode
+    page_plugins = app.plugin_manager.get_page_mode_plugins()
+    if plugin_id not in page_plugins:
+        abort(404, description=f"Plugin {plugin_id} not found or doesn't support page mode")
+    
+    plugin = page_plugins[plugin_id]
+    manifest = plugin['manifest']
+    
+    # Security check - ensure we stay within base directory
+    base_dir = app.config.get('BASE_DIR')
+    if current_path:
+        abs_path = os.path.abspath(os.path.join(base_dir, current_path))
+        if not abs_path.startswith(os.path.abspath(base_dir)):
+            abort(403)
+    else:
+        abs_path = base_dir
+    
+    # Execute plugin with folder constraint
+    result = app.plugin_manager.execute_plugin(plugin_id, path=abs_path)
+    
+    if not result or not result.get('success'):
+        error_msg = result.get('error', 'Unknown error') if result else 'Plugin execution failed'
+        # Use the master template even for errors
+        return render_template('plugin_page_master.html', 
+                             plugin=manifest,
+                             plugin_result={'error': error_msg, 'success': False},
+                             current_path=current_path,
+                             back_url=url_for('explore', path=current_path))
+    
+    # Always use the master template - this guarantees consistent navigation
+    return render_template('plugin_page_master.html',
+                         plugin=manifest,
+                         plugin_result=result,
+                         current_path=current_path,
+                         back_url=url_for('explore', path=current_path))
+
+def _generate_plugin_breadcrumbs(manifest, target_path):
+    """Generate breadcrumbs for plugin page"""
+    breadcrumbs = [
+        {'name': 'Home', 'url': url_for('explore', path='')},
+    ]
+    
+    if target_path:
+        # Add path segments
+        segments = target_path.split('/')
+        accumulated = ''
+        for segment in segments:
+            if segment:
+                accumulated += segment + '/'
+                breadcrumbs.append({
+                    'name': segment,
+                    'url': url_for('explore', path=accumulated.rstrip('/'))
+                })
+    
+    # Add plugin breadcrumb
+    plugin_title = manifest.get('page_title') or manifest.get('name')
+    breadcrumbs.append({
+        'name': plugin_title,
+        'url': None  # Current page
+    })
+    
+    return breadcrumbs

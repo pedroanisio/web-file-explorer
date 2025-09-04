@@ -196,12 +196,15 @@ class PluginManager:
                 "path": plugin_path
             }
             
-            # Add to toolbar items
+            # Add to toolbar items with V2 support
             self.toolbar_items.append({
                 "id": manifest["id"],
                 "name": manifest["name"],
                 "icon": manifest["icon"],
-                "description": manifest.get("description", "")
+                "description": manifest.get("description", ""),
+                "supports_page_mode": manifest.get("supports_page_mode", False),
+                "schema_version": manifest.get("schema_version", "1.0"),
+                "page_title": manifest.get("page_title")
             })
             
             logger.info(f"Successfully loaded UI plugin: {manifest['name']}")
@@ -372,6 +375,23 @@ class PluginManager:
         Get all toolbar items for the UI.
         """
         return self.toolbar_items
+    
+    def get_page_mode_plugins(self):
+        """Get plugins that support page mode (V2 only)"""
+        page_plugins = {}
+        for plugin_id, plugin in self.plugins.items():
+            manifest = plugin['manifest']
+            if (manifest.get('schema_version') == '2.0' and 
+                manifest.get('supports_page_mode', False) and
+                manifest.get('type') == 'ui'):
+                page_plugins[plugin_id] = plugin
+        return page_plugins
+    
+    def get_plugin_manifest(self, plugin_id):
+        """Get manifest for a specific plugin"""
+        if plugin_id in self.plugins:
+            return self.plugins[plugin_id]['manifest']
+        return None
         
     def get_backend_plugins(self):
         """

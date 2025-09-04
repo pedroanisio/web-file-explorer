@@ -311,7 +311,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const pluginId = this.getAttribute('data-plugin-id');
             const currentPath = this.getAttribute('data-current-path');
+            const supportsPage = this.getAttribute('data-supports-page') === 'true';
+            const schemaVersion = this.getAttribute('data-schema-version');
 
+            // Check if this is a V2 plugin with page mode support
+            if (supportsPage && schemaVersion === '2.0') {
+                // Show dropdown for V2 plugins with page support
+                const wrapper = this.closest('.toolbar-item-wrapper');
+                const dropdown = wrapper.querySelector('.toolbar-dropdown');
+                if (dropdown) {
+                    // Hide all other dropdowns first
+                    document.querySelectorAll('.toolbar-dropdown').forEach(d => {
+                        if (d !== dropdown) d.classList.add('hidden');
+                    });
+                    dropdown.classList.toggle('hidden');
+                    e.stopPropagation();
+                    return;
+                }
+            }
+
+            // Standard execution for V1 plugins or V2 plugins without page mode
             if (pluginId && typeof currentPath !== 'undefined') { // currentPath can be empty string for root
                 this.classList.add('disabled'); //
                 const originalText = this.innerHTML;
@@ -525,3 +544,63 @@ async function executePlugin(pluginId, path) {
         modalManager.show('Client-Side Error', `Failed to execute plugin: ${error.message}`, { isError: true, showCopyButton: true, copyText: error.message }); //
     }
 }
+
+// Handle dropdown option selection for V2 plugins
+document.addEventListener('click', function(e) {
+    const dropdownOption = e.target.closest('.dropdown-option');
+    
+    if (dropdownOption) {
+        // Handle dropdown option selection
+        const action = dropdownOption.dataset.action;
+        const wrapper = dropdownOption.closest('.toolbar-item-wrapper');
+        const button = wrapper.querySelector('.toolbar-item');
+        const pluginId = button.dataset.pluginId;
+        const currentPath = button.dataset.currentPath;
+        
+        // Hide dropdown
+        wrapper.querySelector('.toolbar-dropdown').classList.add('hidden');
+        
+        if (action === 'page') {
+            // Navigate to plugin page with folder constraint
+            const url = `/plugin/${pluginId}?path=${encodeURIComponent(currentPath)}`;
+            window.location.href = url;
+        } else {
+            // Standard modal execution
+            executePlugin(pluginId, currentPath);
+        }
+        
+        e.stopPropagation();
+        return;
+    }
+});
+
+// Hide dropdowns when clicking elsewhere
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.toolbar-item-wrapper')) {
+        document.querySelectorAll('.toolbar-dropdown').forEach(dropdown => {
+            dropdown.classList.add('hidden');
+        });
+    }
+});
+
+// Handle keyboard navigation for dropdowns
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.toolbar-dropdown').forEach(dropdown => {
+            dropdown.classList.add('hidden');
+        });
+    }
+});
+
+// Enhanced executePlugin function for V2 support
+window.executePluginV2 = async function(pluginId, path, mode = 'modal') {
+    if (mode === 'page') {
+        // Navigate to plugin page
+        const url = `/plugin/${pluginId}?path=${encodeURIComponent(path)}`;
+        window.location.href = url;
+        return;
+    }
+    
+    // Use existing modal execution
+    return executePlugin(pluginId, path);
+};

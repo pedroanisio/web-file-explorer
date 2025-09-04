@@ -37,10 +37,39 @@
 {% if plugins %}
 <div class="toolbar flex flex-wrap gap-2 mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
     {% for plugin in plugins %}
-    <button class="toolbar-item" data-plugin-id="{{ plugin.id }}" data-current-path="{{ current_path }}" title="{{ plugin.description }}" aria-label="{{ plugin.name }} plugin button">
-        <span class="toolbar-item-icon">{{ plugin.icon }}</span>
-        <span>{{ plugin.name }}</span>
-    </button>
+    <div class="toolbar-item-wrapper relative">
+        <button class="toolbar-item" 
+                data-plugin-id="{{ plugin.id }}" 
+                data-current-path="{{ current_path }}" 
+                data-supports-page="{{ plugin.supports_page_mode | lower }}"
+                data-schema-version="{{ plugin.schema_version }}"
+                title="{{ plugin.description }}" 
+                aria-label="{{ plugin.name }} plugin button">
+            <span class="toolbar-item-icon">{{ plugin.icon }}</span>
+            <span>{{ plugin.name }}</span>
+            {% if plugin.supports_page_mode %}
+            <span class="page-mode-indicator ml-1 text-xs text-blue-600 dark:text-blue-400" title="Supports full page mode">📄</span>
+            {% endif %}
+        </button>
+        
+        {% if plugin.supports_page_mode %}
+        <!-- Dropdown for page-capable plugins -->
+        <div class="toolbar-dropdown absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-10 hidden min-w-40">
+            <button class="dropdown-option w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center" data-action="modal">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 11-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4z" clip-rule="evenodd"/>
+                </svg>
+                Quick View (Modal)
+            </button>
+            <button class="dropdown-option w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center" data-action="page">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                </svg>
+                Full Page View
+            </button>
+        </div>
+        {% endif %}
+    </div>
     {% endfor %}
 </div>
 {% endif %}

@@ -1,0 +1,20 @@
+{
+    "id": "folder_dashboard",
+    "name": "Folder Dashboard",
+    "version": "1.0.0",
+    "entry_point": "dashboard_plugin",
+    "type": "ui",
+    "icon": "📊",
+    "description": "Comprehensive folder analysis with charts and statistics - perfect for page mode",
+    "schema_version": "2.0",
+    "supports_page_mode": true,
+    "page_title": "Folder Analytics Dashboard",
+    "dependencies": [],
+    "auto_install_dependencies": false,
+    "hooks": [],
+    "settings": {
+        "show_hidden_files": false,
+        "max_file_size_mb": 100,
+        "chart_colors": ["#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6"]
+    }
+}

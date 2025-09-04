@@ -22,4 +22,9 @@ class PluginManifest(BaseModel):
     hooks: List[str] = Field(default_factory=list)
 
     # Arbitrary user-defined settings block
-    settings: Dict[str, Any] = Field(default_factory=dict) 
+    settings: Dict[str, Any] = Field(default_factory=dict)
+    
+    # V2 Fields - Simple and focused
+    schema_version: Literal["1.0", "2.0"] = "1.0"
+    supports_page_mode: bool = False  # Simple flag to enable page mode
+    page_title: str | None = None     # Optional custom page title 
