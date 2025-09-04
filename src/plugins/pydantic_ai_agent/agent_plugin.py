@@ -10,8 +10,7 @@ from ..plugin_base import BackendPlugin
 
 # Import PydanticAI
 try:
-    from pydantic_ai import Agent
-    from pydantic_ai.tools import FunctionTool
+    from pydantic_ai import Agent, Tool, RunContext
     from pydantic import BaseModel
     
     # Try to verify version compatibility
@@ -74,16 +73,11 @@ class PydanticAIAgentPlugin(BackendPlugin):
         # Initialize the PydanticAI agent
         try:
             self.agent = Agent(
-                name="FIXIT Assistant",
-                system_prompt=system_prompts.CODE_ANALYSIS_PROMPT,
                 model=settings.get('model', 'gpt-4'),
-                model_settings={
-                    "temperature": settings.get('temperature', 0.7),
-                    "max_tokens": settings.get('max_tokens', 4096)
-                }
+                system_prompt=system_prompts.CODE_ANALYSIS_PROMPT,
             )
             
-            # Register tools with the agent
+            # Register tools with the agent using decorators
             self._register_tools()
             
             logger.info("PydanticAI agent initialized successfully")
@@ -117,11 +111,10 @@ class PydanticAIAgentPlugin(BackendPlugin):
             }
             
             # Run the agent
-            result = self.agent.run_sync(query, context=run_context)
+            result = self.agent.run_sync(query, deps=run_context)
             
             return {
-                "response": result.final_output,
-                "reasoning": result.intermediate_steps,
+                "response": result.output,
                 "success": True
             }
         except Exception as e:
@@ -149,14 +142,15 @@ class PydanticAIAgentPlugin(BackendPlugin):
             task = f"Analyze the {file_context['file_type']} file at {file_path} and provide detailed code insights"
             
             # Run the agent with file context
-            result = self.agent.run_sync(task, context={"file": file_context})
+            result = self.agent.run_sync(task, deps={"file": file_context})
             
-            # Extract structured analysis if available
-            analysis = self._parse_analysis(result.final_output)
+            # Extract structured analysis if available  
+            raw_output = result.output
+            analysis = self._parse_analysis(raw_output)
             
             return {
                 "analysis": analysis,
-                "raw_output": result.final_output,
+                "raw_output": raw_output,
                 "success": True
             }
         except Exception as e:
@@ -171,39 +165,26 @@ class PydanticAIAgentPlugin(BackendPlugin):
         if not self.agent:
             return
             
-        # Register file tools
-        self.agent.add_tool(
-            FunctionTool.from_function(
-                file_tools.read_file,
-                name="read_file",
-                description="Read content from a file"
-            )
-        )
+        # Register tools using the modern decorator approach
+        @self.agent.tool_plain
+        def read_file(path: str) -> dict:
+            """Read content from a file"""
+            return file_tools.read_file(path)
         
-        self.agent.add_tool(
-            FunctionTool.from_function(
-                file_tools.list_directory,
-                name="list_directory",
-                description="List contents of a directory"
-            )
-        )
+        @self.agent.tool_plain
+        def list_directory(path: str) -> dict:
+            """List contents of a directory"""
+            return file_tools.list_directory(path)
         
-        # Register code tools
-        self.agent.add_tool(
-            FunctionTool.from_function(
-                code_tools.analyze_syntax,
-                name="analyze_syntax",
-                description="Analyze code syntax and structure"
-            )
-        )
+        @self.agent.tool_plain
+        def analyze_syntax(code: str, language: str = "python") -> dict:
+            """Analyze code syntax and structure"""
+            return code_tools.analyze_syntax(code, language)
         
-        self.agent.add_tool(
-            FunctionTool.from_function(
-                code_tools.suggest_improvements,
-                name="suggest_improvements",
-                description="Suggest code improvements"
-            )
-        )
+        @self.agent.tool_plain
+        def suggest_improvements(code: str, language: str = "python") -> dict:
+            """Suggest code improvements"""
+            return code_tools.suggest_improvements(code, language)
     
     def _get_file_type(self, file_path):
         """Determine file type from extension"""

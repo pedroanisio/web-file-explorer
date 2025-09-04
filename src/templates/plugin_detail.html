@@ -40,7 +40,7 @@
                                     <option value="true" {% if value %}selected{% endif %}>Enabled</option>
                                     <option value="false" {% if not value %}selected{% endif %}>Disabled</option>
                                 </select>
-                            {% elif value is list %}
+                            {% elif value is iterable and value is not string %}
                                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Edit list values (one per line):</p>
                                  <textarea id="{{ key }}" name="{{ key }}" rows="{{ value|length + 2 }}" class="form-control mt-1 block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm whitespace-pre">{{ value|join('\n') }}</textarea>
                             {% else %}
