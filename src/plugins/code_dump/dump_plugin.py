@@ -8,14 +8,17 @@ import html
 import logging
 import json
 import tempfile
-from datetime import datetime
+import time
+import zipfile
 from pathlib import Path
 
 # Default exclusion patterns
 DEFAULT_PATTERNS = [
     ".venv","venv", "*.md", "node_modules", "*.png", "*-lock.json",
     "*.jpg", "*.lock", ".git", "*.db", "*.pyc", "*git*","*.ico","*.svg",
-    "wait-for-it.sh", ".pytest_cache", "htmlcov", ".coverage", "*.log"
+    "wait-for-it.sh", ".pytest_cache", "htmlcov", ".coverage", "*.log",
+    "target", "Cargo.lock", "*.rlib", "*.rmeta", "*.d", "*.fingerprint",
+    "bin"
 ]
 
 def get_default_patterns():
@@ -62,11 +65,24 @@ def save_plugin_config(data):
     }
     return save_settings(settings)
 
+def _cat_or_skip():
+    """Returns a shell snippet that skips binary files before catting."""
+    return (
+        'enc=$(file -b --mime-encoding "{}"); '
+        'if [ "$enc" = "binary" ]; then '
+        'echo "File: {} [binary - skipped]"; '
+        'else '
+        'echo "File: {}"; cat "{}"; '
+        'fi'
+    )
+
 def build_find_command(path, exclude_patterns):
     """Builds the find command with specified exclusion patterns."""
+    cat_snippet = _cat_or_skip()
+
     if not exclude_patterns:
         # If no patterns selected, just find all files
-        return f'cd "{path}" && find . -type f -print | xargs -I {{}} sh -c \'echo "File: {{}}"; cat {{}}\''
+        return f'cd "{path}" && find . -type f -print | xargs -I {{}} sh -c \'{cat_snippet}\''
 
     # Build the exclusion part of the find command
     exclusion_parts = []
@@ -75,7 +91,7 @@ def build_find_command(path, exclude_patterns):
 
     exclusion_string = " -o ".join(exclusion_parts)
 
-    return f'cd "{path}" && find . \\( {exclusion_string} \\) -prune -o -type f -print | xargs -I {{}} sh -c \'echo "File: {{}}"; cat {{}}\''
+    return f'cd "{path}" && find . \\( {exclusion_string} \\) -prune -o -type f -print | xargs -I {{}} sh -c \'{cat_snippet}\''
 
 def execute(path, **kwargs):
     """
@@ -108,45 +124,49 @@ def execute(path, **kwargs):
         logger.info(f"Excluding patterns: {exclude_patterns}")
         logger.debug(f"Executing command: {command}")
         
-        # Run the command
+        # Run the command as bytes to avoid UTF-8 decode errors from
+        # non-UTF-8 text files that slip past the binary check.
         result = subprocess.run(
             command,
             shell=True,
             capture_output=True,
-            text=True,
             check=False
         )
 
         if result.returncode != 0:
+            stderr_text = result.stderr.decode("utf-8", errors="replace")
             logger.error(f"Command failed with exit code {result.returncode}")
-            logger.error(f"Stderr: {result.stderr}")
+            logger.error(f"Stderr: {stderr_text}")
             return {
                 "success": False,
-                "error": f"Command failed: {result.stderr or 'Unknown error'}",
-                "output": result.stderr
+                "error": f"Command failed: {stderr_text or 'Unknown error'}",
+                "output": stderr_text
             }
+
+        stdout_text = result.stdout.decode("utf-8", errors="replace")
         
-        # Generate a filename based on the folder name and timestamp
+        # Generate a filename based on the folder name and timestamp in nanoseconds
         folder_name = os.path.basename(os.path.normpath(path))
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{folder_name}_{timestamp}.dump.txt"
-        
-        # Create a temporary file with the output
+        timestamp_ns = time.time_ns()
+        filename = f"{folder_name}-{timestamp_ns}.zip"
+
+        # Create a zip file containing the dump
         temp_dir = tempfile.gettempdir()
         file_path = os.path.join(temp_dir, filename)
-        
-        with open(file_path, 'w') as f:
-            f.write(result.stdout)
-        
-        logger.info(f"Created dump file at: {file_path}")
-        
+        dump_txt_name = f"{folder_name}.dump.txt"
+
+        with zipfile.ZipFile(file_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr(dump_txt_name, stdout_text)
+
+        logger.info(f"Created dump zip at: {file_path}")
+
         # Return a response that will initiate a download
         return {
             "success": True,
             "download": {
                 "file_path": file_path,
                 "filename": filename,
-                "content_type": "text/plain"
+                "content_type": "application/zip"
             },
             "message": f"Code dump created successfully. Downloading {filename}..."
         }
